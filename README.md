@@ -1,4 +1,4 @@
-![logo](./chessjslogo.svg)
+![logo](./chesspgnlogo.png)
 
 # chess.js
 

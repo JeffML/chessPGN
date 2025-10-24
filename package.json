@@ -1,14 +1,14 @@
 {
-  "name": "chess.js",
-  "description": "TypeScript library for chess move generation, validation, execution, and game state - everything but the AI.",
-  "version": "1.4.0",
+  "name": "@chess-pgn/chess-pgn",
+  "description": "Chess library with enhanced PGN support for parsing large, multi-game PGN files.",
+  "version": "0.1.0",
   "license": "BSD-2-Clause",
-  "main": "dist/cjs/chess.js",
-  "module": "dist/esm/chess.js",
-  "types": "dist/types/chess.d.ts",
-  "homepage": "https://github.com/jhlywa/chess.js",
-  "keywords": ["chess", "fen", "pgn", "typescript"],
-  "author": "Jeff Hlywa <jhlywa@gmail.com>",
+  "main": "dist/cjs/chessPGN.js",
+  "module": "dist/esm/chessPGN.js",
+  "types": "dist/types/chessPGN.d.ts",
+  "homepage": "https://github.com/JeffML/chessPGN",
+  "keywords": ["chess", "pgn", "typescript", "parser"],
+  "author": "Jeff Lowery <jlowery2663@gmail.com>",
   "scripts": {
     "prepare": "npm run build",
     "build": "npm run parser && tsc --noEmit && rollup -c",
@@ -27,10 +27,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jhlywa/chess.js"
+    "url": "https://github.com/JeffML/chessPGN"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.15.0"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.52.8",
