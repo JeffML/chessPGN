@@ -5,3 +5,4 @@ src/pgn.*
 website/.docusaurus/
 website/build/
 website/versioned_docs/**/*.md
+MULTIGAME_PGN_PROPOSAL.md
