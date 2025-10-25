@@ -1,4 +1,4 @@
-import { Chess } from '../src/chess'
+import { ChessPGN } from '../src/chessPGN'
 import { describe, expect, it } from 'vitest'
 
 describe('Board Tests', () => {
@@ -133,7 +133,7 @@ describe('Board Tests', () => {
 
   tests.forEach(({ fen, board }) => {
     it('Board - ' + fen, () => {
-      const chess = new Chess(fen)
+      const chess = new ChessPGN(fen)
       expect(chess.board()).toEqual(board)
     })
   })

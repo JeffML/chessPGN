@@ -1,12 +1,11 @@
 import {
-  Chess,
+  ChessPGN,
   Square,
   Color,
-  SQUARES,
   WHITE,
   BLACK,
   DEFAULT_POSITION,
-} from '../src/chess'
+} from '../src/chessPGN'
 import { expect, test } from 'vitest'
 
 function areAttacked(chess: Chess, squares: Square[], color: Color) {
@@ -25,7 +24,7 @@ function areNotAttacked(chess: Chess, squares: Square[], color: Color) {
 }
 
 test('isAttacked (white pawn attacks)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
 
   // diagonal attacks
   chess.load('4k3/4p3/8/8/8/8/4P3/4K3 w - - 0 1')
@@ -37,7 +36,7 @@ test('isAttacked (white pawn attacks)', () => {
 })
 
 test('isAttacked (black pawn attacks)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
 
   // diagonal attacks
   chess.load('4k3/4p3/8/8/8/8/4P3/4K3 w - - 0 1')
@@ -49,7 +48,7 @@ test('isAttacked (black pawn attacks)', () => {
 })
 
 test('isAttacked (knight)', () => {
-  const chess = new Chess('4k3/4p3/8/8/4N3/8/8/4K3 w - - 0 1')
+  const chess = new ChessPGN('4k3/4p3/8/8/4N3/8/8/4K3 w - - 0 1')
 
   const squares: Square[] = ['d2', 'f2', 'c3', 'g3', 'd6', 'f6', 'c5', 'g5']
 
@@ -58,7 +57,7 @@ test('isAttacked (knight)', () => {
 })
 
 test('isAttacked (bishop)', () => {
-  const chess = new Chess('4k3/4p3/8/8/4b3/8/8/4K3 w - - 0 1')
+  const chess = new ChessPGN('4k3/4p3/8/8/4b3/8/8/4K3 w - - 0 1')
 
   const squares: Square[] = [
     'b1',
@@ -80,7 +79,7 @@ test('isAttacked (bishop)', () => {
 })
 
 test('isAttacked (rook)', () => {
-  const chess = new Chess('4k3/4n3/8/8/8/4R3/8/4K3 w - - 0 1')
+  const chess = new ChessPGN('4k3/4n3/8/8/8/4R3/8/4K3 w - - 0 1')
 
   const squares: Square[] = [
     'e1', // yes, we can attack our own color
@@ -102,7 +101,7 @@ test('isAttacked (rook)', () => {
 })
 
 test('isAttacked (queen)', () => {
-  const chess = new Chess('4k3/4n3/8/8/8/4q3/4P3/4K3 w - - 0 1')
+  const chess = new ChessPGN('4k3/4n3/8/8/8/4q3/4P3/4K3 w - - 0 1')
 
   const squares: Square[] = [
     'e2',
@@ -134,7 +133,7 @@ test('isAttacked (queen)', () => {
 })
 
 test('isAttacked (king)', () => {
-  const chess = new Chess('4k3/4n3/8/8/8/4q3/4P3/4K3 w - - 0 1')
+  const chess = new ChessPGN('4k3/4n3/8/8/8/4q3/4P3/4K3 w - - 0 1')
 
   const squares: Square[] = [
     'e2', // yes, we can attack our own color
@@ -149,17 +148,17 @@ test('isAttacked (king)', () => {
 
 test('isAttacked (pinned pieces still attacks)', () => {
   // pinned pawn, but still is an attacked square
-  const chess = new Chess('4k3/4r3/8/8/8/8/4P3/4K3 w - - 0 1')
+  const chess = new ChessPGN('4k3/4r3/8/8/8/8/4P3/4K3 w - - 0 1')
   expect(areAttacked(chess, ['d3', 'f3'], WHITE)).toBe(true)
 })
 
 test('isAttacked (no x-ray)', () => {
-  const chess = new Chess('4k3/4n3/8/8/8/4q3/4P3/4K3 w - - 0 1')
+  const chess = new ChessPGN('4k3/4n3/8/8/8/4q3/4P3/4K3 w - - 0 1')
   expect(areNotAttacked(chess, ['e1'], BLACK)).toBe(true)
 })
 
 test('isAttacked (doc tests)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   expect(chess.isAttacked('f3', WHITE)).toBe(true)
   expect(chess.isAttacked('f6', BLACK)).toBe(true)
   chess.load(DEFAULT_POSITION)

@@ -1,10 +1,10 @@
-import { Chess } from '../src/chess'
+import { ChessPGN } from '../src/chessPGN'
 import { test, expect } from 'vitest'
 
 test('null move at start', () => {
   const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
   const next = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 1 1'
-  const chess = new Chess(fen)
+  const chess = new ChessPGN(fen)
   chess.move('--')
   expect(chess.fen()).toBe(next)
 })
@@ -12,14 +12,14 @@ test('null move at start', () => {
 test('making null move by passing null object', () => {
   const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
   const next = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 1 1'
-  const chess = new Chess(fen)
+  const chess = new ChessPGN(fen)
   chess.move(null)
   expect(chess.fen()).toBe(next)
 })
 
 test('null move is correctly displayed in pgn', () => {
   const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-  const chess = new Chess(fen)
+  const chess = new ChessPGN(fen)
   chess.move('e4')
   chess.move('e5')
   chess.move('--')
@@ -37,7 +37,7 @@ test('null move while in check is not allowed', () => {
   const fn = () => {
     const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
-    const chess = new Chess(fen)
+    const chess = new ChessPGN(fen)
     chess.move('e4')
     chess.move('e5')
     chess.move('Nf3')
@@ -52,7 +52,7 @@ test('null move while in check is not allowed', () => {
 
 test('6 null moves in a row result in a draw', () => {
   const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-  const chess = new Chess(fen)
+  const chess = new ChessPGN(fen)
   chess.move('--')
   chess.move('--')
   chess.move('--')

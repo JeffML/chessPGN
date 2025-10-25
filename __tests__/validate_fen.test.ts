@@ -1,4 +1,4 @@
-import { validateFen } from '../src/chess'
+import { validateFen } from '../src/chessPGN'
 import { expect, test } from 'vitest'
 
 test.each([

@@ -1,4 +1,4 @@
-import { Chess, DEFAULT_POSITION } from '../src/chess'
+import { ChessPGN, DEFAULT_POSITION } from '../src/chessPGN'
 import { expect, test } from 'vitest'
 
 const checkmates = [
@@ -10,7 +10,7 @@ const checkmates = [
 
 checkmates.forEach((fen, i) => {
   test(`isCheckmate - position ${i}`, () => {
-    const chess = new Chess(fen)
+    const chess = new ChessPGN(fen)
     expect(chess.isCheckmate()).toBe(true)
     expect(chess.isDraw()).toBe(false)
   })
@@ -23,7 +23,7 @@ const notCheckmates = [
 
 notCheckmates.forEach((fen, i) => {
   test(`isCheckmate - position ${i} - not checkmate`, () => {
-    const chess = new Chess(fen)
+    const chess = new ChessPGN(fen)
     expect(chess.isCheckmate()).toBe(false)
   })
 })

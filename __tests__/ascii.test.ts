@@ -1,4 +1,4 @@
-import { Chess } from '../src/chess'
+import { ChessPGN } from '../src/chessPGN'
 import { describe, expect, it } from 'vitest'
 
 describe('ASCII Board', () => {
@@ -17,7 +17,7 @@ describe('ASCII Board', () => {
       '     a  b  c  d  e  f  g  h',
     ]
 
-    const chess = new Chess(
+    const chess = new ChessPGN(
       'r4rk1/4nqpp/1p1p4/2pPpp2/bPP1P3/R1B1NQ2/P4PPP/1R4K1 w - - 0 28',
     )
 

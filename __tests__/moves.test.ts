@@ -1,28 +1,28 @@
-import { Chess, Square, Move } from '../src/chess'
+import { ChessPGN, Square, Move } from '../src/chessPGN'
 import { split } from './utils'
 import { expect, test } from 'vitest'
 
 test('moves', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const moves = `a3 a4 b3 b4 c3 c4 d3 d4 e3 e4 f3 f4 g3 g4 h3 h4 Na3 Nc3 Nf3
                  Nh3`
   expect(chess.moves()).to.have.members(split(moves))
 })
 
 test('moves - single square', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const moves = 'e3 e4'
   expect(chess.moves({ square: 'e2' })).to.have.members(split(moves))
 })
 
 test('moves - single square - invalid square', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const moves: string[] = []
   expect(chess.moves({ square: 'e9' as Square })).toEqual(moves)
 })
 
 test('moves - single square - pinned piece', () => {
-  const chess = new Chess(
+  const chess = new ChessPGN(
     'rnbqk1nr/pppp1ppp/4p3/8/1b1P4/2N5/PPP1PPPP/R1BQKBNR w KQkq - 2 3',
   )
   const moves: string[] = []
@@ -30,13 +30,13 @@ test('moves - single square - pinned piece', () => {
 })
 
 test('moves - single square - promotion', () => {
-  const chess = new Chess('8/k7/8/8/8/8/7p/K7 b - - 0 1')
+  const chess = new ChessPGN('8/k7/8/8/8/8/7p/K7 b - - 0 1')
   const moves = 'h1=N h1=B h1=R+ h1=Q+'
   expect(chess.moves({ square: 'h2' })).to.have.members(split(moves))
 })
 
 test('moves - single square - castling', () => {
-  const chess = new Chess(
+  const chess = new ChessPGN(
     'r1bq1rk1/1pp2ppp/p1np1n2/2b1p3/2B1P3/2NP1N2/PPPBQPPP/R3K2R w KQ - 0 8',
   )
   const moves = 'Kf1 Kd1 O-O O-O-O'
@@ -44,7 +44,7 @@ test('moves - single square - castling', () => {
 })
 
 test('moves - single square - no castling', () => {
-  const chess = new Chess(
+  const chess = new ChessPGN(
     'r1bq1rk1/1pp2ppp/p1np1n2/2b1p3/2B1P3/2NP1N2/PPPBQPPP/R3K2R w - - 0 8',
   )
   const moves = 'Kf1 Kd1'
@@ -52,13 +52,13 @@ test('moves - single square - no castling', () => {
 })
 
 test('moves - single square - trapped king', () => {
-  const chess = new Chess('8/7K/8/8/1R6/k7/1R1p4/8 b - - 0 1')
+  const chess = new ChessPGN('8/7K/8/8/1R6/k7/1R1p4/8 b - - 0 1')
   const moves: string[] = []
   expect(chess.moves({ square: 'a3' })).toEqual(moves)
 })
 
 test('moves - single square - verbose', () => {
-  const chess = new Chess('8/7K/8/8/1R6/k7/1R1p4/8 b - - 0 1')
+  const chess = new ChessPGN('8/7K/8/8/1R6/k7/1R1p4/8 b - - 0 1')
   const moves = [
     {
       color: 'b',
@@ -119,13 +119,13 @@ test('moves - single square - verbose', () => {
 })
 
 test('moves - piece', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const moves = 'Na3 Nc3 Nf3 Nh3'
   expect(chess.moves({ piece: 'n' })).to.have.members(split(moves))
 })
 
 test('moves - piece - en passante', () => {
-  const chess = new Chess(
+  const chess = new ChessPGN(
     'rnbq1rk1/4bpp1/p2p1n1p/Ppp1p3/2B1P3/2NP1N1P/1PP2PP1/R1BQ1RK1 w - b6 0 10',
   )
   const moves = 'axb6 b3 b4 d4 g3 g4 h4'
@@ -133,14 +133,14 @@ test('moves - piece - en passante', () => {
 })
 
 test('moves - piece - no such piece', () => {
-  const chess = new Chess(
+  const chess = new ChessPGN(
     'r1bq1rk1/1pp2ppp/p1np1n2/2b1p3/4P3/2NP1N2/PPP1QPPP/R3K2R w KQ - 0 8',
   )
   const moves: string[] = []
   expect(chess.moves({ piece: 'b' })).toEqual(moves)
 })
 test('moves - piece - verbose', () => {
-  const chess = new Chess(
+  const chess = new ChessPGN(
     'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/R1R3K1 w - - 0 19',
   )
   const moves = [
@@ -269,7 +269,7 @@ test('moves - piece - verbose', () => {
 })
 
 test('moves - square and piece', () => {
-  const chess = new Chess(
+  const chess = new ChessPGN(
     '5rk1/1p3rp1/p1n1p3/2p1p2p/2PpP1qP/P2P2P1/1P2QP1K/3R1R2 w - - 0 23',
   )
   const moves = 'Qd2 Qc2 Qe1 Qe3 Qf3 Qxg4'
@@ -279,17 +279,17 @@ test('moves - square and piece', () => {
 })
 
 test('moves - no kings (starting position minus kings)', () => {
-  const noKings = new Chess()
+  const noKings = new ChessPGN()
   noKings.remove('e1')
   noKings.remove('e8')
 
-  const kings = new Chess()
+  const kings = new ChessPGN()
 
   expect(noKings.moves().filter((m) => m !== 'Qe1')).toEqual(kings.moves())
 })
 
 test('inCheck - no kings (starting position minus kings)', () => {
-  const noKings = new Chess()
+  const noKings = new ChessPGN()
   noKings.remove('e1')
   noKings.remove('e8')
 
@@ -297,7 +297,7 @@ test('inCheck - no kings (starting position minus kings)', () => {
 })
 
 test('isCheckmate - no kings (starting position minus kings)', () => {
-  const noKings = new Chess()
+  const noKings = new ChessPGN()
   noKings.remove('e1')
   noKings.remove('e8')
 
@@ -305,7 +305,7 @@ test('isCheckmate - no kings (starting position minus kings)', () => {
 })
 
 test('isStalemate - no kings (starting position minus kings)', () => {
-  const noKings = new Chess()
+  const noKings = new ChessPGN()
   noKings.remove('e1')
   noKings.remove('e8')
 

@@ -1,11 +1,11 @@
-import { Chess, SEVEN_TAG_ROSTER } from '../src/chess'
+import { ChessPGN, SEVEN_TAG_ROSTER } from '../src/chessPGN'
 import { beforeEach, describe, expect, test } from 'vitest'
 
-describe('Chess Header Methods', () => {
-  let chess: Chess
+describe('ChessPGN Header Methods', () => {
+  let chess: ChessPGN
 
   beforeEach(() => {
-    chess = new Chess()
+    chess = new ChessPGN()
   })
 
   test('setHeader should add or update a header', () => {

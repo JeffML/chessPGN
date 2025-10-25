@@ -1,10 +1,10 @@
-import { Chess, SEVEN_TAG_ROSTER } from '../src/chess'
-import { diffChars, SEVEN_TAG_ROSTER_STRING } from './utils'
+import { ChessPGN, SEVEN_TAG_ROSTER } from '../src/chessPGN'
+import {  SEVEN_TAG_ROSTER_STRING } from './utils'
 import { describe, expect, it } from 'vitest'
 
 describe('Regression Tests', () => {
   it('Github Issue #30 - move generateion - single square bug', () => {
-    const chess = new Chess(
+    const chess = new ChessPGN(
       'rnbqk2r/ppp1pp1p/5n1b/3p2pQ/1P2P3/B1N5/P1PP1PPP/R3KBNR b KQkq - 3 5',
     )
     const moves: string[] = []
@@ -12,7 +12,7 @@ describe('Regression Tests', () => {
   })
 
   it('Github Issue #32 - castling flag reappearing', () => {
-    const chess = new Chess(
+    const chess = new ChessPGN(
       'b3k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qNP/6QK b k - 2 28',
     )
     chess.move({ from: 'a8', to: 'g2' })
@@ -22,7 +22,7 @@ describe('Regression Tests', () => {
   })
 
   it('Github Issue #58 - placing more than one king', () => {
-    const chess = new Chess('N3k3/8/8/8/8/8/5b2/4K3 w - - 0 1')
+    const chess = new ChessPGN('N3k3/8/8/8/8/8/5b2/4K3 w - - 0 1')
     expect(chess.put({ type: 'k', color: 'w' }, 'a1')).toBe(false)
     chess.put({ type: 'q', color: 'w' }, 'a1')
     chess.remove('a1')
@@ -30,7 +30,7 @@ describe('Regression Tests', () => {
   })
 
   it('Github Issue #85 (white) - SetUp and FEN should be accepted in loadPgn', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     const pgn = [
       '[SetUp "1"]',
       '[FEN "7k/5K2/4R3/8/8/8/8/8 w - - 0 1"]',
@@ -42,7 +42,7 @@ describe('Regression Tests', () => {
   })
 
   it('Github Issue #85 (black) - SetUp and FEN should be accepted in loadPgn', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     const pgn = [
       '[SetUp "1"]',
       '[FEN "r4r1k/1p4b1/3p3p/5qp1/1RP5/6P1/3NP3/2Q2RKB b - - 0 1"]',
@@ -56,7 +56,7 @@ describe('Regression Tests', () => {
   })
 
   it('Github Issue #98 (white) - Wrong movement number after setting a position via FEN', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
     chess.move('f7')
     const result = chess.pgn()
@@ -64,7 +64,7 @@ describe('Regression Tests', () => {
   })
 
   it('Github Issue #98 (black) - Wrong movement number after setting a position via FEN', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 b - - 1 45')
     chess.move('Rf1+')
     const result = chess.pgn()
@@ -86,7 +86,7 @@ describe('Regression Tests', () => {
       '1.Qd2 Be7 *',
     ]
 
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.loadPgn(pgn.join('\n'))
     const expected = {
       Event: 'Test Olympiad',
@@ -117,7 +117,7 @@ describe('Regression Tests', () => {
       '1.Qd2 Be7 *',
     ]
 
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.loadPgn(pgn.join('\n'))
     chess.clear()
     expect(chess.getHeaders()).toEqual({ ...SEVEN_TAG_ROSTER })
@@ -147,18 +147,18 @@ describe('Regression Tests', () => {
       '32. Qe5 Qe8 33. a4 Qd8 34. R1f2 Qe8 35. R2f3 Qd8 36. Bd3 Qe8',
       '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0',
     ]
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.loadPgn(pgn.join('\n'))
     expect(chess.header()['Date']).toBe('1972.01.07')
   })
 
   it('Github Issue #284 - permissive settings allows illegal moves', () => {
-    const chess = new Chess('4k3/8/8/8/8/4p3/8/4K3 w - - 0 1')
+    const chess = new ChessPGN('4k3/8/8/8/8/4p3/8/4K3 w - - 0 1')
     expect(() => chess.move('e1f2')).toThrowError()
   })
 
   it('Github Issue #282 - playing a move on an empty board throws an error', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.clear()
     expect(() => chess.move('e4')).toThrowError()
   })
@@ -179,7 +179,7 @@ describe('Regression Tests', () => {
     ]
 
     // trailing comment - no end of game marker
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.loadPgn(
       '1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 ' +
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 {comment}',
@@ -234,14 +234,14 @@ describe('Regression Tests', () => {
   })
 
   it('Github Issue #286 - pgn should not generate sloppy moves', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.loadPgn('1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O')
     expect(chess.pgn()).toBe(`${SEVEN_TAG_ROSTER_STRING}
 1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O *`)
   })
 
   it('Github Issue #321 - strict parser should always run before permissive', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     // these test examples are lifted from the github issue
     chess.load('r4rk1/4nqpp/1p1p4/2pPpp2/bPP1P3/R1B1NQ2/P4PPP/1R4K1 w - - 0 28')
     chess.move('bxc5')
@@ -258,7 +258,7 @@ describe('Regression Tests', () => {
   })
 
   it('Github Issue #326a - ignore whitespace after header tag (loadPgn)', () => {
-    let chess = new Chess()
+    let chess = new ChessPGN()
     const pgn = `
     [white "player a"]
          [black "player b"]
@@ -270,7 +270,7 @@ describe('Regression Tests', () => {
   })
 
   it('Github Issue #326b - ignore whitespace in line after header (loadPgn)', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     const pgn = `
     [white "player a"]
          [black "player b"]
@@ -282,7 +282,7 @@ describe('Regression Tests', () => {
   })
 
   it('Github Issue #113 - cannot parse pgn not starting with move number 1', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     const pgn = `[Event "SampleSite"]
     [Site "?"]
     [Date "2008-01-04"]
@@ -305,7 +305,7 @@ describe('Regression Tests', () => {
   })
 
   it('Github Issue #552 - ignore invalid castling rights', () => {
-    const chess = new Chess('kb4r1/p2n3P/1PP5/1P6/8/8/6p1/R3KR2 b KQkq - 0 19')
+    const chess = new ChessPGN('kb4r1/p2n3P/1PP5/1P6/8/8/6p1/R3KR2 b KQkq - 0 19')
     expect(chess.isGameOver()).toBe(false) // this was crashing due to invalid castling moves being generated
   })
 })

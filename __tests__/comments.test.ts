@@ -1,9 +1,9 @@
-import { Chess } from '../src/chess'
+import { ChessPGN } from '../src/chessPGN'
 import { describe, expect, it } from 'vitest'
 
 describe('Suffix-Only Support', () => {
   it('captures multiple suffixes and comments', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     const pgn =
       '1. c4 {English Opening} ' +
       'e5!? {Aggressive} ' +
@@ -47,7 +47,7 @@ describe('Suffix-Only Support', () => {
 
 describe('Chess getComments - First Approach (Suffix-Only Handling)', () => {
   it('should correctly handle comments, suffixes, and suffix-only cases from PGN loading', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     const pgn =
       '1. c4 {Comment for c4} e5!? {Comment and Suffix for e5} 2. Nf3!! Nc6 *'
 
@@ -84,7 +84,7 @@ describe('Chess getComments - First Approach (Suffix-Only Handling)', () => {
   })
 
   it('should handle manually set suffix-only with an empty comment string for the current FEN', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.move('g3')
     const currentFen = chess.fen()
 
@@ -104,7 +104,7 @@ describe('Chess getComments - First Approach (Suffix-Only Handling)', () => {
 
 describe('Manipulate Comments', () => {
   it('no comments', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     expect(chess.getComment()).toBeUndefined()
     expect(chess.getComments()).toEqual([])
     chess.move('e4')
@@ -114,7 +114,7 @@ describe('Manipulate Comments', () => {
   })
 
   it('comment for initial position', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.setComment('starting position')
     expect(chess.getComment()).toEqual('starting position')
     expect(chess.getComments()).toEqual([
@@ -124,7 +124,7 @@ describe('Manipulate Comments', () => {
   })
 
   it('comment for first move', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.move('e4')
     const e4 = chess.fen()
     chess.setComment('good move')
@@ -137,7 +137,7 @@ describe('Manipulate Comments', () => {
   })
 
   it('comment for last move', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.move('e4')
     chess.move('e6')
     chess.setComment('dubious move')
@@ -149,13 +149,13 @@ describe('Manipulate Comments', () => {
   })
 
   it('comment with brackets', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.setComment('{starting position}')
     expect(chess.getComment()).toEqual('[starting position]')
   })
 
   it('comments for everything', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
 
     const initial = chess.fen()
     chess.setComment('starting position')
@@ -194,7 +194,7 @@ describe('Manipulate Comments', () => {
   })
 
   it('remove comments', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     expect(chess.removeComment()).toBeUndefined()
     expect(chess.removeComments()).toEqual([])
     const initial = chess.fen()
@@ -223,7 +223,7 @@ describe('Manipulate Comments', () => {
   })
 
   it('prune comments', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.move('e4')
     chess.setComment('tactical')
     chess.undo()
@@ -237,7 +237,7 @@ describe('Manipulate Comments', () => {
 
   it('clear comments', () => {
     const test = (fn: (chess: Chess) => void) => {
-      const chess = new Chess()
+      const chess = new ChessPGN()
       chess.move('e4')
       chess.setComment('good move')
       expect(chess.getComments()).toEqual([
@@ -263,7 +263,7 @@ describe('Manipulate Comments', () => {
 
 describe('Format Comments', () => {
   it('wrap comments', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.move('e4')
     chess.setComment('good   move')
     chess.move('e5')
@@ -382,7 +382,7 @@ describe('Load Comments', () => {
 
   tests.forEach((test) => {
     it(`load ${test.name}`, () => {
-      const chess = new Chess()
+      const chess = new ChessPGN()
       chess.loadPgn(test.input)
       expect(chess.pgn().endsWith(test.output + ' *')).toBe(true)
     })

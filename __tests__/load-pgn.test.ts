@@ -1,8 +1,8 @@
-import { Chess, DEFAULT_POSITION, SEVEN_TAG_ROSTER } from '../src/chess'
+import { ChessPGN, DEFAULT_POSITION, SEVEN_TAG_ROSTER } from '../src/chessPGN'
 import { expect, test } from 'vitest'
 
 test('loadPgn - works', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = '4q2k/2r1r3/4PR1p/p1p5/P1Bp1Q1P/1P6/6P1/6K1 b - - 4 41'
   const pgn = `
 [Event "Reykjavik WCh"]
@@ -30,11 +30,11 @@ test('loadPgn - works', () => {
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - no header', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = 'r1b1r3/pp1k3p/n2p4/8/Q7/b2P4/P1PK2P1/1R3B2 b - - 1 23'
   const pgn = `
 1. e4 e5 2. f4 exf4 3. Nf3 g5 4. h4 g4 5. Ne5 Nf6 6. Nxg4 Nxe4 7. d3 Ng3 8.
@@ -45,23 +45,23 @@ Qxh1 Bxb2 21. Qh4+ Kd7 22. Rb1 Bxa3 23. Qa4+`
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - no moves', () => {
   // GitHub Issue #362 - Load PGN works - no moves
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const pgn = ''
 
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(DEFAULT_POSITION)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - no moves (header only)', () => {
   // GitHub Issue #362 - Load PGN works - no moves
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const pgn = `
 [White "White"]
 [Black "Black"]
@@ -70,22 +70,22 @@ test('loadPgn - works - no moves (header only)', () => {
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(DEFAULT_POSITION)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - empty game', () => {
   // GitHub Issue #506 - Load PGN works - empty game
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const pgn = chess.pgn()
 
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(DEFAULT_POSITION)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - comments', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17'
   const comments = [
     {
@@ -125,12 +125,12 @@ pawn, is hanging, the bishop is blocked because of the Queen.--Fischer} b5
   expect(chess.fen()).toEqual(fen)
   expect(chess.getComments()).toEqual(comments)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - comments (before first move)', () => {
   // Github Issue #134 - Load PGN with comment before first move
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen =
     'r1bqk2r/pp1nbppp/2p1pn2/3p4/2PP4/5NP1/PP2PPBP/RNBQ1RK1 w kq - 4 7'
   const comments = [
@@ -174,7 +174,7 @@ Bogo-Indian. } 3...d5 4.Bg2 c6 5.Nf3 Be7 6.O-O Nbd7
   expect(chess.fen()).toEqual(fen)
   expect(chess.getComments()).toEqual(comments)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - regression test (pinned piece)', () => {
@@ -183,48 +183,48 @@ test('loadPgn - works - regression test (pinned piece)', () => {
    * c3 and ended up in this position:
    * rnbqk2r/pp1p1ppp/4pn2/1N6/1bPN4/8/PP2PPPP/R1BQKB1R b KQkq - 2 6
    */
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = 'rnbqk2r/pp1p1ppp/4pn2/1N6/1bP5/2N5/PP2PPPP/R1BQKB1R b KQkq - 2 6'
   const pgn = '1. d4 Nf6 2. c4 e6 3. Nf3 c5 4. Nc3 cxd4 5. Nxd4 Bb4 6. Nb5'
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - move annotations', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = 'rnbqkbnr/ppp2ppp/8/3pp3/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3'
   const pgn = '1. e4!! e5?! 2. d4?? d5!?'
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - move annotations (including check symbols)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = 'rnb2q1r/pp1k2pp/2pb1n2/8/3P4/5N2/PPP2PPP/RNBQKB1R w KQ - 0 8'
   const pgn =
     '1.e4 e6 2.d4 d5 3.exd5 c6?? 4.dxe6 Nf6?! 5.exf7+!! Kd7!? 6.Nf3 Bd6 7.f8=N+!! Qxf8'
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - multiple NAGs', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = 'rnbqkbnr/pppp1ppp/4p3/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2'
   const pgn = '1.e4 $1 $14 2. e6 $6 2.d4'
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - prunes recursive annotation variations (RAV)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const pgn = "1. e4 ( 1. d4 { Queen's pawn } d5 ( 1... Nf6 ) ) e5"
   const fen = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2'
 
@@ -232,11 +232,11 @@ test('loadPgn - works - prunes recursive annotation variations (RAV)', () => {
   expect(chess.fen()).toEqual(fen)
   expect(chess.getComments()).toEqual([])
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - preserves RAV inside comments', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen =
     '3q1rk1/1b1rbp1p/p2p1np1/1p2pP2/3BP3/P1NB3Q/1PP3PP/4RR1K w - - 0 19'
   const comments = [
@@ -263,11 +263,11 @@ Nf6 21. Qh3 Bc6 22. Kg1 Qb8 23. Qg3 Nh5 24. Qf2 Bf6 25. Be2 Bxd4
   expect(chess.fen()).toEqual(fen)
   expect(chess.getComments()).toEqual(comments)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - mixed RAV and comments', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen =
     'rnbq1rk1/ppp1ppbp/5np1/3p4/3P1B2/4PN1P/PPP2PP1/RN1QKB1R w KQ - 1 6'
   const comments = [
@@ -284,11 +284,11 @@ test('loadPgn - works - mixed RAV and comments', () => {
   expect(chess.fen()).toEqual(fen)
   expect(chess.getComments()).toEqual(comments)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - FEN and SetUp tag', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17'
   const pgn = `
 [White "Paul Morphy"]
@@ -300,11 +300,11 @@ test('loadPgn - works - FEN and SetUp tag', () => {
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - strict - SetUp tag requires FEN tag', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const pgn = `
 [White "Paul Morphy"]
 [Black "Duke Karl / Count Isouard"]
@@ -318,7 +318,7 @@ test('loadPgn - strict - SetUp tag requires FEN tag', () => {
 })
 
 test('loadPgn - strict - FEN and SetUp tag', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17'
   const pgn = `
 [White "Paul Morphy"]
@@ -330,11 +330,11 @@ test('loadPgn - strict - FEN and SetUp tag', () => {
   chess.loadPgn(pgn, { strict: true })
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test("loadPgn - works - prunes numeric annotation glyphs (NAG's)", () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = 'r2r2k1/5pp1/p1p2q2/PpP1p3/1PnbP2p/5R2/2Q1BPPP/2B2RK1 b - - 3 27'
   const pgn = `
 1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bb6 5. a4 a6 6. c3 Nf6 7. d3 d6
@@ -346,11 +346,11 @@ test("loadPgn - works - prunes numeric annotation glyphs (NAG's)", () => {
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - messy whitespace (tabs, whitespace, and mixed newlines)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const pgn =
     '    \t   [ Event"Reykjavik WCh"    ]\n' +
     '[Site "Reykjavik WCh"]       \n' +
@@ -381,11 +381,11 @@ test('loadPgn - works - messy whitespace (tabs, whitespace, and mixed newlines)'
   expect(chess.header()['Event']).toEqual('Reykjavik WCh')
   expect(chess.header()['Round']).toEqual('6')
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - parses different newline characters', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17'
   const comments = [
     {
@@ -430,11 +430,11 @@ test('loadPgn - works - parses different newline characters', () => {
     expect(chess.getComments()).toEqual(comments)
   })
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - permissive parser (unnecessary disambiguation - #1)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = '8/4P1bp/pk6/1p6/4r3/1P2n3/r5PP/2R4K w - - 0 33'
   const pgn = `
 1.e4 e5 2.Nf3 d6 3.d4 Bg4 4.dxe5 Bxf3 5.Qxf3 dxe5 6.Qf5 Nc6 7.Bb5 Nge7 8.Qxe5
@@ -450,11 +450,11 @@ Ng4 23.Rxd7+ Kc6 24.Rxf7 Bxb2 25.Rxg7 Ne3 26.Rg3 Bd4 27.Kh1 Rxa2 28.Rc1+ Kb6
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - permissive parser (unnecessary disambiguation - #2)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const pgn = `
 1.e4 e5 2. Nf3 d5 3. Nxe5 f6 4. Bb5+ c6 5. Qh5+ Ke7 Qf7+ Kd6 7. d3 Kxe5 8. Qh5+
 g5 9. g3 cxb5 10. Bf4+ Ke6 exd5+ Qxd5 12. Qe8+ Kf5 13. Rg1 gxf4 14. Nc3 Qc5 15.
@@ -470,11 +470,11 @@ Rc4-d4 Rb7 29. Qf7 Rc7 30. Qe8# 1-0`
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - permissive parser (correctly disambiguated move - #1)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = '8/4P1bp/pk6/1p6/4r3/1P2n3/r5PP/2R4K w - - 0 33'
   const pgn = `
 1.e4 e5 2.Nf3 d6 3.d4 Bg4 4.dxe5 Bxf3 5.Qxf3 dxe5 6.Qf5 Nc6 7.Bb5 Ne7 8.Qxe5
@@ -491,11 +491,11 @@ Ng4 23.Rxd7+ Kc6 24.Rxf7 Bxb2 25.Rxg7 Ne3 26.Rg3 Bd4 27.Kh1 Rxa2 28.Rc1+ Kb6
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - permissive parser (correctly disambiguated move - #2)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = 'r1bq1b1r/ppp3pp/4k3/3np3/1nB5/2N2Q2/PPPP1PPP/R1B1K2R w KQ - 4 9'
   const pgn = `
 1.e4 e5 2.Nf3 Nc6 3.Bc4 Nf6 4.Ng5 d5 5.exd5 Nxd5 6.Nxf7 Kxf7 7.Qf3+ Ke6 8.Nc3 Nb4`
@@ -506,11 +506,11 @@ test('loadPgn - works - permissive parser (correctly disambiguated move - #2)', 
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - permissive parser (alebraic notation)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = 'r1q1r1k1/1p1n1ppB/p2b4/2pn4/8/7P/PPQ2BP1/3R1RK1 b - - 0 25'
   const pgn = `
 e2e4 d7d5 e4d5 d8d5 d2d4 g8f6 c2c4 d5d8 g1f3 c8g4 f1e2 e7e6 b1c3 f8e7 c1e3 e8g8
@@ -525,11 +525,11 @@ d3h7`
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - permissive parser (alebraic notation with symbols and en passant)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = '8/p2Q4/2P3kp/5p2/4b3/1P2P3/r6q/3K1R2 w - - 0 39'
   const pgn = `
 1. d2d4 f7f5 2. b2b3 e7e6 3. c1b2 d7d5 4. g1f3 f8d6 5. e2e3 g8f6 6. b1d2 e8g8
@@ -547,11 +547,11 @@ e6d5 30. f3d1 f7h5 31. c2h2 g4g3+ 32. f4g3 g8g3+ 33. g1f2 h5h2+ 34. f2e1 g3g2
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - permissive parser (alebraic notation with underpromotion)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = '7Q/6R1/4B3/7k/4N3/8/6PP/6K1 b - - 2 68'
   const pgn = `
 1. e2e4 c7c5 2. g1f3 d7d6 3. d2d4 c5d4 4. f3d4 g8f6 5. f1d3 a7a6 6. c1e3 e7e5
@@ -575,11 +575,11 @@ h5h4 67. f7f8Q h4h5 68. f8h8# 1-0`
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - permissive parser (extended long alebraic notation)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = '8/2kP4/4K3/8/8/1p6/8/8 b - - 2 59'
   const pgn = `
 1. d2d4 f7f5 2. Bc1g5 d7d6 3. e2e3 Nb8d7 4. c2c4 Ng8f6 5. Nb1c3 e7e5 6. d4e5
@@ -603,11 +603,11 @@ Rb7b6 Kc5b6 58. d6d7 Kb6c7 59. Ke5e6 1-0
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - permissive parser (extended long alebraic notation with hyphens)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = '7Q/6R1/4B3/7k/4N3/8/6PP/6K1 b - - 2 68'
   const pgn = `
 1. e2-e4 c7-c5 2. Ng1-f3 d7-d6 3. d2-d4 c5xd4 4. Nf3xd4 Ng8-f6 5. Bf1-d3
@@ -634,11 +634,11 @@ Kh4-h5 68. Qf8-h8# 1-0`
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - permissive parser (0-0 & 0-0-0)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = 'rnbq1rk1/ppp1bppp/4pn2/3p4/3P1B2/2N5/PPPQPPPP/2KR1BNR w - - 4 6'
   const pgn = `
 1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Qd2 Be7 5. 0-0-0 0-0 *`
@@ -650,11 +650,11 @@ test('loadPgn - works - permissive parser (0-0 & 0-0-0)', () => {
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - permissive parser (FEN without SetUp tag)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17'
   const pgn = `
 [White "Paul Morphy"]
@@ -670,11 +670,11 @@ test('loadPgn - works - permissive parser (FEN without SetUp tag)', () => {
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - works - permissive parser (FEN tag case insensitive)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const fen = '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17'
   const pgn = `
 [White "Paul Morphy"]
@@ -690,23 +690,23 @@ test('loadPgn - works - permissive parser (FEN tag case insensitive)', () => {
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 
-  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
 
 test('loadPgn - throws Error (illegal move)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const pgn = '1. e4 Qxd7 1/2-1/2'
   expect(() => chess.loadPgn(pgn)).toThrowError()
 })
 
 test('loadPgn - throws Error (illegal check annotation)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const pgn = '1. e4!+'
   expect(() => chess.loadPgn(pgn)).toThrowError()
 })
 
 test('loadPgn - throws Error (invalid FEN in header)', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const pgn = `
 [White "Paul Morphy"]
 [Black "Duke Karl / Count Isouard"]

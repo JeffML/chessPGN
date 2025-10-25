@@ -1,4 +1,4 @@
-import { Chess, DEFAULT_POSITION } from '../src/chess'
+import { ChessPGN, DEFAULT_POSITION } from '../src/chessPGN'
 import { split } from './utils'
 import { expect, test } from 'vitest'
 
@@ -48,7 +48,7 @@ const positions = [
 
 positions.forEach(({ fen, moves }, i) => {
   test(`standard algebraic notation - ${i}`, () => {
-    const chess = new Chess(fen)
+    const chess = new ChessPGN(fen)
     expect(chess.moves()).to.have.members(split(moves))
   })
 })

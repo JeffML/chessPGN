@@ -1,4 +1,4 @@
-import { Chess, xoroshiro128 } from '../src/chess'
+import { ChessPGN, xoroshiro128 } from '../src/chessPGN'
 import { expect, test } from 'vitest'
 
 // Very basic hash tests, more extensive testing is done as part of the move and load pgn tests.
@@ -19,17 +19,17 @@ test('rand', () => {
 })
 
 test('hash is the same for the same position', () => {
-  const a = new Chess()
-  const b = new Chess()
+  const a = new ChessPGN()
+  const b = new ChessPGN()
 
   expect(a.hash()).toEqual(b.hash())
 })
 
 test('hash is different for different positions', () => {
-  const a = new Chess()
+  const a = new ChessPGN()
   a.move('e4')
 
-  const b = new Chess()
+  const b = new ChessPGN()
   b.move('d4')
 
   expect(a.hash()).not.toEqual(b.hash())

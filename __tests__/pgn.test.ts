@@ -1,4 +1,4 @@
-import { BLACK, Chess, WHITE } from '../src/chess'
+import { BLACK, ChessPGN, WHITE } from '../src/chessPGN'
 import { split, fileToString } from './utils'
 import { describe, expect, it, test } from 'vitest'
 
@@ -68,7 +68,7 @@ describe('PGN', () => {
   ]
 
   test('pgn - works - removes header', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     const pgn = `
   [White "Paul Morphy"]
   [Black "Duke Karl / Count Isouard"]
@@ -76,7 +76,7 @@ describe('PGN', () => {
 
   17.Rd8# 1-0`
 
-    const chess2 = new Chess()
+    const chess2 = new ChessPGN()
     const pgn2 = `
   [White "?"]
   [Black "Duke Karl / Count Isouard"]
@@ -93,19 +93,19 @@ describe('PGN', () => {
   })
 
   test('pgn - works - begins on correct turn - black', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.loadPgn('1. e4')
     expect(chess.turn()).toBe(BLACK)
   })
 
   test('pgn - works - begins on correct turn - white', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.loadPgn('1. e4 e5')
     expect(chess.turn()).toBe(WHITE)
   })
 
   test('pgn - works - begins on correct turn when empty', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     const pgn = `
   [White "LichessAborter"]
   [Black "PoorSap"]
@@ -116,7 +116,7 @@ describe('PGN', () => {
   })
 
   test('pgn - works - supports removing non-existent header', () => {
-    const chess = new Chess()
+    const chess = new ChessPGN()
     const pgn = `
   [White "LichessAborter"]
   [Black "PoorSap"]
@@ -131,7 +131,7 @@ describe('PGN', () => {
 
   positions.forEach((position, i) => {
     it(`Postion: ${i}`, () => {
-      const chess = new Chess()
+      const chess = new ChessPGN()
 
       if (position.starting_position) {
         chess.load(position.starting_position)

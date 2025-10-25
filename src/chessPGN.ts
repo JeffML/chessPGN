@@ -1,6 +1,7 @@
 /**
  * @license
  * Copyright (c) 2025, Jeff Hlywa (jhlywa@gmail.com)
+ * Copyright (c) 2025, Jeff Lowery (jlowery2663@gmail.com)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -437,7 +438,7 @@ function strippedSan(move: string): string {
   return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '')
 }
 
-export class Chess {
+export class ChessPGN {
   private _game!: Game
   private _header: Record<string, string | null> = {}
   private _comments: Record<string, string> = {}

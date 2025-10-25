@@ -1,15 +1,15 @@
-import { Chess as ChessClass, DEFAULT_POSITION } from '../src/chess'
+import { ChessPGN as ChessClass, DEFAULT_POSITION } from '../src/chessPGN'
 import { expect, test } from 'vitest'
 
-// We need to use `Chess as any` to access private property
+// We need to use `ChessPGN as any` to access private property
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/naming-convention
-const Chess = ChessClass as any
-const defaultHash = BigInt('0x' + new Chess(DEFAULT_POSITION).hash())
+const ChessPGN = ChessClass as any
+const defaultHash = BigInt('0x' + new ChessPGN(DEFAULT_POSITION).hash())
 const e4Fen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-const e4Hash = BigInt('0x' + new Chess(e4Fen).hash())
+const e4Hash = BigInt('0x' + new ChessPGN(e4Fen).hash())
 
 test('positionCount - counts repeated positions', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   expect(chess._getPositionCount(defaultHash)).toBe(1)
 
   const hashes: bigint[] = [defaultHash]
@@ -26,7 +26,7 @@ test('positionCount - counts repeated positions', () => {
 })
 
 test('positionCount - removes when undo', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   expect(chess._getPositionCount(defaultHash)).toBe(1)
   expect(chess._getPositionCount(e4Hash)).toBe(0)
   chess.move('e4')
@@ -41,7 +41,7 @@ test('positionCount - removes when undo', () => {
 })
 
 test('positionCount - resets when cleared', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
 
   chess.move('e4')
   chess.clear()
@@ -50,7 +50,7 @@ test('positionCount - resets when cleared', () => {
 })
 
 test('positionCount - resets when loading FEN', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   expect(chess._getPositionCount(defaultHash)).toBe(1)
   chess.move('e4')
   expect(chess._getPositionCount(defaultHash)).toBe(1)
@@ -68,7 +68,7 @@ test('positionCount - resets when loading FEN', () => {
 })
 
 test('positionCount - resets when loading PGN', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   chess.move('e4')
 
   chess.loadPgn('1. d4 d5')
@@ -78,7 +78,7 @@ test('positionCount - resets when loading PGN', () => {
     chess._getPositionCount(
       BigInt(
         '0x' +
-          new Chess(
+          new ChessPGN(
             'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1',
           ).hash(),
       ),
@@ -88,7 +88,7 @@ test('positionCount - resets when loading PGN', () => {
     chess._getPositionCount(
       BigInt(
         '0x' +
-          new Chess(
+          new ChessPGN(
             'rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2',
           ).hash(),
       ),

@@ -1,4 +1,4 @@
-import { Chess } from '../src/chess'
+import { ChessPGN } from '../src/chessPGN'
 import { describe, expect, it, test } from 'vitest'
 
 describe('.load() / .fen() should be symmetric', () => {
@@ -9,7 +9,7 @@ describe('.load() / .fen() should be symmetric', () => {
     '1nbqkbn1/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/1NBQKBN1 b - - 1 2',
   ]
 
-  const chess = new Chess()
+  const chess = new ChessPGN()
 
   validPositions.forEach((fen) => {
     it('fen - symmetry - ' + fen, () => {
@@ -20,20 +20,20 @@ describe('.load() / .fen() should be symmetric', () => {
 })
 
 test('fen - ep square present only if en passant is legal (legal)', () => {
-  const chess = new Chess('4k3/8/8/8/5p2/8/4P3/4K3 w - - 0 1')
+  const chess = new ChessPGN('4k3/8/8/8/5p2/8/4P3/4K3 w - - 0 1')
   chess.move('e4')
   expect(chess.fen()).toEqual('4k3/8/8/8/4Pp2/8/8/4K3 b - e3 0 1')
 })
 
 test('fen - ep square only if en passant is legal (illegal - pinned) - #1)', () => {
-  const chess = new Chess('5k2/8/8/8/5p2/8/4P3/4KR2 w - - 0 1')
+  const chess = new ChessPGN('5k2/8/8/8/5p2/8/4P3/4KR2 w - - 0 1')
   chess.move('e4')
   expect(chess.fen()).toEqual('5k2/8/8/8/4Pp2/8/8/4KR2 b - - 0 1')
 })
 
 test('fen - ep square only if en passant is legal (illegal - pinned - #2)', () => {
   // black queen pins the ep pawn, making ep illegal (submitted by @ajax333221)
-  const chess = new Chess(
+  const chess = new ChessPGN(
     'rnb1kbn1/p1p1pp2/PpPp2qr/5Pp1/8/R1P4p/1PK1P1PP/1NBQ1BNR b - - 0 1',
   )
   chess.move('e5')
@@ -44,7 +44,7 @@ test('fen - ep square only if en passant is legal (illegal - pinned - #2)', () =
 
 test('fen - allow EP square to be included by option (pinned)', () => {
   // black queen pins the ep pawn, making ep illegal (submitted by @ajax333221)
-  const chess = new Chess(
+  const chess = new ChessPGN(
     'rnb1kbn1/p1p1pp2/PpPp2qr/5Pp1/8/R1P4p/1PK1P1PP/1NBQ1BNR b - - 0 1',
   )
   chess.move('e5')
@@ -55,7 +55,7 @@ test('fen - allow EP square to be included by option (pinned)', () => {
 
 test('fen - allow EP square to be included by option (no capturing pawn)`', () => {
   // GitHub Issue #544
-  const chess = new Chess()
+  const chess = new ChessPGN()
   chess.move('h4')
 
   expect(chess.fen({ forceEnpassantSquare: true })).toEqual(

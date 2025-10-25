@@ -1,8 +1,8 @@
-import { Chess } from '../src/chess'
+import { ChessPGN } from '../src/chessPGN'
 import { describe, expect, it, test } from 'vitest'
 
 describe('History', () => {
-  const chess = new Chess()
+  const chess = new ChessPGN()
   const tests = [
     {
       verbose: false,
@@ -1141,7 +1141,7 @@ describe('History', () => {
       },
     ]
 
-    const chess = new Chess()
+    const chess = new ChessPGN()
     chess.loadPgn(pgn)
 
     const history = chess.history({ verbose: true })
