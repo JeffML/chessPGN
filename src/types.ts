@@ -1,5 +1,5 @@
 /**
- * Shared types and constants used across chess.js modules
+ * Shared types and constants used across chessPGN modules
  */
 
 // Zobrist hashing utilities

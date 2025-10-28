@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic'
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'chess.js',
+  title: 'chessPGN',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -13,15 +13,15 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://jhlywa.github.io',
+  url: 'https://JeffML.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/chess.js/',
+  baseUrl: '/chessPGN/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'jhlywa', // Usually your GitHub org/user name.
-  projectName: 'chess.js', // Usually your repo name.
+  organizationName: 'JeffML', // Usually your GitHub org/user name.
+  projectName: 'chessPGN', // Usually your repo name.
 
   trailingSlash: true,
   onBrokenLinks: 'throw',
@@ -58,14 +58,14 @@ const config: Config = {
 
   themeConfig: {
     navbar: {
-      title: 'chess.js',
+      title: 'chessPGN',
       items: [
         {
           type: 'docsVersionDropdown',
           position: 'right',
         },
         {
-          href: 'https://github.com/jhlywa/chess.js',
+          href: 'https://github.com/JeffML/chessPGN',
           label: 'GitHub',
           position: 'right',
         },
@@ -83,16 +83,16 @@ const config: Config = {
           items: [
             {
               label: 'GitHub',
-              href: 'https://github.com/jhlywa/chess.js',
+              href: 'https://github.com/JeffML/chessPGN',
             },
             {
               label: 'NPM',
-              href: 'https://www.npmjs.com/package/chess.js',
+              href: 'https://www.npmjs.com/package/chessPGN',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Jeff Hlywa.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Jeff Hlywa. Refactored by Jeff Lowery on October ${new Date().getFullYear()} for readability and maintainability`,
     },
     prism: {
       theme: prismThemes.github,

@@ -1,7 +1,10 @@
 /**
+ * Refactored by Jeff Lowery (jlowery2663@gmail.com) on October, 2025 to improve readability and maintainability.
+ * Original behavior is preserved. Changes/additions to API and implementation noted in comments and/or changelog.
+ * 
+ * Original chess.js License:
  * @license
  * Copyright (c) 2025, Jeff Hlywa (jhlywa@gmail.com)
- * Copyright (c) 2025, Jeff Lowery (jlowery2663@gmail.com)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,6 +28,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+/** 
+
+* [Original License Terms]
+*/
 
 import { Game } from './Game'
 import { Move } from './Move'

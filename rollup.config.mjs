@@ -4,9 +4,9 @@ import { dts } from 'rollup-plugin-dts'
 
 export default [
   {
-    input: 'src/chess.ts',
+    input: 'src/chessPGN.ts',
     output: {
-      file: 'dist/cjs/chess.js',
+      file: 'dist/cjs/chessPGN.js',
       format: 'cjs',
       sourcemap: true,
     },
@@ -19,9 +19,9 @@ export default [
     ],
   },
   {
-    input: 'src/chess.ts',
+    input: 'src/chessPGN.ts',
     output: {
-      file: 'dist/esm/chess.js',
+      file: 'dist/esm/chessPGN.js',
       format: 'esm',
       sourcemap: true,
     },
@@ -34,9 +34,9 @@ export default [
     ],
   },
   {
-    input: 'src/chess.ts',
+    input: 'src/chessPGN.ts',
     output: {
-      file: 'dist/types/chess.d.ts',
+      file: 'dist/types/chessPGN.d.ts',
       format: 'es',
     },
     plugins: [dts()],

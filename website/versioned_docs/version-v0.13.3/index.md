@@ -12,17 +12,17 @@ chess.js has been extensively tested in node.js and most modern browsers.
 
 ## Installation
 
-Run the following command to install the most recent version of chess.js from NPM:
+Run the following command to install the most recent version of chessPGN from NPM:
 
 ```
-npm install chess.js
+npm install chessPGN
 ```
 
 TypeScript type definitions for chess.js are provided by the community-supported
 DefinitelyTyped repository and can be installed via:
 
 ```
-npm install -D @types/chess.js
+npm install -D @types/chessPGN
 
 ```
 
@@ -33,7 +33,7 @@ The code below plays a random game of chess:
 ```js
 import { Chess } from 'chess.js'
 
-const chess = new Chess()
+const chess = new ChessPGN()
 
 while (!chess.game_over()) {
     const moves = chess.moves()
@@ -45,8 +45,8 @@ console.log(chess.pgn())
 
 ## User Interface
 
-By design, chess.js is headless and does not include user interface.  Many
-developers have had success integrating chess.js with the
+By design, chessPGN is headless and does not include user interface.  Many
+developers have had success integrating chessPGN with the
 [chessboard.js](http://chessboardjs.com) library. See
 [chessboard.js - Random vs Random](http://chessboardjs.com/examples#5002) for
 an example.
@@ -55,7 +55,7 @@ an example.
 
 ### Constructor: Chess([ fen ])
 
-The Chess() constructor takes an optional parameter which specifies the board configuration
+The ChessPGN() constructor takes an optional parameter which specifies the board configuration
 in [Forsyth-Edwards Notation](http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation).
 
 ```js

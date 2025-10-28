@@ -15,15 +15,15 @@ chess.js has been extensively tested in node.js and most modern browsers.
 ## Documentation
 
 This README provides a quick example, full documentation can be found at
-[https://jhlywa.github.io/chess.js](https://jhlywa.github.io/chess.js).
+[https://jhlywa.github.io/chessPGN](https://JeffML.github.io/chessPGN).
 
 ## Installation
 
-Run the following command to install the most recent version of chess.js from
+Run the following command to install the most recent version of chessPGN from
 NPM:
 
 ```sh
-npm install chess.js
+npm install chessPGN
 ```
 
 ## Example Code
