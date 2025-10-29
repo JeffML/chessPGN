@@ -13,7 +13,7 @@ const games = file
 
 // Run the benchmark
 const bench = new Bench({
-  name: chessPGN benchmark',
+  name: 'chessPGN benchmark',
   iterations: 30,
   time: 15,
 })
