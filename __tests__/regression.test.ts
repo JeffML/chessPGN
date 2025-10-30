@@ -1,5 +1,5 @@
 import { ChessPGN, SEVEN_TAG_ROSTER } from '../src/chessPGN'
-import {  SEVEN_TAG_ROSTER_STRING } from './utils'
+import { SEVEN_TAG_ROSTER_STRING } from './utils'
 import { describe, expect, it } from 'vitest'
 
 describe('Regression Tests', () => {
@@ -305,7 +305,9 @@ describe('Regression Tests', () => {
   })
 
   it('Github Issue #552 - ignore invalid castling rights', () => {
-    const chess = new ChessPGN('kb4r1/p2n3P/1PP5/1P6/8/8/6p1/R3KR2 b KQkq - 0 19')
+    const chess = new ChessPGN(
+      'kb4r1/p2n3P/1PP5/1P6/8/8/6p1/R3KR2 b KQkq - 0 19',
+    )
     expect(chess.isGameOver()).toBe(false) // this was crashing due to invalid castling moves being generated
   })
 })

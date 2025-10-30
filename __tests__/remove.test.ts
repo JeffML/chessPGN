@@ -1,8 +1,4 @@
-import {
-  ChessPGN,
-  QUEEN,
-  WHITE,
-} from '../src/chessPGN'
+import { ChessPGN, QUEEN, WHITE } from '../src/chessPGN'
 import { expect, test } from 'vitest'
 
 test('remove - returns piece', () => {

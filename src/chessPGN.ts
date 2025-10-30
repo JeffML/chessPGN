@@ -1,7 +1,7 @@
 /**
  * Refactored by Jeff Lowery (jlowery2663@gmail.com) on October, 2025 to improve readability and maintainability.
  * Original behavior is preserved. Changes/additions to API and implementation noted in comments and/or changelog.
- * 
+ *
  * Original chess.js License:
  * @license
  * Copyright (c) 2025, Jeff Hlywa (jhlywa@gmail.com)
