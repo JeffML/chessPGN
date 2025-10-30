@@ -29,11 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** 
-
-* [Original License Terms]
-*/
-
 import { Game } from './Game'
 import { Move } from './Move'
 import { parse } from './pgn'
