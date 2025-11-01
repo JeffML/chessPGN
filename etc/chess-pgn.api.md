@@ -263,7 +263,7 @@ export const KING = "k";
 // @public (undocumented)
 export const KNIGHT = "n";
 
-// @public (undocumented)
+// @public
 export class Move {
     constructor(internal: InternalMove, san: string, before: string, after: string);
     // (undocumented)
