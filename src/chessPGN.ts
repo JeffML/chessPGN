@@ -463,7 +463,12 @@ export class ChessPGN {
   }
 
   load(fen: string, { skipValidation = false, preserveHeaders = false } = {}) {
-    this._game.load(fen, { skipValidation })
+    // Game.load() will auto-fill missing FEN tokens, so we need to expand first
+    const tokens = fen.split(/\s+/)
+    if (tokens.length >= 2 && tokens.length < 6) {
+      const adjustments = ['-', '-', '0', '1']
+      fen = tokens.concat(adjustments.slice(-(6 - tokens.length))).join(' ')
+    }
     
     if (!skipValidation) {
       const { ok, error } = validateFen(fen)
@@ -471,6 +476,8 @@ export class ChessPGN {
         throw new Error(error)
       }
     }
+
+    this._game.load(fen, { skipValidation: true })
 
     if (!preserveHeaders) {
       this._game._header = { ...HEADER_TEMPLATE }
