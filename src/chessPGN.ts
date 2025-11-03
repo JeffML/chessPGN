@@ -419,7 +419,6 @@ function strippedSan(move: string): string {
 
 export class ChessPGN {
   private _game!: Game
-  private _header: Record<string, string | null> = {}
   private _comments: Record<string, string> = {}
   private _suffixes: Record<string, Suffix> = {}
 
@@ -525,7 +524,7 @@ export class ChessPGN {
     this._moveNumber = 1
     this._history = []
     this._comments = {}
-    this._header = preserveHeaders ? this._header : { ...HEADER_TEMPLATE }
+    this._game._header = preserveHeaders ? this._game._header : { ...HEADER_TEMPLATE }
     this._hash = this._computeHash()
     this._positionCount = new Map<bigint, number>()
 
@@ -534,8 +533,8 @@ export class ChessPGN {
      * these headers don't make sense in this state. They'll get added later
      * via .load() or .put()
      */
-    this._header['SetUp'] = null
-    this._header['FEN'] = null
+    this._game._header['SetUp'] = null
+    this._game._header['FEN'] = null
   }
 
   load(fen: string, { skipValidation = false, preserveHeaders = false } = {}) {
@@ -738,11 +737,11 @@ export class ChessPGN {
     if (this._history.length > 0) return
 
     if (fen !== DEFAULT_POSITION) {
-      this._header['SetUp'] = '1'
-      this._header['FEN'] = fen
+      this._game._header['SetUp'] = '1'
+      this._game._header['FEN'] = fen
     } else {
-      this._header['SetUp'] = null
-      this._header['FEN'] = null
+      this._game._header['SetUp'] = null
+      this._game._header['FEN'] = null
     }
   }
 
@@ -1201,7 +1200,7 @@ export class ChessPGN {
     let headerExists = false
 
     /* add the PGN header information */
-    for (const i in this._header) {
+    for (const i in this._game._header) {
       /*
        * TODO: order of enumerated properties in header object is not
        * guaranteed, see ECMA-262 spec (section 12.6.4)
@@ -1209,8 +1208,8 @@ export class ChessPGN {
        * By using HEADER_TEMPLATE, the order of tags should be preserved; we
        * do have to check for null placeholders, though, and omit them
        */
-      const headerTag = this._header[i]
-      if (headerTag) result.push(`[${i} "${this._header[i]}"]` + newline)
+      const headerTag = this._game._header[i]
+      if (headerTag) result.push(`[${i} "${this._game._header[i]}"]` + newline)
       headerExists = true
     }
 
@@ -1275,7 +1274,7 @@ export class ChessPGN {
     }
 
     // is there a result? (there ALWAYS has to be a result according to spec; see Seven Tag Roster)
-    moves.push(this._header.Result || '*')
+    moves.push(this._game._header.Result || '*')
 
     /*
      * history should be back to what it was before we started generating PGN,
@@ -1351,23 +1350,17 @@ export class ChessPGN {
    * @deprecated Use `setHeader` and `getHeaders` instead. This method will return null header tags (which is not what you want)
    */
   header(...args: string[]): Record<string, string | null> {
-    for (let i = 0; i < args.length; i += 2) {
-      if (typeof args[i] === 'string' && typeof args[i + 1] === 'string') {
-        this._header[args[i]] = args[i + 1]
-      }
-    }
-    return this._header
+    return this._game.header(...args)
   }
 
   // TODO: value validation per spec
   setHeader(key: string, value: string): Record<string, string> {
-    this._header[key] = value ?? SEVEN_TAG_ROSTER[key] ?? null
-    return this.getHeaders()
+    return this._game.setHeader(key, value)
   }
 
   removeHeader(key: string): boolean {
-    if (key in this._header) {
-      this._header[key] = SEVEN_TAG_ROSTER[key] || null
+    if (key in this._game._header) {
+      this._game._header[key] = SEVEN_TAG_ROSTER[key] || null
       return true
     }
     return false
@@ -1375,13 +1368,7 @@ export class ChessPGN {
 
   // return only non-null headers (omit placemarker nulls)
   getHeaders(): Record<string, string> {
-    const nonNullHeaders: Record<string, string> = {}
-    for (const [key, value] of Object.entries(this._header)) {
-      if (value !== null) {
-        nonNullHeaders[key] = value
-      }
-    }
-    return nonNullHeaders
+    return this._game.getHeaders()
   }
 
   loadPgn(
@@ -1473,8 +1460,8 @@ export class ChessPGN {
     const result = parsedPgn.result
     if (
       result &&
-      Object.keys(this._header).length &&
-      this._header['Result'] !== result
+      Object.keys(this._game._header).length &&
+      this._game._header['Result'] !== result
     ) {
       this.setHeader('Result', result)
     }

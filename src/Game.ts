@@ -39,10 +39,63 @@ import {
   ROOKS,
   ROOK,
 } from './types'
+import type { Node } from './node'
+
+/* eslint-disable @typescript-eslint/naming-convention */
+// PGN header constants
+const SEVEN_TAG_ROSTER = {
+  Event: '?',
+  Site: '?',
+  Date: '????.??.??',
+  Round: '?',
+  White: '?',
+  Black: '?',
+  Result: '*',
+}
+
+const SUPPLEMENTAL_TAGS: Record<string, string | null> = {
+  WhiteTitle: null,
+  BlackTitle: null,
+  WhiteElo: null,
+  BlackElo: null,
+  WhiteUSCF: null,
+  BlackUSCF: null,
+  WhiteNA: null,
+  BlackNA: null,
+  WhiteType: null,
+  BlackType: null,
+  EventDate: null,
+  EventSponsor: null,
+  Section: null,
+  Stage: null,
+  Board: null,
+  Opening: null,
+  Variation: null,
+  SubVariation: null,
+  ECO: null,
+  NIC: null,
+  Time: null,
+  UTCTime: null,
+  UTCDate: null,
+  TimeControl: null,
+  SetUp: null,
+  FEN: null,
+  Termination: null,
+  Annotator: null,
+  Mode: null,
+  PlyCount: null,
+}
+
+const HEADER_TEMPLATE = {
+  ...SEVEN_TAG_ROSTER,
+  ...SUPPLEMENTAL_TAGS,
+}
+/* eslint-enable @typescript-eslint/naming-convention */
 
 export class Game {
   _board = new Array<Piece>(128)
   _turn: Color = WHITE
+  _header: Record<string, string | null> = {}
   _kings: Record<Color, number> = { w: EMPTY, b: EMPTY }
   _halfMoves = 0
   _hash = 0n
@@ -52,6 +105,19 @@ export class Game {
   _history: History[] = []
   _fenEpSquare = -1
   _moveNumber = 0
+
+  constructor(headers?: Record<string, string>, _root?: Node) {
+    // Initialize headers with template + provided headers
+    this._header = { ...HEADER_TEMPLATE }
+    if (headers) {
+      Object.assign(this._header, headers)
+    }
+    
+    /*
+     * TODO: Initialize board from root if provided
+     * This will be implemented when integrating with PGN parser
+     */
+  }
 
   get(square: Square): Piece | undefined {
     return this._board[Ox88[square]]
@@ -161,10 +227,9 @@ export class Game {
     if (verbose) {
       return attackers
     } else {
-      return false
-    }
+    return false
   }
-
+}
   attackers(square: Square, attackedBy?: Color): Square[] {
     if (!attackedBy) {
       return this._attacked(this._turn, Ox88[square], true)
@@ -918,5 +983,36 @@ export class Game {
     } else {
       this._positionCount.set(hash, currentCount - 1)
     }
+  }
+
+  /**
+   * @deprecated Use setHeader/getHeaders instead
+   */
+  header(...args: string[]): Record<string, string | null> {
+    if (args.length === 0) {
+      return this.getHeaders()
+    }
+    if (args.length === 2) {
+      return this.setHeader(args[0], args[1])
+    }
+    throw new Error('header() requires 0 or 2 arguments')
+  }
+
+  setHeader(key: string, value: string): Record<string, string> {
+    this._header[key] = value
+    if (!(key in SEVEN_TAG_ROSTER)) {
+      SUPPLEMENTAL_TAGS[key] = value
+    }
+    return this.getHeaders()
+  }
+
+  getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {}
+    for (const [key, value] of Object.entries(this._header)) {
+      if (value !== null) {
+        headers[key] = value
+      }
+    }
+    return headers
   }
 }
