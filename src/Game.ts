@@ -1128,6 +1128,160 @@ export class Game {
   }
 
   /**
+   * Convert a move from Standard Algebraic Notation (SAN) to InternalMove format
+   * @internal
+   */
+  _moveFromSan(move: string, strict = false): InternalMove | null {
+    // strip off any move decorations: e.g Nf3+?! becomes Nf3
+    let cleanMove = Game._strippedSan(move)
+
+    if (!strict) {
+      if (cleanMove === '0-0') {
+        cleanMove = 'O-O'
+      } else if (cleanMove === '0-0-0') {
+        cleanMove = 'O-O-O'
+      }
+    }
+
+    // first implementation of null with a dummy move (black king moves from a8 to a8)
+    if (cleanMove == SAN_NULLMOVE) {
+      const res: InternalMove = {
+        color: this._turn,
+        from: 0,
+        to: 0,
+        piece: 'k',
+        flags: BITS.NULL_MOVE,
+      }
+      return res
+    }
+
+    let pieceType = Game._inferPieceType(cleanMove)
+    let moves = this._moves({ legal: true, piece: pieceType })
+
+    // strict parser
+    for (let i = 0, len = moves.length; i < len; i++) {
+      if (cleanMove === Game._strippedSan(this._moveToSan(moves[i], moves))) {
+        return moves[i]
+      }
+    }
+
+    // the strict parser failed
+    if (strict) {
+      return null
+    }
+
+    let piece = undefined
+    let matches = undefined
+    let from = undefined
+    let to = undefined
+    let promotion = undefined
+
+    /*
+     * The default permissive (non-strict) parser allows the user to parse
+     * non-standard chess notations. This parser is only run after the strict
+     * Standard Algebraic Notation (SAN) parser has failed.
+     *
+     * When running the permissive parser, we'll run a regex to grab the piece, the
+     * to/from square, and an optional promotion piece. This regex will
+     * parse common non-standard notation like: Pe2-e4, Rc1c4, Qf3xf7,
+     * f7f8q, b1c3
+     *
+     * NOTE: Some positions and moves may be ambiguous when using the permissive
+     * parser. For example, in this position: 6k1/8/8/B7/8/8/8/BN4K1 w - - 0 1,
+     * the move b1c3 may be interpreted as Nc3 or B1c3 (a disambiguated bishop
+     * move). In these cases, the permissive parser will default to the most
+     * basic interpretation (which is b1c3 parsing to Nc3).
+     */
+
+    let overlyDisambiguated = false
+
+    matches = cleanMove.match(
+      /([pnbrqkPNBRQK])?([a-h][1-8])x?-?([a-h][1-8])([qrbnQRBN])?/,
+      //     piece         from              to       promotion
+    )
+
+    if (matches) {
+      piece = matches[1]
+      from = matches[2] as Square
+      to = matches[3] as Square
+      promotion = matches[4]
+
+      if (from.length == 1) {
+        overlyDisambiguated = true
+      }
+    } else {
+      /*
+       * The [a-h]?[1-8]? portion of the regex below handles moves that may be
+       * overly disambiguated (e.g. Nge7 is unnecessary and non-standard when
+       * there is one legal knight move to e7). In this case, the value of
+       * 'from' variable will be a rank or file, not a square.
+       */
+
+      matches = cleanMove.match(
+        /([pnbrqkPNBRQK])?([a-h]?[1-8]?)x?-?([a-h][1-8])([qrbnQRBN])?/,
+      )
+
+      if (matches) {
+        piece = matches[1]
+        from = matches[2] as Square
+        to = matches[3] as Square
+        promotion = matches[4]
+
+        if (from.length == 1) {
+          overlyDisambiguated = true
+        }
+      }
+    }
+
+    pieceType = Game._inferPieceType(cleanMove)
+    moves = this._moves({
+      legal: true,
+      piece: piece ? (piece as PieceSymbol) : pieceType,
+    })
+
+    if (!to) {
+      return null
+    }
+
+    for (let i = 0, len = moves.length; i < len; i++) {
+      if (!from) {
+        // if there is no from square, it could be just 'x' missing from a capture
+        if (
+          cleanMove ===
+          Game._strippedSan(this._moveToSan(moves[i], moves)).replace('x', '')
+        ) {
+          return moves[i]
+        }
+        // hand-compare move properties with the results from our permissive regex
+      } else if (
+        (!piece || piece.toLowerCase() == moves[i].piece) &&
+        Ox88[from] == moves[i].from &&
+        Ox88[to] == moves[i].to &&
+        (!promotion || promotion.toLowerCase() == moves[i].promotion)
+      ) {
+        return moves[i]
+      } else if (overlyDisambiguated) {
+        /*
+         * SPECIAL CASE: we parsed a move string that may have an unneeded
+         * rank/file disambiguator (e.g. Nge7).  The 'from' variable will
+         */
+
+        const square = algebraic(moves[i].from)
+        if (
+          (!piece || piece.toLowerCase() == moves[i].piece) &&
+          Ox88[to] == moves[i].to &&
+          (from == square[0] || from == square[1]) &&
+          (!promotion || promotion.toLowerCase() == moves[i].promotion)
+        ) {
+          return moves[i]
+        }
+      }
+    }
+
+    return null
+  }
+
+  /**
    * @deprecated Use setHeader/getHeaders instead
    */
   header(...args: string[]): Record<string, string | null> {
