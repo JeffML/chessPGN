@@ -1545,6 +1545,9 @@ export class Game {
     this._moveNumber = parseInt(tokens[5], 10)
 
     this._hash = this._computeHash()
-    this._incPositionCount()
+    /*
+     * Note: Position count is incremented by the caller (ChessPGN.load or after moves)
+     * not during FEN loading, since loading is setting up a position, not making a move
+     */
   }
 }
