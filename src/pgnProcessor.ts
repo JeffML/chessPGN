@@ -6,6 +6,7 @@
  */
 
 import { ChessPGN } from './chessPGN'
+import { Game } from './Game'
 import { parse } from './pgn'
 import type { Node } from './node'
 
@@ -28,6 +29,23 @@ export function processPgn(
   const chess = new ChessPGN()
   chess.loadPgn(pgn, options)
   return chess
+}
+
+/**
+ * Process a PGN string into a Game instance
+ * This creates a lightweight Game without ChessPGN's comment/suffix tracking
+ */
+export function processPgnToGame(
+  pgn: string,
+  options: ProcessPgnOptions = {},
+): Game {
+  // Normalize newlines if needed
+  if (options.newlineChar && options.newlineChar !== '\r?\n') {
+    pgn = pgn.replace(new RegExp(options.newlineChar, 'g'), '\n')
+  }
+
+  const { headers, root } = parse(pgn)
+  return new Game(headers, root)
 }
 
 /**
