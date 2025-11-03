@@ -485,6 +485,10 @@ export class ChessPGN {
 
     this._updateSetup(fen)
     this._incPositionCount()
+    
+    // Clear comments and suffixes when loading a new position
+    this._comments = {}
+    this._suffixes = {}
   }
 
   fen({
