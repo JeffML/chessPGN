@@ -342,60 +342,6 @@ export function validateFen(fen: string): { ok: boolean; error?: string } {
   return { ok: true }
 }
 
-// this function is used to uniquely identify ambiguous moves
-function getDisambiguator(move: InternalMove, moves: InternalMove[]): string {
-  const from = move.from
-  const to = move.to
-  const piece = move.piece
-
-  let ambiguities = 0
-  let sameRank = 0
-  let sameFile = 0
-
-  for (let i = 0, len = moves.length; i < len; i++) {
-    const ambigFrom = moves[i].from
-    const ambigTo = moves[i].to
-    const ambigPiece = moves[i].piece
-
-    /*
-     * if a move of the same piece type ends on the same to square, we'll need
-     * to add a disambiguator to the algebraic notation
-     */
-    if (piece === ambigPiece && from !== ambigFrom && to === ambigTo) {
-      ambiguities++
-
-      if (rank(from) === rank(ambigFrom)) {
-        sameRank++
-      }
-
-      if (file(from) === file(ambigFrom)) {
-        sameFile++
-      }
-    }
-  }
-
-  if (ambiguities > 0) {
-    if (sameRank > 0 && sameFile > 0) {
-      /*
-       * if there exists a similar moving piece on the same rank and file as
-       * the move in question, use the square as the disambiguator
-       */
-      return algebraic(from)
-    } else if (sameFile > 0) {
-      /*
-       * if the moving piece rests on the same file, use the rank symbol as the
-       * disambiguator
-       */
-      return algebraic(from).charAt(1)
-    } else {
-      // else use the file symbol
-      return algebraic(from).charAt(0)
-    }
-  }
-
-  return ''
-}
-
 /**
  * @deprecated Use Game._inferPieceType() instead
  */
@@ -1473,45 +1419,7 @@ export class ChessPGN {
    */
 
   private _moveToSan(move: InternalMove, moves: InternalMove[]): string {
-    let output = ''
-
-    if (move.flags & BITS.KSIDE_CASTLE) {
-      output = 'O-O'
-    } else if (move.flags & BITS.QSIDE_CASTLE) {
-      output = 'O-O-O'
-    } else if (move.flags & BITS.NULL_MOVE) {
-      return SAN_NULLMOVE
-    } else {
-      if (move.piece !== PAWN) {
-        const disambiguator = getDisambiguator(move, moves)
-        output += move.piece.toUpperCase() + disambiguator
-      }
-
-      if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
-        if (move.piece === PAWN) {
-          output += algebraic(move.from)[0]
-        }
-        output += 'x'
-      }
-
-      output += algebraic(move.to)
-
-      if (move.promotion) {
-        output += '=' + move.promotion.toUpperCase()
-      }
-    }
-
-    this._makeMove(move)
-    if (this.isCheck()) {
-      if (this.isCheckmate()) {
-        output += '#'
-      } else {
-        output += '+'
-      }
-    }
-    this._undoMove()
-
-    return output
+    return this._game._moveToSan(move, moves)
   }
 
   // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
