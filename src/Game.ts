@@ -110,9 +110,14 @@ export class Game {
   _history: History[] = []
   _fenEpSquare = -1
   _moveNumber = 0
-  _root?: Node // Root node from parsed PGN (for deferred processing)
 
   constructor(headers?: Record<string, string>, root?: Node) {
+    /*
+     * Initialize board to starting position. This sets up all pieces,
+     * castling rights, turn, etc.
+     */
+    this.load(DEFAULT_POSITION, { skipValidation: true })
+
     // Initialize headers with template + provided headers
     this._header = { ...HEADER_TEMPLATE }
     if (headers) {
@@ -120,13 +125,43 @@ export class Game {
     }
     
     /*
-     * Store root node for future processing. Currently, Game doesn't have
-     * SAN parsing logic (it's in ChessPGN). Options for future implementation:
-     * 1. Move _moveFromSan and related logic from ChessPGN to Game
-     * 2. Provide a separate loadFromRoot() method
-     * 3. Have Cursor use ChessPGN instead of Game directly
+     * If headers specify a custom starting position (SetUp + FEN),
+     * load it before processing moves
      */
-    this._root = root
+    if (headers && headers['SetUp'] === '1' && headers['FEN']) {
+      this.load(headers['FEN'], { skipValidation: true })
+    }
+    
+    /*
+     * Process root node if provided. This allows Game to be fully initialized
+     * from parsed PGN data (headers + move tree).
+     */
+    if (root) {
+      this._processRoot(root)
+    }
+  }
+
+  /**
+   * Process the root node from a parsed PGN, applying all moves in the main line
+   * @internal
+   */
+  private _processRoot(root: Node): void {
+    let node: Node | undefined = root
+
+    while (node) {
+      if (node.move) {
+        /* Use permissive parsing for PGN moves (strict=false) */
+        const move = this._moveFromSan(node.move, false)
+        if (!move) {
+          throw new Error(`Invalid move in PGN: ${node.move}`)
+        }
+        this._makeMove(move)
+        this._incPositionCount()
+      }
+
+      /* Follow the main line (first variation) */
+      node = node.variations[0]
+    }
   }
 
   /**
