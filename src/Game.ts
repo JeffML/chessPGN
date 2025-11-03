@@ -41,6 +41,9 @@ import {
 } from './types'
 import type { Node } from './node'
 
+export const DEFAULT_POSITION =
+  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
 const SAN_NULLMOVE = '--'
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -1310,5 +1313,203 @@ export class Game {
       }
     }
     return headers
+  }
+
+  /**
+   * Generate FEN string from current position
+   */
+  fen({
+    forceEnpassantSquare = false,
+  }: { forceEnpassantSquare?: boolean } = {}): string {
+    let empty = 0
+    let fen = ''
+
+    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
+      if (this._board[i]) {
+        if (empty > 0) {
+          fen += empty
+          empty = 0
+        }
+        const { color, type: piece } = this._board[i]
+
+        fen += color === WHITE ? piece.toUpperCase() : piece.toLowerCase()
+      } else {
+        empty++
+      }
+
+      if ((i + 1) & 0x88) {
+        if (empty > 0) {
+          fen += empty
+        }
+
+        if (i !== Ox88.h1) {
+          fen += '/'
+        }
+
+        empty = 0
+        i += 8
+      }
+    }
+
+    let castling = ''
+    if (this._castling[WHITE] & BITS.KSIDE_CASTLE) {
+      castling += 'K'
+    }
+    if (this._castling[WHITE] & BITS.QSIDE_CASTLE) {
+      castling += 'Q'
+    }
+    if (this._castling[BLACK] & BITS.KSIDE_CASTLE) {
+      castling += 'k'
+    }
+    if (this._castling[BLACK] & BITS.QSIDE_CASTLE) {
+      castling += 'q'
+    }
+
+    // do we have an empty castling flag?
+    castling = castling || '-'
+
+    let epSquare = '-'
+    /*
+     * only print the ep square if en passant is a valid move (pawn is present
+     * and ep capture is not pinned)
+     */
+    if (this._fenEpSquare !== EMPTY) {
+      if (forceEnpassantSquare) {
+        epSquare = algebraic(this._fenEpSquare)
+      } else if (this._epSquare !== EMPTY) {
+        const bigPawnSquare = this._epSquare + (this._turn === WHITE ? 16 : -16)
+        const squares = [bigPawnSquare + 1, bigPawnSquare - 1]
+
+        for (const square of squares) {
+          // is the square off the board?
+          if (square & 0x88) {
+            continue
+          }
+
+          const color = this._turn
+
+          // is there a pawn that can capture the epSquare?
+          if (
+            this._board[square]?.color === color &&
+            this._board[square]?.type === PAWN
+          ) {
+            // if the pawn makes an ep capture, does it leave its king in check?
+            this._makeMove({
+              color,
+              from: square,
+              to: this._epSquare,
+              piece: PAWN,
+              captured: PAWN,
+              flags: BITS.EP_CAPTURE,
+            })
+            const isLegal = !this._isKingAttacked(color)
+            this._undoMove()
+
+            // if ep is legal, break and set the ep square in the FEN output
+            if (isLegal) {
+              epSquare = algebraic(this._epSquare)
+              break
+            }
+          }
+        }
+      }
+    }
+
+    return [
+      fen,
+      this._turn,
+      castling,
+      epSquare,
+      this._halfMoves,
+      this._moveNumber,
+    ].join(' ')
+  }
+
+  /**
+   * Load position from FEN string
+   * Note: This doesn't handle headers - that's managed by ChessPGN
+   */
+  load(
+    fen: string,
+    { skipValidation = false }: { skipValidation?: boolean } = {},
+  ): void {
+    let tokens = fen.split(/\s+/)
+
+    // append commonly omitted fen tokens
+    if (tokens.length >= 2 && tokens.length < 6) {
+      const adjustments = ['-', '-', '0', '1']
+      fen = tokens.concat(adjustments.slice(-(6 - tokens.length))).join(' ')
+    }
+
+    tokens = fen.split(/\s+/)
+
+    if (!skipValidation) {
+      /*
+       * Import validateFen from chessPGN if needed, or inline it here
+       * For now, we'll skip validation in Game and let ChessPGN handle it
+       */
+    }
+
+    const position = tokens[0]
+    let square = 0
+
+    // Clear board and reset state (but NOT headers)
+    this._board = new Array<Piece>(128)
+    this._kings = { w: EMPTY, b: EMPTY }
+    this._turn = WHITE
+    this._castling = { w: 0, b: 0 }
+    this._epSquare = EMPTY
+    this._fenEpSquare = EMPTY
+    this._halfMoves = 0
+    this._moveNumber = 1
+    this._history = []
+    this._hash = this._computeHash()
+    this._positionCount = new Map<bigint, number>()
+
+    // Parse position
+    for (let i = 0; i < position.length; i++) {
+      const piece = position.charAt(i)
+
+      if (piece === '/') {
+        square += 8
+      } else if (piece >= '0' && piece <= '9') {
+        square += parseInt(piece, 10)
+      } else {
+        const color = piece < 'a' ? WHITE : BLACK
+        const type = piece.toLowerCase() as PieceSymbol
+        const sq = square
+        
+        this._set(sq, { type, color })
+        if (type === KING) {
+          this._kings[color] = sq
+        }
+        square++
+      }
+    }
+
+    this._turn = tokens[1] as Color
+
+    if (tokens[2].indexOf('K') > -1) {
+      this._castling.w |= BITS.KSIDE_CASTLE
+    }
+    if (tokens[2].indexOf('Q') > -1) {
+      this._castling.w |= BITS.QSIDE_CASTLE
+    }
+    if (tokens[2].indexOf('k') > -1) {
+      this._castling.b |= BITS.KSIDE_CASTLE
+    }
+    if (tokens[2].indexOf('q') > -1) {
+      this._castling.b |= BITS.QSIDE_CASTLE
+    }
+
+    this._updateCastlingRights()
+
+    this._epSquare = tokens[3] === '-' ? EMPTY : Ox88[tokens[3] as Square]
+    this._fenEpSquare = this._epSquare
+    this._halfMoves = parseInt(tokens[4], 10)
+    this._moveNumber = parseInt(tokens[5], 10)
+
+    this._hash = this._computeHash()
+    this._incPositionCount()
   }
 }

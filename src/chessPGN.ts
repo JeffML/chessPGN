@@ -463,16 +463,8 @@ export class ChessPGN {
   }
 
   load(fen: string, { skipValidation = false, preserveHeaders = false } = {}) {
-    let tokens = fen.split(/\s+/)
-
-    // append commonly omitted fen tokens
-    if (tokens.length >= 2 && tokens.length < 6) {
-      const adjustments = ['-', '-', '0', '1']
-      fen = tokens.concat(adjustments.slice(-(6 - tokens.length))).join(' ')
-    }
-
-    tokens = fen.split(/\s+/)
-
+    this._game.load(fen, { skipValidation })
+    
     if (!skipValidation) {
       const { ok, error } = validateFen(fen)
       if (!ok) {
@@ -480,51 +472,10 @@ export class ChessPGN {
       }
     }
 
-    const position = tokens[0]
-    let square = 0
-
-    this.clear({ preserveHeaders })
-
-    for (let i = 0; i < position.length; i++) {
-      const piece = position.charAt(i)
-
-      if (piece === '/') {
-        square += 8
-      } else if (isDigit(piece)) {
-        square += parseInt(piece, 10)
-      } else {
-        const color = piece < 'a' ? WHITE : BLACK
-        this._put(
-          { type: piece.toLowerCase() as PieceSymbol, color },
-          algebraic(square),
-        )
-        square++
-      }
+    if (!preserveHeaders) {
+      this._game._header = { ...HEADER_TEMPLATE }
     }
 
-    this._turn = tokens[1] as Color
-
-    if (tokens[2].indexOf('K') > -1) {
-      this._castling.w |= BITS.KSIDE_CASTLE
-    }
-    if (tokens[2].indexOf('Q') > -1) {
-      this._castling.w |= BITS.QSIDE_CASTLE
-    }
-    if (tokens[2].indexOf('k') > -1) {
-      this._castling.b |= BITS.KSIDE_CASTLE
-    }
-    if (tokens[2].indexOf('q') > -1) {
-      this._castling.b |= BITS.QSIDE_CASTLE
-    }
-
-    this._updateCastlingRights()
-
-    this._epSquare = tokens[3] === '-' ? EMPTY : Ox88[tokens[3] as Square]
-    this._fenEpSquare = this._epSquare
-    this._halfMoves = parseInt(tokens[4], 10)
-    this._moveNumber = parseInt(tokens[5], 10)
-
-    this._hash = this._computeHash()
     this._updateSetup(fen)
     this._incPositionCount()
   }
@@ -532,108 +483,7 @@ export class ChessPGN {
   fen({
     forceEnpassantSquare = false,
   }: { forceEnpassantSquare?: boolean } = {}) {
-    let empty = 0
-    let fen = ''
-
-    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-      if (this._board[i]) {
-        if (empty > 0) {
-          fen += empty
-          empty = 0
-        }
-        const { color, type: piece } = this._board[i]
-
-        fen += color === WHITE ? piece.toUpperCase() : piece.toLowerCase()
-      } else {
-        empty++
-      }
-
-      if ((i + 1) & 0x88) {
-        if (empty > 0) {
-          fen += empty
-        }
-
-        if (i !== Ox88.h1) {
-          fen += '/'
-        }
-
-        empty = 0
-        i += 8
-      }
-    }
-
-    let castling = ''
-    if (this._castling[WHITE] & BITS.KSIDE_CASTLE) {
-      castling += 'K'
-    }
-    if (this._castling[WHITE] & BITS.QSIDE_CASTLE) {
-      castling += 'Q'
-    }
-    if (this._castling[BLACK] & BITS.KSIDE_CASTLE) {
-      castling += 'k'
-    }
-    if (this._castling[BLACK] & BITS.QSIDE_CASTLE) {
-      castling += 'q'
-    }
-
-    // do we have an empty castling flag?
-    castling = castling || '-'
-
-    let epSquare = '-'
-    /*
-     * only print the ep square if en passant is a valid move (pawn is present
-     * and ep capture is not pinned)
-     */
-    if (this._fenEpSquare !== EMPTY) {
-      if (forceEnpassantSquare) {
-        epSquare = algebraic(this._fenEpSquare)
-      } else if (this._epSquare !== EMPTY) {
-        const bigPawnSquare = this._epSquare + (this._turn === WHITE ? 16 : -16)
-        const squares = [bigPawnSquare + 1, bigPawnSquare - 1]
-
-        for (const square of squares) {
-          // is the square off the board?
-          if (square & 0x88) {
-            continue
-          }
-
-          const color = this._turn
-
-          // is there a pawn that can capture the epSquare?
-          if (
-            this._board[square]?.color === color &&
-            this._board[square]?.type === PAWN
-          ) {
-            // if the pawn makes an ep capture, does it leave its king in check?
-            this._makeMove({
-              color,
-              from: square,
-              to: this._epSquare,
-              piece: PAWN,
-              captured: PAWN,
-              flags: BITS.EP_CAPTURE,
-            })
-            const isLegal = !this._isKingAttacked(color)
-            this._undoMove()
-
-            // if ep is legal, break and set the ep square in the FEN output
-            if (isLegal) {
-              epSquare = algebraic(this._epSquare)
-              break
-            }
-          }
-        }
-      }
-    }
-
-    return [
-      fen,
-      this._turn,
-      castling,
-      epSquare,
-      this._halfMoves,
-      this._moveNumber,
-    ].join(' ')
+    return this._game.fen({ forceEnpassantSquare })
   }
 
   private _pieceKey(i: number) {
