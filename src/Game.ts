@@ -105,8 +105,9 @@ export class Game {
   _history: History[] = []
   _fenEpSquare = -1
   _moveNumber = 0
+  _root?: Node // Root node from parsed PGN (for deferred processing)
 
-  constructor(headers?: Record<string, string>, _root?: Node) {
+  constructor(headers?: Record<string, string>, root?: Node) {
     // Initialize headers with template + provided headers
     this._header = { ...HEADER_TEMPLATE }
     if (headers) {
@@ -114,9 +115,13 @@ export class Game {
     }
     
     /*
-     * TODO: Initialize board from root if provided
-     * This will be implemented when integrating with PGN parser
+     * Store root node for future processing. Currently, Game doesn't have
+     * SAN parsing logic (it's in ChessPGN). Options for future implementation:
+     * 1. Move _moveFromSan and related logic from ChessPGN to Game
+     * 2. Provide a separate loadFromRoot() method
+     * 3. Have Cursor use ChessPGN instead of Game directly
      */
+    this._root = root
   }
 
   get(square: Square): Piece | undefined {
