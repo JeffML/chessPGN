@@ -1333,6 +1333,11 @@ export class Game {
   }
 
   setHeader(key: string, value: string): Record<string, string> {
+    // Don't allow seven tag roster headers to be set to null - keep their defaults
+    if (value === null && key in SEVEN_TAG_ROSTER) {
+      return this.getHeaders()
+    }
+    
     this._header[key] = value
     if (!(key in SEVEN_TAG_ROSTER)) {
       SUPPLEMENTAL_TAGS[key] = value
