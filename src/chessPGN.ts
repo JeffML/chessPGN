@@ -396,25 +396,18 @@ function getDisambiguator(move: InternalMove, moves: InternalMove[]): string {
   return ''
 }
 
+/**
+ * @deprecated Use Game._inferPieceType() instead
+ */
 function inferPieceType(san: string): PieceSymbol | undefined {
-  let pieceType = san.charAt(0)
-  if (pieceType >= 'a' && pieceType <= 'h') {
-    const matches = san.match(/[a-h]\d.*[a-h]\d/)
-    if (matches) {
-      return undefined
-    }
-    return PAWN
-  }
-  pieceType = pieceType.toLowerCase()
-  if (pieceType === 'o') {
-    return KING
-  }
-  return pieceType as PieceSymbol
+  return Game._inferPieceType(san)
 }
 
-// parses all of the decorators out of a SAN string
+/**
+ * @deprecated Use Game._strippedSan() instead
+ */
 function strippedSan(move: string): string {
-  return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '')
+  return Game._strippedSan(move)
 }
 
 export class ChessPGN {

@@ -5,8 +5,8 @@
  * See the LICENSE file for the full text, including disclaimer.
  */
 
-import { parse } from './pgn'
-import { Game } from './Game'
+import { ChessPGN } from './chessPGN'
+import { processPgn } from './pgnProcessor'
 
 /**
  * Options for configuring a cursor over multi-game PGN files
@@ -36,11 +36,11 @@ interface GameIndex {
  */
 export interface Cursor {
   // Core navigation
-  next(): Game | null
+  next(): ChessPGN | null
   hasNext(): boolean
 
   // Optional backward navigation (Phase 2)
-  before?(): Game | null
+  before?(): ChessPGN | null
   hasBefore?(): boolean
 
   // Position tracking
@@ -54,13 +54,13 @@ export interface Cursor {
   // Filtering (Phase 2)
   findNext?(
     predicate: (headers: Record<string, string>) => boolean,
-  ): Game | null
+  ): ChessPGN | null
 
   // Error tracking
   errors: Array<{ index: number; error: Error }>
 
   // Async iteration support (Phase 3)
-  [Symbol.asyncIterator]?(): AsyncIterableIterator<Game>
+  [Symbol.asyncIterator]?(): AsyncIterableIterator<ChessPGN>
 }
 
 /**
@@ -70,7 +70,7 @@ export class CursorImpl implements Cursor {
   private pgn: string
   private gameIndices: GameIndex[]
   private currentPosition: number
-  private cache: Map<number, Game>
+  private cache: Map<number, ChessPGN>
   private options: Required<CursorOptions>
   public errors: Array<{ index: number; error: Error }> = []
 
@@ -109,7 +109,7 @@ export class CursorImpl implements Cursor {
     )
   }
 
-  next(): Game | null {
+  next(): ChessPGN | null {
     if (!this.hasNext()) {
       return null
     }
@@ -130,7 +130,7 @@ export class CursorImpl implements Cursor {
     return this.currentPosition > this.options.start
   }
 
-  before(): Game | null {
+  before(): ChessPGN | null {
     if (!this.hasBefore()) {
       return null
     }
@@ -156,7 +156,7 @@ export class CursorImpl implements Cursor {
   // Phase 2: Filtering
   findNext(
     predicate: (headers: Record<string, string>) => boolean,
-  ): Game | null {
+  ): ChessPGN | null {
     while (this.hasNext()) {
       const index = this.gameIndices[this.currentPosition]
       if (index.headers && predicate(index.headers)) {
@@ -168,7 +168,7 @@ export class CursorImpl implements Cursor {
   }
 
   // Phase 3: Async iteration
-  async *[Symbol.asyncIterator](): AsyncIterableIterator<Game> {
+  async *[Symbol.asyncIterator](): AsyncIterableIterator<ChessPGN> {
     while (this.hasNext()) {
       const game = this.next()
       if (game) {
@@ -178,7 +178,7 @@ export class CursorImpl implements Cursor {
   }
 
   // Private helper methods
-  private parseGame(index: number): Game | null {
+  private parseGame(index: number): ChessPGN | null {
     // Check cache first
     if (this.cache.has(index)) {
       return this.cache.get(index)!
@@ -233,12 +233,8 @@ export class CursorImpl implements Cursor {
     }
   }
 
-  private parsePgnToGame(pgn: string): Game {
-    const {headers, root, result} = parse(pgn)
-
-    console.log({result})
-
-    return new Game(headers, root)
+  private parsePgnToGame(pgn: string): ChessPGN {
+    return processPgn(pgn, { strict: this.options.strict })
   }
 }
 
