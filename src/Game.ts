@@ -613,11 +613,18 @@ export class Game {
     }
 
     /*
-     * filter out illegal moves
-     * NOTE: This requires _makeMove and _undoMove which are still in Chess
-     * For now, we'll return pseudo-legal moves and let Chess do the filtering
+     * filter out illegal moves (moves that leave the king in check)
      */
-    return moves
+    const legalMoves: InternalMove[] = []
+    for (let i = 0; i < moves.length; i++) {
+      this._makeMove(moves[i])
+      if (!this._isKingAttacked(us)) {
+        legalMoves.push(moves[i])
+      }
+      this._undoMove()
+    }
+
+    return legalMoves
   }
 
   board(): ({ square: Square; type: PieceSymbol; color: Color } | null)[][] {
