@@ -439,27 +439,15 @@ export class ChessPGN {
   }
 
   clear({ preserveHeaders = false } = {}) {
-    this._game._board = new Array<Piece>(128)
-    this._kings = { w: EMPTY, b: EMPTY }
-    this._turn = WHITE
-    this._castling = { w: 0, b: 0 }
-    this._epSquare = EMPTY
-    this._fenEpSquare = EMPTY
-    this._halfMoves = 0
-    this._moveNumber = 1
-    this._history = []
-    this._comments = {}
-    this._game._header = preserveHeaders ? this._game._header : { ...HEADER_TEMPLATE }
-    this._hash = this._computeHash()
-    this._positionCount = new Map<bigint, number>()
-
     /*
-     * Delete the SetUp and FEN headers (if preserved), the board is empty and
-     * these headers don't make sense in this state. They'll get added later
-     * via .load() or .put()
+     * Delegate resetting internal game state to Game.reset() to keep
+     * ChessPGN as a thin wrapper over Game internals.
      */
-    this._game._header['SetUp'] = null
-    this._game._header['FEN'] = null
+    this._game.reset(preserveHeaders)
+
+    // Clear ChessPGN-specific metadata
+    this._comments = {}
+    this._suffixes = {}
   }
 
   load(fen: string, { skipValidation = false, preserveHeaders = false } = {}) {
@@ -469,7 +457,7 @@ export class ChessPGN {
       const adjustments = ['-', '-', '0', '1']
       fen = tokens.concat(adjustments.slice(-(6 - tokens.length))).join(' ')
     }
-    
+
     if (!skipValidation) {
       const { ok, error } = validateFen(fen)
       if (!ok) {
@@ -485,7 +473,7 @@ export class ChessPGN {
 
     this._updateSetup(fen)
     this._incPositionCount()
-    
+
     // Clear comments and suffixes when loading a new position
     this._comments = {}
     this._suffixes = {}

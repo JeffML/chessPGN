@@ -123,7 +123,7 @@ export class Game {
     if (headers) {
       Object.assign(this._header, headers)
     }
-    
+
     /*
      * If headers specify a custom starting position (SetUp + FEN),
      * load it before processing moves
@@ -131,7 +131,7 @@ export class Game {
     if (headers && headers['SetUp'] === '1' && headers['FEN']) {
       this.load(headers['FEN'], { skipValidation: true })
     }
-    
+
     /*
      * Process root node if provided. This allows Game to be fully initialized
      * from parsed PGN data (headers + move tree).
@@ -300,9 +300,9 @@ export class Game {
     if (verbose) {
       return attackers
     } else {
-    return false
+      return false
+    }
   }
-}
   attackers(square: Square, attackedBy?: Color): Square[] {
     if (!attackedBy) {
       return this._attacked(this._turn, Ox88[square], true)
@@ -1344,7 +1344,7 @@ export class Game {
     if (value === null && key in SEVEN_TAG_ROSTER) {
       return this.getHeaders()
     }
-    
+
     this._header[key] = value
     if (!(key in SEVEN_TAG_ROSTER)) {
       SUPPLEMENTAL_TAGS[key] = value
@@ -1525,7 +1525,7 @@ export class Game {
         const color = piece < 'a' ? WHITE : BLACK
         const type = piece.toLowerCase() as PieceSymbol
         const sq = square
-        
+
         this._set(sq, { type, color })
         if (type === KING) {
           this._kings[color] = sq
@@ -1561,5 +1561,36 @@ export class Game {
      * Note: Position count is incremented by the caller (ChessPGN.load or after moves)
      * not during FEN loading, since loading is setting up a position, not making a move
      */
+  }
+
+  /**
+   * Reset game internal state to an initial starting position.
+   * If `preserveHeaders` is false (default) the header template will be
+   * re-applied. When true, existing headers are preserved.
+   */
+  reset(preserveHeaders: boolean = false): void {
+    // Reset board and state
+    this._board = new Array<Piece>(128)
+    this._kings = { w: EMPTY, b: EMPTY }
+    this._turn = WHITE
+    this._castling = { w: 0, b: 0 }
+    this._epSquare = EMPTY
+    this._fenEpSquare = EMPTY
+    this._halfMoves = 0
+    this._moveNumber = 1
+    this._history = []
+
+    // Headers: reset to template unless caller asked to preserve
+    if (!preserveHeaders) {
+      this._header = { ...HEADER_TEMPLATE }
+    }
+
+    // Clear any SetUp/FEN tags when resetting to the default position
+    this._header['SetUp'] = null
+    this._header['FEN'] = null
+
+    // Recompute hash and clear position counts
+    this._hash = this._computeHash()
+    this._positionCount = new Map<bigint, number>()
   }
 }
