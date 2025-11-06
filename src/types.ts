@@ -327,3 +327,7 @@ export const ROOKS = {
     { square: Ox88.h8, flag: BITS.KSIDE_CASTLE },
   ],
 }
+
+// Suffix annotation list used for per-position suffix annotations (e.g. '!', '?', '!!')
+export const SUFFIX_LIST = ['!', '?', '!!', '!?', '?!', '??'] as const
+export type Suffix = (typeof SUFFIX_LIST)[number]

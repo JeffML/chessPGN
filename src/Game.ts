@@ -38,6 +38,8 @@ import {
   History,
   ROOKS,
   ROOK,
+  SUFFIX_LIST,
+  Suffix,
 } from './types'
 import type { Node } from './node'
 
@@ -101,6 +103,9 @@ export class Game {
   _board = new Array<Piece>(128)
   _turn: Color = WHITE
   _header: Record<string, string | null> = {}
+  // Per-position comments and suffix annotations keyed by FEN
+  _comments: Record<string, string> = {}
+  _suffixes: Record<string, Suffix> = {}
   _kings: Record<Color, number> = { w: EMPTY, b: EMPTY }
   _halfMoves = 0
   _hash = 0n
@@ -151,12 +156,21 @@ export class Game {
     while (node) {
       if (node.move) {
         /* Use permissive parsing for PGN moves (strict=false) */
+        const suffixAnnotation = node.suffixAnnotation
         const move = this._moveFromSan(node.move, false)
         if (!move) {
           throw new Error(`Invalid move in PGN: ${node.move}`)
         }
         this._makeMove(move)
         this._incPositionCount()
+
+        if (suffixAnnotation) {
+          this._suffixes[this.fen()] = suffixAnnotation as Suffix
+        }
+      }
+
+      if (node.comment !== undefined) {
+        this._comments[this.fen()] = node.comment
       }
 
       /* Follow the main line (first variation) */
@@ -1592,5 +1606,111 @@ export class Game {
     // Recompute hash and clear position counts
     this._hash = this._computeHash()
     this._positionCount = new Map<bigint, number>()
+    // Clear per-position metadata when not preserving headers
+    if (!preserveHeaders) {
+      this._comments = {}
+      this._suffixes = {}
+    }
+  }
+
+  /**
+   * Per-position comment / suffix API
+   * These mirror the older ChessPGN APIs but live on Game so that
+   * multi-game cursors can yield independent Game instances with their
+   * own per-game metadata.
+   */
+
+  _pruneComments() {
+    const reversedHistory: (InternalMove | null)[] = []
+    const currentComments: Record<string, string> = {}
+
+    const copyComment = (fen: string) => {
+      if (fen in this._comments) {
+        currentComments[fen] = this._comments[fen]
+      }
+    }
+
+    while (this._history.length > 0) {
+      reversedHistory.push(this._undoMove())
+    }
+
+    copyComment(this.fen())
+
+    while (true) {
+      const move = reversedHistory.pop()
+      if (!move) break
+      this._makeMove(move)
+      copyComment(this.fen())
+    }
+
+    this._comments = currentComments
+  }
+
+  getComment(fen?: string): string | undefined {
+    return this._comments[fen ?? this.fen()]
+  }
+
+  setComment(comment: string, fen?: string): void {
+    /**
+     * Store the comment exactly as provided by the caller. Caller may be the
+     * PGN parser (which expects raw braces preserved) or the user API which
+     * may sanitize before calling.
+     */
+    this._comments[fen ?? this.fen()] = comment
+  }
+
+  removeComment(fen?: string): string | undefined {
+    const key = fen ?? this.fen()
+    const old = this._comments[key]
+    delete this._comments[key]
+    return old
+  }
+
+  getComments(): { fen: string; comment?: string; suffixAnnotation?: string }[] {
+    this._pruneComments()
+
+    const allFenKeys = new Set<string>()
+    Object.keys(this._comments).forEach((fen) => allFenKeys.add(fen))
+    Object.keys(this._suffixes).forEach((fen) => allFenKeys.add(fen))
+
+    const result: { fen: string; comment?: string; suffixAnnotation?: string }[] = []
+    for (const fen of allFenKeys) {
+      const commentContent = this._comments[fen]
+      const suffixAnnotation = this._suffixes[fen]
+
+      const entry: { fen: string; comment?: string; suffixAnnotation?: string } = { fen }
+      if (commentContent !== undefined) entry.comment = commentContent
+      if (suffixAnnotation !== undefined) entry.suffixAnnotation = suffixAnnotation
+      result.push(entry)
+    }
+
+    return result
+  }
+
+  public getSuffixAnnotation(fen?: string): Suffix | undefined {
+    return this._suffixes[fen ?? this.fen()]
+  }
+
+  public setSuffixAnnotation(suffix: Suffix, fen?: string): void {
+    if (!SUFFIX_LIST.includes(suffix)) {
+      throw new Error(`Invalid suffix: ${suffix}`)
+    }
+    this._suffixes[fen ?? this.fen()] = suffix
+  }
+
+  public removeSuffixAnnotation(fen?: string): Suffix | undefined {
+    const key = fen ?? this.fen()
+    const old = this._suffixes[key]
+    delete this._suffixes[key]
+    return old
+  }
+
+  removeComments(): { fen: string; comment: string }[] {
+    this._pruneComments()
+    return Object.keys(this._comments).map((fen) => {
+      const comment = this._comments[fen]
+      delete this._comments[fen]
+      return { fen: fen, comment: comment }
+    })
   }
 }

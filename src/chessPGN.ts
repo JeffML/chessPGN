@@ -27,6 +27,7 @@ import {
   algebraic,
   Ox88,
   History,
+  Suffix,
 } from './types'
 
 // Re-export types and constants from types.ts for backward compatibility
@@ -49,10 +50,6 @@ export {
 } from './types'
 export { Move } from './Move'
 export { xoroshiro128 } from './types'
-
-export const SUFFIX_LIST = ['!', '?', '!!', '!?', '?!', '??'] as const
-
-export type Suffix = (typeof SUFFIX_LIST)[number]
 
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -346,13 +343,10 @@ export function validateFen(fen: string): { ok: boolean; error?: string } {
 
 export class ChessPGN {
   private _game!: Game
-  private _comments: Record<string, string> = {}
-  private _suffixes: Record<string, Suffix> = {}
+  // Per-position metadata now lives on Game instances
 
   constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
     this._game = new Game()
-    this._comments = {}
-    this._suffixes = {}
     this.load(fen, { skipValidation })
   }
 
@@ -447,9 +441,7 @@ export class ChessPGN {
      */
     this._game.reset(preserveHeaders)
 
-    // Clear ChessPGN-specific metadata
-    this._comments = {}
-    this._suffixes = {}
+    // Game.reset already clears per-position metadata when appropriate
   }
 
   load(fen: string, { skipValidation = false, preserveHeaders = false } = {}) {
@@ -475,10 +467,12 @@ export class ChessPGN {
 
     this._updateSetup(fen)
     this._incPositionCount()
-
-    // Clear comments and suffixes when loading a new position
-    this._comments = {}
-    this._suffixes = {}
+  /**
+   * Clear comments and suffixes when loading a new position so that
+   * metadata from a previously used Game/ChessPGN instance isn't retained.
+   */
+  this._game._comments = {}
+  this._game._suffixes = {}
   }
 
   fen({
@@ -523,8 +517,6 @@ export class ChessPGN {
 
   reset() {
     this.load(DEFAULT_POSITION)
-    this._comments = {}
-    this._suffixes = {}
   }
 
   get(square: Square): Piece | undefined {
@@ -979,7 +971,7 @@ export class ChessPGN {
     }
 
     const appendComment = (moveString: string) => {
-      const comment = this._comments[this.fen()]
+      const comment = this._game.getComment()
       if (typeof comment !== 'undefined') {
         const delimiter = moveString.length > 0 ? ' ' : ''
         moveString = `${moveString}${delimiter}{${comment}}`
@@ -1200,13 +1192,13 @@ export class ChessPGN {
           this._incPositionCount()
 
           if (suffixAnnotation) {
-            this._suffixes[this.fen()] = suffixAnnotation as Suffix
+            this._game.setSuffixAnnotation(suffixAnnotation as Suffix)
           }
         }
       }
 
       if (node.comment !== undefined) {
-        this._comments[this.fen()] = node.comment
+        this._game.setComment(node.comment)
       }
 
       node = node.variations[0]
@@ -1345,51 +1337,31 @@ export class ChessPGN {
   }
 
   private _pruneComments() {
-    const reversedHistory = []
-    const currentComments: Record<string, string> = {}
-
-    const copyComment = (fen: string) => {
-      if (fen in this._comments) {
-        currentComments[fen] = this._comments[fen]
-      }
-    }
-
-    while (this._history.length > 0) {
-      reversedHistory.push(this._undoMove())
-    }
-
-    copyComment(this.fen())
-
-    while (true) {
-      const move = reversedHistory.pop()
-      if (!move) {
-        break
-      }
-      this._makeMove(move)
-      copyComment(this.fen())
-    }
-    this._comments = currentComments
+    /**
+     * Delegate pruning to Game so metadata remains consistent when ChessPGN
+     * is a thin wrapper around a Game instance.
+     */
+    this._game._pruneComments()
   }
 
-  getComment(): string {
-    return this._comments[this.fen()]
+  getComment(): string | undefined {
+    return this._game.getComment()
   }
 
   setComment(comment: string) {
-    this._comments[this.fen()] = comment.replace('{', '[').replace('}', ']')
+    // Preserve original behavior: sanitize braces from user-supplied comments
+    this._game.setComment(comment.replace('{', '[').replace('}', ']'))
   }
 
   /**
    * @deprecated Renamed to `removeComment` for consistency
    */
-  deleteComment(): string {
+  deleteComment(): string | undefined {
     return this.removeComment()
   }
 
-  removeComment(): string {
-    const comment = this._comments[this.fen()]
-    delete this._comments[this.fen()]
-    return comment
+  removeComment(): string | undefined {
+    return this._game.removeComment()
   }
 
   getComments(): {
@@ -1397,50 +1369,14 @@ export class ChessPGN {
     comment?: string
     suffixAnnotation?: string
   }[] {
-    this._pruneComments()
-
-    const allFenKeys = new Set<string>()
-    Object.keys(this._comments).forEach((fen) => allFenKeys.add(fen))
-    Object.keys(this._suffixes).forEach((fen) => allFenKeys.add(fen))
-
-    const result: {
-      fen: string
-      comment?: string
-      suffixAnnotation?: string
-    }[] = []
-
-    for (const fen of allFenKeys) {
-      const commentContent = this._comments[fen]
-      const suffixAnnotation = this._suffixes[fen]
-
-      const entry: {
-        fen: string
-        comment?: string
-        suffixAnnotation?: string
-      } = {
-        fen: fen,
-      }
-
-      if (commentContent !== undefined) {
-        entry.comment = commentContent
-      }
-
-      if (suffixAnnotation !== undefined) {
-        entry.suffixAnnotation = suffixAnnotation
-      }
-
-      result.push(entry)
-    }
-
-    return result
+    return this._game.getComments()
   }
 
   /**
    * Get the suffix annotation for the given position (or current one).
    */
   public getSuffixAnnotation(fen?: string): Suffix | undefined {
-    const key = fen ?? this.fen()
-    return this._suffixes[key]
+    return this._game.getSuffixAnnotation(fen)
   }
 
   /**
@@ -1448,10 +1384,7 @@ export class ChessPGN {
    * Throws if the suffix isn't one of the allowed SUFFIX_LIST values.
    */
   public setSuffixAnnotation(suffix: Suffix, fen?: string): void {
-    if (!SUFFIX_LIST.includes(suffix)) {
-      throw new Error(`Invalid suffix: ${suffix}`)
-    }
-    this._suffixes[fen || this.fen()] = suffix
+    this._game.setSuffixAnnotation(suffix, fen)
   }
 
   /**
@@ -1459,10 +1392,7 @@ export class ChessPGN {
    */
 
   public removeSuffixAnnotation(fen?: string): Suffix | undefined {
-    const key = fen || this.fen()
-    const old = this._suffixes[key]
-    delete this._suffixes[key]
-    return old
+    return this._game.removeSuffixAnnotation(fen)
   }
 
   /**
@@ -1473,12 +1403,7 @@ export class ChessPGN {
   }
 
   removeComments(): { fen: string; comment: string }[] {
-    this._pruneComments()
-    return Object.keys(this._comments).map((fen) => {
-      const comment = this._comments[fen]
-      delete this._comments[fen]
-      return { fen: fen, comment: comment }
-    })
+    return this._game.removeComments()
   }
 
   setCastlingRights(

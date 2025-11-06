@@ -7,6 +7,7 @@
 
 import { Game } from './Game'
 import { processPgnToGame } from './pgnProcessor'
+import { parse } from './pgn'
 
 /**
  * Options for configuring a cursor over multi-game PGN files
@@ -158,7 +159,7 @@ export class CursorImpl implements Cursor {
     predicate: (headers: Record<string, string>) => boolean,
   ): Game | null {
     while (this.hasNext()) {
-      const index = this.gameIndices[this.currentPosition]
+    const index = this.gameIndices[this.currentPosition]
       if (index.headers && predicate(index.headers)) {
         return this.next()
       }
@@ -184,14 +185,11 @@ export class CursorImpl implements Cursor {
       return this.cache.get(index)!
     }
 
-    try {
-      const gameIndex = this.gameIndices[index]
-      const gamePgn = this.pgn.substring(
-        gameIndex.startOffset,
-        gameIndex.endOffset,
-      )
+    const gameIndex = this.gameIndices[index]
+    const gamePgn = this.pgn.substring(gameIndex.startOffset, gameIndex.endOffset)
 
-      // Parse PGN to Game
+    try {
+      // Try the normal parsing path first
       const game = processPgnToGame(gamePgn, { strict: this.options.strict })
 
       // Manage cache
@@ -203,14 +201,47 @@ export class CursorImpl implements Cursor {
       return game
     } catch (error) {
       const err = error as Error
-      this.errors.push({ index, error: err })
+    // Record the original error
+    this.errors.push({ index, error: err })
 
-      if (this.options.strict) {
-        throw err
+  /*
+   * Fallback rationale: the Peggy-generated parser (used by
+   * `processPgnToGame`) rejects certain tag-pair header values that
+   * contain backslash-escaped quotes (e.g. `[Annotator "O\\"Connor"]`).
+   * However, `indexPgnGames` extracts headers using a permissive
+   * scanner and already provides the correct header values. To avoid
+   * losing the game entirely when the full-blob parse fails, we parse
+   * only the moves section by prepending a safe dummy tag-pair and
+   * then construct a `Game` with the headers we previously indexed.
+   * This keeps behavior correct for consumers while avoiding wholesale
+   * parser rewrites; both the original and any fallback errors are
+   * recorded in `this.errors`.
+   */
+    /*
+     * Attempt a fallback when we have pre-parsed headers for this index.
+     */
+      try {
+  const m = gamePgn.match(/\r?\n\s*\r?\n/)
+  const movesOnly = m && m.index !== undefined ? gamePgn.substring(m.index + m[0].length) : ''
+  const safe = `[Event "_"]\n\n${movesOnly}`
+        const parsed = parse(safe)
+        const game = new Game(gameIndex.headers || {}, parsed.root)
+
+        if (this.cache.size >= this.options.cacheSize) {
+          this.evictOldest()
+        }
+        this.cache.set(index, game)
+
+        return game
+      } catch (fallbackErr) {
+        const fErr = fallbackErr as Error
+        this.errors.push({ index, error: fErr })
+        if (this.options.strict) {
+          throw fErr
+        }
+        this.options.onError(fErr, index)
+        return null
       }
-
-      this.options.onError(err, index)
-      return null
     }
   }
 
@@ -240,32 +271,88 @@ export class CursorImpl implements Cursor {
 export function indexPgnGames(pgn: string): GameIndex[] {
   const indices: GameIndex[] = []
   const lines = pgn.split('\n')
-  let currentGameStart = -1
-  let inGame = false
+  // trackers removed — we use the indices array to manage start/end offsets
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim()
 
-    // Detect game start (header line)
-    if (line.startsWith('[Event ')) {
-      if (inGame && currentGameStart >= 0) {
-        // Previous game ended
-        indices.push({
-          startOffset: currentGameStart,
-          endOffset: getLineOffset(pgn, i - 1),
-        })
+    // Detect game start when we encounter any tag-pair line like: [Key "Value"]
+    if (line.startsWith('[')) {
+      const prev = i > 0 ? lines[i - 1].trim() : ''
+  /*
+   * Only treat the first tag line after a blank (or start of file) as the
+   * start of a header block. This avoids creating one entry per tag-line.
+   */
+      if (prev !== '') {
+        continue
       }
-      currentGameStart = getLineOffset(pgn, i)
-      inGame = true
+
+      const startOffset = getLineOffset(pgn, i)
+
+      // If the last index entry was created without an endOffset, close it
+      if (indices.length > 0 && indices[indices.length - 1].endOffset === 0) {
+        indices[indices.length - 1].endOffset = startOffset
+      }
+
+  /**
+   * Parse headers for this game by scanning forward until a blank line.
+   * Accept escaped quotes inside the value (e.g. [Site "My \"Home\""])
+   */
+      const headers: Record<string, string> = {}
+      // Parse header lines more permissively to handle unusual escaping
+      for (let j = i; j < lines.length; j++) {
+        const ln = lines[j].trim()
+        if (ln === '') break
+        if (!ln.startsWith('[')) break
+
+        // Extract tag name
+        const nameMatch = ln.match(/^\[([A-Za-z0-9_]+)\s+/)
+        if (!nameMatch) continue
+        const key = nameMatch[1]
+
+        // Find the opening quote for the value
+        const firstQuote = ln.indexOf('"', nameMatch[0].length)
+        if (firstQuote === -1) continue
+
+        // Find the matching closing quote, skipping escaped quotes
+        let k = firstQuote + 1
+        let closed = -1
+        while (k < ln.length) {
+          if (ln[k] === '"') {
+            // count preceding backslashes
+            let bs = 0
+            let p = k - 1
+            while (p >= 0 && ln[p] === '\\') {
+              bs++
+              p--
+            }
+            if (bs % 2 === 0) {
+              closed = k
+              break
+            }
+          }
+          k++
+        }
+        if (closed === -1) continue
+
+        // Ensure the line ends with a closing bracket after the value
+        const after = ln.substring(closed + 1).trim()
+        if (!after.startsWith(']')) continue
+
+        const raw = ln.substring(firstQuote + 1, closed)
+        // Unescape backslashes first, then escaped quotes
+        const value = raw.replace(/\\\\/g, '\\').replace(/\\"/g, '"')
+        headers[key] = value
+      }
+
+      // Push a partial entry with endOffset=0; will be finalized when next game is found
+  indices.push({ startOffset, endOffset: 0, headers })
     }
   }
 
-  // Add final game
-  if (inGame && currentGameStart >= 0) {
-    indices.push({
-      startOffset: currentGameStart,
-      endOffset: pgn.length,
-    })
+  // Finalize any trailing partial entry
+  if (indices.length > 0 && indices[indices.length - 1].endOffset === 0) {
+    indices[indices.length - 1].endOffset = pgn.length
   }
 
   return indices
