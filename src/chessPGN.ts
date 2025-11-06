@@ -7,6 +7,8 @@
 
 import { Game } from './Game'
 import { Move } from './Move'
+import { createPrettyMove } from './moveUtils'
+import { renderHeaders } from './pgnRenderer'
 import { parse } from './pgn'
 import {
   WHITE,
@@ -757,14 +759,8 @@ export class ChessPGN {
   }
 
   private _createMove(internal: InternalMove) {
-    const san = this._moveToSan(internal, this._moves({ legal: true }))
-    const before = this.fen()
-
-    this._makeMove(internal)
-    const after = this.fen()
-    this._undoMove()
-
-    return new Move(internal, san, before, after)
+    // Delegate pretty move construction to moveUtils to keep this class thin
+    return createPrettyMove(this._game, internal)
   }
 
   moves(): string[]
@@ -971,21 +967,12 @@ export class ChessPGN {
      */
 
     const result: string[] = []
-    let headerExists = false
-
-    /* add the PGN header information */
-    for (const i in this._game._header) {
-      /*
-       * TODO: order of enumerated properties in header object is not
-       * guaranteed, see ECMA-262 spec (section 12.6.4)
-       *
-       * By using HEADER_TEMPLATE, the order of tags should be preserved; we
-       * do have to check for null placeholders, though, and omit them
-       */
-      const headerTag = this._game._header[i]
-      if (headerTag) result.push(`[${i} "${this._game._header[i]}"]` + newline)
-      headerExists = true
-    }
+    const { lines: headerLines, headerExists } = renderHeaders(
+      this._game._header,
+      newline,
+    )
+    // append header lines
+    result.push(...headerLines)
 
     if (headerExists && this._history.length) {
       result.push(newline)
