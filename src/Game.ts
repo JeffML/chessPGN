@@ -42,6 +42,8 @@ import {
   Suffix,
 } from './types'
 import type { Node } from './node'
+import { Move } from './Move'
+import { createPrettyMove } from './moveUtils'
 
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -725,15 +727,30 @@ export class Game {
   }
 
   // Game status methods
-  isCheckmate(legalMoves: InternalMove[]): boolean {
+  isCheckmate(): boolean
+  isCheckmate(legalMoves: InternalMove[]): boolean
+  isCheckmate(legalMoves?: InternalMove[]): boolean {
+    if (legalMoves === undefined) {
+      legalMoves = this._moves({ legal: true })
+    }
     return this.isCheck() && legalMoves.length === 0
   }
 
-  isStalemate(legalMoves: InternalMove[]): boolean {
+  isStalemate(): boolean
+  isStalemate(legalMoves: InternalMove[]): boolean
+  isStalemate(legalMoves?: InternalMove[]): boolean {
+    if (legalMoves === undefined) {
+      legalMoves = this._moves({ legal: true })
+    }
     return !this.isCheck() && legalMoves.length === 0
   }
 
-  isDraw(legalMoves: InternalMove[]): boolean {
+  isDraw(): boolean
+  isDraw(legalMoves: InternalMove[]): boolean
+  isDraw(legalMoves?: InternalMove[]): boolean {
+    if (legalMoves === undefined) {
+      legalMoves = this._moves({ legal: true })
+    }
     return (
       this.isDrawByFiftyMoves() ||
       this.isStalemate(legalMoves) ||
@@ -742,7 +759,12 @@ export class Game {
     )
   }
 
-  isGameOver(legalMoves: InternalMove[]): boolean {
+  isGameOver(): boolean
+  isGameOver(legalMoves: InternalMove[]): boolean
+  isGameOver(legalMoves?: InternalMove[]): boolean {
+    if (legalMoves === undefined) {
+      legalMoves = this._moves({ legal: true })
+    }
     return this.isCheckmate(legalMoves) || this.isDraw(legalMoves)
   }
 
@@ -1725,5 +1747,145 @@ export class Game {
       delete this._comments[fen]
       return { fen: fen, comment: comment }
     })
+  }
+
+  /*
+   * ==========================================================================
+   * Public Move API - enables Game instances from Cursor to work standalone
+   * ==========================================================================
+   */
+
+  /**
+   * Generate all legal moves for the current position.
+   * Supports filtering by square and/or piece, and verbose mode for full Move objects.
+   */
+  moves(): string[]
+  moves({ square }: { square: Square }): string[]
+  moves({ piece }: { piece: PieceSymbol }): string[]
+  moves({ square, piece }: { square: Square; piece: PieceSymbol }): string[]
+  moves({ verbose, square }: { verbose: true; square?: Square }): Move[]
+  moves({ verbose, square }: { verbose: false; square?: Square }): string[]
+  moves({
+    verbose,
+    square,
+  }: {
+    verbose?: boolean
+    square?: Square
+  }): string[] | Move[]
+  moves({ verbose, piece }: { verbose: true; piece?: PieceSymbol }): Move[]
+  moves({ verbose, piece }: { verbose: false; piece?: PieceSymbol }): string[]
+  moves({
+    verbose,
+    piece,
+  }: {
+    verbose?: boolean
+    piece?: PieceSymbol
+  }): string[] | Move[]
+  moves({
+    verbose,
+    square,
+    piece,
+  }: {
+    verbose: true
+    square?: Square
+    piece?: PieceSymbol
+  }): Move[]
+  moves({
+    verbose,
+    square,
+    piece,
+  }: {
+    verbose: false
+    square?: Square
+    piece?: PieceSymbol
+  }): string[]
+  moves({
+    verbose,
+    square,
+    piece,
+  }: {
+    verbose?: boolean
+    square?: Square
+    piece?: PieceSymbol
+  }): string[] | Move[]
+  moves({ square, piece }: { square?: Square; piece?: PieceSymbol }): Move[]
+  moves({
+    verbose = false,
+    square = undefined,
+    piece = undefined,
+  }: { verbose?: boolean; square?: Square; piece?: PieceSymbol } = {}) {
+    const legalMoves = this._moves({ legal: true, square, piece })
+
+    if (verbose) {
+      return legalMoves.map((move) => createPrettyMove(this, move))
+    } else {
+      return legalMoves.map((move) => this._moveToSan(move, legalMoves))
+    }
+  }
+
+  /**
+   * Make a move on the board.
+   * @param move - SAN string (e.g., 'e4'), move object ({ from: 'e2', to: 'e4' }), or null for null move
+   * @param options - { strict: boolean } - whether to strictly validate SAN format
+   * @returns Move object with full details
+   * @throws Error if move is invalid
+   */
+  move(
+    move: string | { from: string; to: string; promotion?: string } | null,
+    { strict = false }: { strict?: boolean } = {},
+  ): Move {
+    let moveObj: InternalMove | null = null
+
+    if (typeof move === 'string') {
+      moveObj = this._moveFromSan(move, strict)
+    } else if (move === null) {
+      moveObj = this._moveFromSan(SAN_NULLMOVE, strict)
+    } else if (typeof move === 'object') {
+      const moves = this._moves({ legal: true })
+
+      // Convert pretty move object to internal move
+      for (let i = 0, len = moves.length; i < len; i++) {
+        if (
+          move.from === algebraic(moves[i].from) &&
+          move.to === algebraic(moves[i].to) &&
+          (!('promotion' in moves[i]) || move.promotion === moves[i].promotion)
+        ) {
+          moveObj = moves[i]
+          break
+        }
+      }
+    }
+
+    // Failed to find move
+    if (!moveObj) {
+      if (typeof move === 'string') {
+        throw new Error(`Invalid move: ${move}`)
+      } else {
+        throw new Error(`Invalid move: ${JSON.stringify(move)}`)
+      }
+    }
+
+    // Disallow null moves when in check
+    if (this.isCheck() && moveObj.flags & BITS.NULL_MOVE) {
+      throw new Error('Null move not allowed when in check')
+    }
+
+    // Create pretty move before making the move (need current state for SAN/FEN)
+    const prettyMove = createPrettyMove(this, moveObj)
+
+    this._makeMove(moveObj)
+    return prettyMove
+  }
+
+  /**
+   * Undo the last move made.
+   * @returns Move object that was undone, or null if no moves to undo
+   */
+  undo(): Move | null {
+    const move = this._undoMove()
+    if (move) {
+      return createPrettyMove(this, move)
+    }
+    return null
   }
 }

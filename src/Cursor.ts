@@ -137,7 +137,9 @@ export class CursorImpl implements Cursor {
 
   public hasNext(): boolean {
     const start = this.options.start
-    const max = isFinite(this.options.length) ? start + this.options.length : this.gameIndices.length
+    const max = isFinite(this.options.length)
+      ? start + this.options.length
+      : this.gameIndices.length
     return this.currentPosition < Math.min(this.gameIndices.length, max)
   }
 
@@ -295,7 +297,7 @@ export function indexPgnGames(pgn: string): GameIndex[] {
         indices[indices.length - 1].endOffset = startOffset
       }
 
-          const { headers, nextIndex } = parseHeaders(lines, i)
+      const { headers, nextIndex } = parseHeaders(lines, i)
       /*
        * Advance outer loop to the last header line we consumed so we don't
        * re-scan header lines on the next iteration.

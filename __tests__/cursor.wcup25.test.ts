@@ -24,7 +24,7 @@ describe('Cursor with wcup25.pgn', () => {
   test('cursor can iterate through all games', () => {
     const indices = indexPgnGames(pgn)
     const cursor = new CursorImpl(pgn, indices, { start: 0 })
-    
+
     let count = 0
     while (cursor.hasNext()) {
       const game = cursor.next()
@@ -37,7 +37,7 @@ describe('Cursor with wcup25.pgn', () => {
   test('findNext can filter by headers', () => {
     const indices = indexPgnGames(pgn)
     const cursor = new CursorImpl(pgn, indices, { start: 0 })
-    
+
     // Find a game with a specific white player
     const game = cursor.findNext((h) => h['White'] === 'Harikrishna, Pentala')
     expect(game).not.toBeNull()
@@ -50,7 +50,7 @@ describe('Cursor with wcup25.pgn', () => {
 
   test('can find games by round', () => {
     const indices = indexPgnGames(pgn)
-    
+
     // Count games in round 1.1 using header index (no parsing needed)
     let count = 0
     for (const idx of indices) {
@@ -58,21 +58,21 @@ describe('Cursor with wcup25.pgn', () => {
         count++
       }
     }
-    
+
     expect(count).toBeGreaterThan(0)
   })
 
   test('cursor reports no errors on valid games', () => {
     const indices = indexPgnGames(pgn)
     const cursor = new CursorImpl(pgn, indices, { start: 0, cacheSize: 50 })
-    
+
     // Iterate through first 50 games
     let count = 0
     while (cursor.hasNext() && count < 50) {
       cursor.next()
       count++
     }
-    
+
     expect(cursor.errors.length).toBe(0)
   })
 })
