@@ -1666,21 +1666,34 @@ export class Game {
     return old
   }
 
-  getComments(): { fen: string; comment?: string; suffixAnnotation?: string }[] {
+  getComments(): {
+    fen: string
+    comment?: string
+    suffixAnnotation?: string
+  }[] {
     this._pruneComments()
 
     const allFenKeys = new Set<string>()
     Object.keys(this._comments).forEach((fen) => allFenKeys.add(fen))
     Object.keys(this._suffixes).forEach((fen) => allFenKeys.add(fen))
 
-    const result: { fen: string; comment?: string; suffixAnnotation?: string }[] = []
+    const result: {
+      fen: string
+      comment?: string
+      suffixAnnotation?: string
+    }[] = []
     for (const fen of allFenKeys) {
       const commentContent = this._comments[fen]
       const suffixAnnotation = this._suffixes[fen]
 
-      const entry: { fen: string; comment?: string; suffixAnnotation?: string } = { fen }
+      const entry: {
+        fen: string
+        comment?: string
+        suffixAnnotation?: string
+      } = { fen }
       if (commentContent !== undefined) entry.comment = commentContent
-      if (suffixAnnotation !== undefined) entry.suffixAnnotation = suffixAnnotation
+      if (suffixAnnotation !== undefined)
+        entry.suffixAnnotation = suffixAnnotation
       result.push(entry)
     }
 

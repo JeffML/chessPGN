@@ -467,12 +467,12 @@ export class ChessPGN {
 
     this._updateSetup(fen)
     this._incPositionCount()
-  /**
-   * Clear comments and suffixes when loading a new position so that
-   * metadata from a previously used Game/ChessPGN instance isn't retained.
-   */
-  this._game._comments = {}
-  this._game._suffixes = {}
+    /**
+     * Clear comments and suffixes when loading a new position so that
+     * metadata from a previously used Game/ChessPGN instance isn't retained.
+     */
+    this._game._comments = {}
+    this._game._suffixes = {}
   }
 
   fen({

@@ -16,7 +16,7 @@ describe('Cursor indexing and headers', () => {
 [Annotator "O\\"Connor"]
 
 1. d4 d5 *
-`;
+`
 
   test('indexPgnGames extracts two games with headers and unescaped values', () => {
     const indices = indexPgnGames(multiPgn)
@@ -37,6 +37,9 @@ describe('Cursor indexing and headers', () => {
     const g = cursor.findNext((h) => h['White'] === 'Carol')
     expect(g).not.toBeNull()
     // when found, the returned object should be a Game (have a fen method)
-    if (g) expect(typeof (g as unknown as { fen: () => string }).fen).toBe('function')
+    if (g)
+      expect(typeof (g as unknown as { fen: () => string }).fen).toBe(
+        'function',
+      )
   })
 })
