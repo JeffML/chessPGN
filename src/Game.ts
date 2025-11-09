@@ -794,13 +794,18 @@ export class Game {
   _push(move: InternalMove) {
     this._history.push({
       move,
-      kings: { b: this._kings.b, w: this._kings.w },
-      turn: this._turn,
-      castling: { b: this._castling.b, w: this._castling.w },
-      epSquare: this._epSquare,
-      fenEpSquare: this._fenEpSquare,
-      halfMoves: this._halfMoves,
-      moveNumber: this._moveNumber,
+      positionSnapshot: {
+        board: {}, // Not used yet - will be used when we fully integrate Position
+        kings: { b: this._kings.b, w: this._kings.w },
+        turn: this._turn,
+        castling: { b: this._castling.b, w: this._castling.w },
+        epSquare: this._epSquare,
+        fenEpSquare: this._fenEpSquare,
+        halfMoves: this._halfMoves,
+        moveNumber: this._moveNumber,
+        hash: 0n, // Not used - hash is recomputed during undo
+        positionCount: new Map(), // Not used yet
+      },
     })
   }
 
@@ -945,19 +950,24 @@ export class Game {
       return null
     }
 
+    // XOR out current ep/castling before restoring old state
     this._hash ^= this._epKey()
     this._hash ^= this._castlingKey()
 
     const move = old.move
+    const snapshot = old.positionSnapshot
 
-    this._kings = old.kings
-    this._turn = old.turn
-    this._castling = old.castling
-    this._epSquare = old.epSquare
-    this._fenEpSquare = old.fenEpSquare
-    this._halfMoves = old.halfMoves
-    this._moveNumber = old.moveNumber
+    // Restore position state from snapshot (except board and hash - handled by undo logic)
+    this._kings = snapshot.kings
+    this._turn = snapshot.turn
+    this._castling = snapshot.castling
+    this._epSquare = snapshot.epSquare
+    this._fenEpSquare = snapshot.fenEpSquare
+    this._halfMoves = snapshot.halfMoves
+    this._moveNumber = snapshot.moveNumber
+    // Note: hash is managed via XOR operations, positionCount managed separately
 
+    // XOR in restored ep/castling/side
     this._hash ^= this._epKey()
     this._hash ^= this._castlingKey()
     this._hash ^= SIDE_KEY

@@ -218,13 +218,7 @@ export const BITS: Record<string, number> = {
 
 export interface History {
   move: InternalMove
-  kings: Record<Color, number>
-  turn: Color
-  castling: Record<Color, number>
-  epSquare: number
-  fenEpSquare: number
-  halfMoves: number
-  moveNumber: number
+  positionSnapshot: import('./Position').PositionSnapshot
 }
 
 // Extracts the zero-based rank of an 0x88 square.
