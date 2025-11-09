@@ -44,6 +44,7 @@ import {
 import type { Node } from './node'
 import { Move } from './Move'
 import { createPrettyMove } from './moveUtils'
+import { renderHeaders } from './pgnRenderer'
 
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -1887,5 +1888,146 @@ export class Game {
       return createPrettyMove(this, move)
     }
     return null
+  }
+
+  /**
+   * Generate PGN string for the game
+   * @param options - Formatting options (newline character and max width)
+   * @returns PGN string representation of the game
+   */
+  pgn({
+    newline = '\n',
+    maxWidth = 0,
+  }: { newline?: string; maxWidth?: number } = {}): string {
+    const result: string[] = []
+    const { lines: headerLines, headerExists } = renderHeaders(
+      this._header,
+      newline,
+    )
+    result.push(...headerLines)
+
+    if (headerExists && this._history.length) {
+      result.push(newline)
+    }
+
+    const appendComment = (moveString: string) => {
+      const comment = this.getComment()
+      if (typeof comment !== 'undefined') {
+        const delimiter = moveString.length > 0 ? ' ' : ''
+        moveString = `${moveString}${delimiter}{${comment}}`
+      }
+      return moveString
+    }
+
+    /* Pop all of history onto reversed_history */
+    const reversedHistory = []
+    while (this._history.length > 0) {
+      const move = this._undoMove()
+      if (move) reversedHistory.push(move)
+    }
+
+    const moves = []
+    let moveString = ''
+    let moveNumber = 1
+
+    /* Special case of a commented starting position with no moves */
+    if (reversedHistory.length === 0) {
+      moves.push(appendComment(''))
+    }
+
+    /* Build the list of moves */
+    while (reversedHistory.length > 0) {
+      moveString = appendComment(moveString)
+      const move = reversedHistory.pop()
+
+      if (!move) break
+
+      /* If the position started with black to move, start PGN with number. ... */
+      if (this._history.length === 0 && move.color === 'b') {
+        const prefix = `${moveNumber}. ...`
+        moveString = moveString ? `${moveString} ${prefix}` : prefix
+      } else if (move.color === 'w') {
+        /* Store the previous generated move_string if we have one */
+        if (moveString.length) {
+          moves.push(moveString)
+        }
+        moveString = moveNumber + '.'
+      }
+
+      moveString =
+        moveString + ' ' + this._moveToSan(move, this._moves({ legal: true }))
+      this._makeMove(move)
+
+      if (move.color === 'b') {
+        moveNumber++
+      }
+    }
+
+    /* Are there any other leftover moves? */
+    if (moveString.length) {
+      moves.push(appendComment(moveString))
+    }
+
+    /* Add result (there ALWAYS has to be a result according to spec) */
+    moves.push(this._header.Result || '*')
+
+    /* Join together moves */
+    if (maxWidth === 0) {
+      return result.join('') + moves.join(' ')
+    }
+
+    /* Wrap at maxWidth */
+    const strip = function () {
+      if (result.length > 0 && result[result.length - 1] === ' ') {
+        result.pop()
+        return true
+      }
+      return false
+    }
+
+    const wrapComment = function (width: number, move: string) {
+      for (const token of move.split(' ')) {
+        if (!token) continue
+        if (width + token.length > maxWidth) {
+          while (strip()) {
+            width--
+          }
+          result.push(newline)
+          width = 0
+        }
+        result.push(token)
+        width += token.length
+        result.push(' ')
+        width++
+      }
+      if (strip()) {
+        width--
+      }
+      return width
+    }
+
+    let currentWidth = 0
+    for (let i = 0; i < moves.length; i++) {
+      if (currentWidth + moves[i].length > maxWidth) {
+        if (moves[i].includes('{')) {
+          currentWidth = wrapComment(currentWidth, moves[i])
+          continue
+        }
+      }
+      if (currentWidth + moves[i].length > maxWidth && i !== 0) {
+        if (result[result.length - 1] === ' ') {
+          result.pop()
+        }
+        result.push(newline)
+        currentWidth = 0
+      } else if (i !== 0) {
+        result.push(' ')
+        currentWidth++
+      }
+      result.push(moves[i])
+      currentWidth += moves[i].length
+    }
+
+    return result.join('')
   }
 }

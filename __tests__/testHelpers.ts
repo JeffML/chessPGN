@@ -22,11 +22,12 @@ export function createCursorForTesting(
 
 /**
  * Create ChessPGN instance that matches a Game instance's position
- * by loading the same FEN
+ * by loading the Game's PGN representation
  */
 export function createMatchingChessPgn(gameInstance: Game): ChessPGN {
   const chess = new ChessPGN()
-  chess.load(gameInstance.fen())
+  const gamePgn = gameInstance.pgn()
+  chess.loadPgn(gamePgn)
   return chess
 }
 

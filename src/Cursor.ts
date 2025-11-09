@@ -69,7 +69,7 @@ export interface Cursor {
  * Implementation of Cursor for multi-game PGN files
  */
 export class CursorImpl implements Cursor {
-  private pgn: string
+  private _pgnSource: string
   private gameIndices: GameIndex[]
   private currentPosition: number
   private cache: Map<number, Game>
@@ -89,7 +89,7 @@ export class CursorImpl implements Cursor {
       onError: () => {},
     }
 
-    this.pgn = pgn
+    this._pgnSource = pgn
     this.gameIndices = indices
     this.options = { ...defaults, ...(options as CursorOptions) }
     this.currentPosition = this.options.start
@@ -180,7 +180,7 @@ export class CursorImpl implements Cursor {
     }
 
     const gameIndex = this.gameIndices[index]
-    const gamePgn = this.pgn.substring(
+    const gamePgn = this._pgnSource.substring(
       gameIndex.startOffset,
       gameIndex.endOffset,
     )
@@ -265,6 +265,37 @@ export class CursorImpl implements Cursor {
     if (oldestKey !== undefined) {
       this.cache.delete(oldestKey)
     }
+  }
+
+  /**
+   * Generate PGN string for all games in the cursor
+   * @param options - Formatting options (newline character and max width)
+   * @returns Combined PGN string of all games
+   */
+  pgn({
+    newline = '\n',
+    maxWidth = 0,
+  }: { newline?: string; maxWidth?: number } = {}): string {
+    const gamePgns: string[] = []
+
+    /* Save current position */
+    const savedPosition = this.currentPosition
+
+    /* Reset to start and iterate through all games */
+    this.reset()
+
+    while (this.hasNext()) {
+      const game = this.next()
+      if (game) {
+        gamePgns.push(game.pgn({ newline, maxWidth }))
+      }
+    }
+
+    /* Restore position */
+    this.currentPosition = savedPosition
+
+    /* Join games with double newline separator */
+    return gamePgns.join(newline + newline)
   }
 }
 
