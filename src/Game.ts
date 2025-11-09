@@ -212,7 +212,7 @@ export class Game {
   }
 
   get(square: Square): Piece | undefined {
-    return this._board[Ox88[square]]
+    return this._position.get(square)
   }
 
   findPiece(piece: Piece): Square[] {
@@ -775,12 +775,14 @@ export class Game {
   _set(sq: number, piece: Piece) {
     this._hash ^= this._pieceKey(sq)
     this._board[sq] = piece
+    this._position._board[sq] = piece
     this._hash ^= this._pieceKey(sq)
   }
 
   _clear(sq: number) {
     this._hash ^= this._pieceKey(sq)
     delete this._board[sq]
+    delete this._position._board[sq]
   }
 
   _movePiece(from: number, to: number) {
@@ -788,6 +790,8 @@ export class Game {
 
     this._board[to] = this._board[from]
     delete this._board[from]
+    this._position._board[to] = this._position._board[from]
+    delete this._position._board[from]
 
     this._hash ^= this._pieceKey(to)
   }
