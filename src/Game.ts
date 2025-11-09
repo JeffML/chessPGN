@@ -104,7 +104,9 @@ const HEADER_TEMPLATE = {
 /* eslint-enable @typescript-eslint/naming-convention */
 
 export class Game {
-  _board = new Array<Piece>(128)
+  get _board() {
+    return this._position._board
+  }
   _turn: Color = WHITE
   _header: Record<string, string | null> = {}
   // Per-position comments and suffix annotations keyed by FEN
@@ -775,14 +777,12 @@ export class Game {
   _set(sq: number, piece: Piece) {
     this._hash ^= this._pieceKey(sq)
     this._board[sq] = piece
-    this._position._board[sq] = piece
     this._hash ^= this._pieceKey(sq)
   }
 
   _clear(sq: number) {
     this._hash ^= this._pieceKey(sq)
     delete this._board[sq]
-    delete this._position._board[sq]
   }
 
   _movePiece(from: number, to: number) {
@@ -790,8 +790,6 @@ export class Game {
 
     this._board[to] = this._board[from]
     delete this._board[from]
-    this._position._board[to] = this._position._board[from]
-    delete this._position._board[from]
 
     this._hash ^= this._pieceKey(to)
   }
@@ -1554,7 +1552,7 @@ export class Game {
     let square = 0
 
     // Clear board and reset state (but NOT headers)
-    this._board = new Array<Piece>(128)
+    this._position._board = new Array<Piece>(128)
     this._kings = { w: EMPTY, b: EMPTY }
     this._turn = WHITE
     this._castling = { w: 0, b: 0 }
@@ -1626,7 +1624,7 @@ export class Game {
    */
   reset(preserveHeaders: boolean = false): void {
     // Reset board and state
-    this._board = new Array<Piece>(128)
+    this._position._board = new Array<Piece>(128)
     this._kings = { w: EMPTY, b: EMPTY }
     this._turn = WHITE
     this._castling = { w: 0, b: 0 }
