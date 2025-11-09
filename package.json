@@ -18,7 +18,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint src/ --ext .ts",
     "parser": "peggy -c peggy.config.mjs",
-    "test": "vitest",
+    "test": "vitest --run",
     "test:coverage": "vitest --coverage",
     "bench": "tsx benchmarks/bench.ts",
     "update-version": "tsx update-version.ts",
