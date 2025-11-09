@@ -8,11 +8,14 @@
 import { describe, it, expect } from 'vitest'
 import * as fs from 'fs'
 import * as path from 'path'
+import type { Square } from '../src/types'
 import {
   createCursorForTesting,
   createMatchingChessPgn,
   compareMovesResults,
   compareGameState,
+  compareFindPieceResults,
+  compareGetResults,
 } from './testHelpers'
 
 describe('Game vs ChessPGN API Parity', () => {
@@ -204,6 +207,125 @@ describe('Game vs ChessPGN API Parity', () => {
         expect(gameFen2).toBe(gameFen1)
         expect(chessFen2).toBe(chessFen1)
         expect(gameFen2).toBe(chessFen2)
+      }
+    })
+  })
+
+  describe('findPiece() method', () => {
+    it('should return identical results for 10 games', () => {
+      const cursor = createCursorForTesting(pgn, 0, 10)
+
+      for (let i = 0; i < 10; i++) {
+        const game = cursor.next()
+        expect(game).not.toBeNull()
+        if (!game) break
+
+        const chess = createMatchingChessPgn(game)
+
+        /* Test finding various pieces */
+        const piecesToFind = [
+          { type: 'p' as const, color: 'w' as const },
+          { type: 'p' as const, color: 'b' as const },
+          { type: 'n' as const, color: 'w' as const },
+          { type: 'n' as const, color: 'b' as const },
+          { type: 'b' as const, color: 'w' as const },
+          { type: 'b' as const, color: 'b' as const },
+          { type: 'r' as const, color: 'w' as const },
+          { type: 'r' as const, color: 'b' as const },
+          { type: 'q' as const, color: 'w' as const },
+          { type: 'q' as const, color: 'b' as const },
+          { type: 'k' as const, color: 'w' as const },
+          { type: 'k' as const, color: 'b' as const },
+        ]
+
+        for (const piece of piecesToFind) {
+          expect(compareFindPieceResults(game, chess, piece)).toBe(true)
+        }
+      }
+    })
+  })
+
+  describe('get() method', () => {
+    it('should return identical results for 10 games', () => {
+      const cursor = createCursorForTesting(pgn, 0, 10)
+
+      for (let i = 0; i < 10; i++) {
+        const game = cursor.next()
+        expect(game).not.toBeNull()
+        if (!game) break
+
+        const chess = createMatchingChessPgn(game)
+
+        const squares: Square[] = [
+          'a1',
+          'b1',
+          'c1',
+          'd1',
+          'e1',
+          'f1',
+          'g1',
+          'h1',
+          'a2',
+          'b2',
+          'c2',
+          'd2',
+          'e2',
+          'f2',
+          'g2',
+          'h2',
+          'a3',
+          'b3',
+          'c3',
+          'd3',
+          'e3',
+          'f3',
+          'g3',
+          'h3',
+          'a4',
+          'b4',
+          'c4',
+          'd4',
+          'e4',
+          'f4',
+          'g4',
+          'h4',
+          'a5',
+          'b5',
+          'c5',
+          'd5',
+          'e5',
+          'f5',
+          'g5',
+          'h5',
+          'a6',
+          'b6',
+          'c6',
+          'd6',
+          'e6',
+          'f6',
+          'g6',
+          'h6',
+          'a7',
+          'b7',
+          'c7',
+          'd7',
+          'e7',
+          'f7',
+          'g7',
+          'h7',
+          'a8',
+          'b8',
+          'c8',
+          'd8',
+          'e8',
+          'f8',
+          'g8',
+          'h8',
+        ]
+
+        for (const square of squares) {
+          expect(compareGetResults(game, chess, square)).toBe(true)
+        }
       }
     })
   })

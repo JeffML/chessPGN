@@ -6,7 +6,7 @@ import { ChessPGN } from '../src/chessPGN'
 import { Game } from '../src/Game'
 import { CursorImpl, indexPgnGames } from '../src/Cursor'
 import type { Move } from '../src/Move'
-import type { Square, PieceSymbol } from '../src/types'
+import type { Square, PieceSymbol, Piece } from '../src/types'
 
 /**
  * Load a multi-game PGN and return Cursor with specified range
@@ -140,4 +140,24 @@ export function compareGetResults(
   return (
     gamePiece.type === chessPiece.type && gamePiece.color === chessPiece.color
   )
+}
+
+/**
+ * Compare findPiece() results between Game and ChessPGN
+ */
+export function compareFindPieceResults(
+  game: Game,
+  chess: ChessPGN,
+  piece: Piece,
+): boolean {
+  const gameSquares = game.findPiece(piece)
+  const chessSquares = chess.findPiece(piece)
+
+  if (gameSquares.length !== chessSquares.length) return false
+
+  /* Sort both arrays for consistent comparison */
+  const gameSorted = [...gameSquares].sort()
+  const chessSorted = [...chessSquares].sort()
+
+  return JSON.stringify(gameSorted) === JSON.stringify(chessSorted)
 }
