@@ -797,7 +797,7 @@ export class Game {
     this._history.push({
       move,
       positionSnapshot: {
-        board: {}, // Not used yet - will be used when we fully integrate Position
+        board: new Array<Piece>(128), // Not used yet - will be used when we fully integrate Position
         kings: { b: this._kings.b, w: this._kings.w },
         turn: this._turn,
         castling: { b: this._castling.b, w: this._castling.w },

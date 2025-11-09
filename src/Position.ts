@@ -40,7 +40,7 @@ export const DEFAULT_POSITION =
  * Position is mutable - methods modify the state in place for performance.
  */
 export class Position {
-  _board: Record<number, Piece> = {}
+  _board: Piece[] = new Array<Piece>(128)
   _turn: Color = WHITE
   _kings: Record<Color, number> = { w: EMPTY, b: EMPTY }
   _halfMoves = 0
@@ -73,7 +73,7 @@ export class Position {
     let square = 0
 
     // Clear board and reset state
-    this._board = {}
+    this._board = new Array<Piece>(128)
     this._kings = { w: EMPTY, b: EMPTY }
     this._turn = WHITE
     this._castling = { w: 0, b: 0 }
@@ -317,7 +317,7 @@ export class Position {
    */
   snapshot(): PositionSnapshot {
     return {
-      board: { ...this._board },
+      board: [...this._board],
       turn: this._turn,
       kings: { ...this._kings },
       halfMoves: this._halfMoves,
@@ -334,7 +334,7 @@ export class Position {
    * Restore position state from a snapshot
    */
   restore(snapshot: PositionSnapshot): void {
-    this._board = { ...snapshot.board }
+    this._board = [...snapshot.board]
     this._turn = snapshot.turn
     this._kings = { ...snapshot.kings }
     this._halfMoves = snapshot.halfMoves
@@ -351,7 +351,7 @@ export class Position {
  * Snapshot of position state for history tracking
  */
 export interface PositionSnapshot {
-  board: Record<number, Piece>
+  board: Piece[]
   turn: Color
   kings: Record<Color, number>
   halfMoves: number
