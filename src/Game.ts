@@ -45,6 +45,7 @@ import type { Node } from './node'
 import { Move } from './Move'
 import { createPrettyMove } from './moveUtils'
 import { renderHeaders } from './pgnRenderer'
+import { Position } from './Position'
 
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -118,6 +119,7 @@ export class Game {
   _history: History[] = []
   _fenEpSquare = -1
   _moveNumber = 0
+  _position: Position = new Position()
 
   constructor(headers?: Record<string, string>, root?: Node) {
     /*
@@ -1608,6 +1610,9 @@ export class Game {
      * Note: Position count is incremented by the caller (ChessPGN.load or after moves)
      * not during FEN loading, since loading is setting up a position, not making a move
      */
+    
+    // Keep Position in sync
+    this._position.load(fen)
   }
 
   /**
