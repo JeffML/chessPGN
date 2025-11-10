@@ -6,7 +6,7 @@ import { resolve } from 'path'
 /*
  * These tests validate worker thread performance for async iteration.
  * Run separately: npm test -- cursor.async.test.ts
- * 
+ *
  * Skipped in full test suite to avoid timeout issues with parallel test execution
  */
 describe.skip('Cursor async iterator with workers', () => {

@@ -1612,7 +1612,7 @@ export class Game {
      * Note: Position count is incremented by the caller (ChessPGN.load or after moves)
      * not during FEN loading, since loading is setting up a position, not making a move
      */
-    
+
     // Keep Position in sync
     this._position.load(fen)
   }
