@@ -9,6 +9,7 @@ import { Game } from './Game'
 import { processPgnToGame } from './pgnProcessor'
 import { parse } from './pgn'
 import { parseHeaders } from './headerParser'
+import { WorkerPool } from './WorkerPool'
 
 /**
  * Options for configuring a cursor over multi-game PGN files
@@ -22,6 +23,8 @@ export interface CursorOptions {
   lazyParse?: boolean // Parse moves only when accessed (default: true)
   strict?: boolean // Throw on first error (default: false)
   onError?: (error: Error, gameIndex: number) => void
+  workers?: boolean | number // Enable worker threads (boolean or worker count, default: false)
+  workerBatchSize?: number // Games per worker batch (default: 10)
 }
 
 /**
@@ -74,6 +77,7 @@ export class CursorImpl implements Cursor {
   private currentPosition: number
   private cache: Map<number, Game>
   private options: Required<CursorOptions>
+  private workerPool?: WorkerPool
   public errors: Array<{ index: number; error: Error }> = []
   public totalGames?: number
 
@@ -87,6 +91,8 @@ export class CursorImpl implements Cursor {
       lazyParse: true,
       strict: false,
       onError: () => {},
+      workers: false,
+      workerBatchSize: 10,
     }
 
     this._pgnSource = pgn
@@ -95,6 +101,16 @@ export class CursorImpl implements Cursor {
     this.currentPosition = this.options.start
     this.cache = new Map()
     this.totalGames = indices.length
+
+    // Initialize worker pool if workers enabled
+    if (this.options.workers) {
+      const workerCount =
+        typeof this.options.workers === 'number' ? this.options.workers : 4
+      this.workerPool = new WorkerPool(workerCount, {
+        batchSize: this.options.workerBatchSize,
+        strict: this.options.strict,
+      })
+    }
   }
 
   // Phase 2: Backward navigation
@@ -123,6 +139,16 @@ export class CursorImpl implements Cursor {
   reset(): void {
     this.currentPosition = this.options.start
     this.cache.clear()
+  }
+
+  /**
+   * Terminate worker pool (call when done with cursor)
+   */
+  async terminate(): Promise<void> {
+    if (this.workerPool) {
+      await this.workerPool.terminate()
+      this.workerPool = undefined
+    }
   }
 
   // Core navigation
@@ -164,10 +190,69 @@ export class CursorImpl implements Cursor {
 
   // Phase 3: Async iteration
   async *[Symbol.asyncIterator](): AsyncIterableIterator<Game> {
+    if (!this.workerPool) {
+      // No workers - use synchronous path
+      while (this.hasNext()) {
+        const game = this.next()
+        if (game) {
+          yield game
+        }
+      }
+      return
+    }
+
+    // With workers - batch parse ahead
+    const batchSize = this.options.workerBatchSize
     while (this.hasNext()) {
-      const game = this.next()
-      if (game) {
-        yield game
+      const batch: Array<{ index: number; pgn: string }> = []
+
+      // Prepare batch of games to parse
+      for (let i = 0; i < batchSize && this.hasNext(); i++) {
+        const idx = this.currentPosition + i
+        if (idx >= this.gameIndices.length) break
+
+        const gameIndex = this.gameIndices[idx]
+        const gamePgn = this._pgnSource.substring(
+          gameIndex.startOffset,
+          gameIndex.endOffset,
+        )
+        batch.push({ index: idx, pgn: gamePgn })
+      }
+
+      if (batch.length === 0) break
+
+      try {
+        // Parse batch with workers
+        const results = await this.workerPool.parseGames(batch)
+
+        // Yield results in order
+        for (const result of results) {
+          if (result.game) {
+            this.currentPosition++
+            yield result.game
+          } else {
+            // Handle parse error
+            this.errors.push({
+              index: result.index,
+              error: new Error('Failed to parse game'),
+            })
+            if (this.options.strict) {
+              throw new Error(`Failed to parse game at index ${result.index}`)
+            }
+            this.currentPosition++
+          }
+        }
+      } catch {
+        // Worker error - fall back to sync for this batch
+        for (const item of batch) {
+          const game = this.parseGame(item.index)
+          if (game) {
+            this.currentPosition++
+            yield game
+          } else {
+            this.currentPosition++
+          }
+        }
       }
     }
   }
