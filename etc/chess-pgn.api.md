@@ -33,7 +33,7 @@ export class ChessPGN {
         preserveHeaders?: boolean | undefined;
     }): void;
     // @deprecated (undocumented)
-    deleteComment(): string;
+    deleteComment(): string | undefined;
     // @deprecated (undocumented)
     deleteComments(): {
         fen: string;
@@ -53,7 +53,7 @@ export class ChessPGN {
         [QUEEN]: boolean;
     };
     // (undocumented)
-    getComment(): string;
+    getComment(): string | undefined;
     // (undocumented)
     getComments(): {
         fen: string;
@@ -62,6 +62,7 @@ export class ChessPGN {
     }[];
     // (undocumented)
     getHeaders(): Record<string, string>;
+    // Warning: (ae-forgotten-export) The symbol "Suffix" needs to be exported by the entry point chessPGN.d.ts
     getSuffixAnnotation(fen?: string): Suffix | undefined;
     // (undocumented)
     hash(): string;
@@ -209,7 +210,7 @@ export class ChessPGN {
     // (undocumented)
     remove(square: Square): Piece | undefined;
     // (undocumented)
-    removeComment(): string;
+    removeComment(): string | undefined;
     // (undocumented)
     removeComments(): {
         fen: string;
@@ -240,7 +241,7 @@ export class ChessPGN {
 // @public (undocumented)
 export type Color = 'w' | 'b';
 
-// @public (undocumented)
+// @public
 export const DEFAULT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 // @public (undocumented)
@@ -330,12 +331,6 @@ export type Square = 'a8' | 'b8' | 'c8' | 'd8' | 'e8' | 'f8' | 'g8' | 'h8' | 'a7
 
 // @public (undocumented)
 export const SQUARES: Square[];
-
-// @public (undocumented)
-export type Suffix = (typeof SUFFIX_LIST)[number];
-
-// @public
-export const SUFFIX_LIST: readonly ["!", "?", "!!", "!?", "?!", "??"];
 
 // @public (undocumented)
 export function validateFen(fen: string): {
