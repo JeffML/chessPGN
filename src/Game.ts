@@ -5,6 +5,7 @@
  * See the LICENSE file for the full text, including disclaimer.
  */
 
+import type { IChessGame } from './IChessGame'
 import {
   Piece,
   Square,
@@ -103,7 +104,7 @@ const HEADER_TEMPLATE = {
 }
 /* eslint-enable @typescript-eslint/naming-convention */
 
-export class Game {
+export class Game implements IChessGame {
   get _board() {
     return this._position._board
   }
@@ -1622,8 +1623,38 @@ export class Game {
    * If `preserveHeaders` is false (default) the header template will be
    * re-applied. When true, existing headers are preserved.
    */
+  /**
+   * Reset game to the starting position.
+   * If `preserveHeaders` is false (default) the header template will be
+   * re-applied. When true, existing headers are preserved.
+   */
   reset(preserveHeaders: boolean = false): void {
-    // Reset board and state
+    // Headers: reset to template unless caller asked to preserve
+    if (!preserveHeaders) {
+      this._header = { ...HEADER_TEMPLATE }
+    }
+
+    // Clear any SetUp/FEN tags when resetting to the default position
+    this._header['SetUp'] = null
+    this._header['FEN'] = null
+
+    // Load the starting position
+    this.load(DEFAULT_POSITION, { skipValidation: true })
+
+    // Clear per-position metadata when not preserving headers
+    if (!preserveHeaders) {
+      this._comments = {}
+      this._suffixes = {}
+    }
+  }
+
+  /**
+   * Clear the board to an empty position.
+   * If `preserveHeaders` is false (default) the header template will be
+   * re-applied. When true, existing headers are preserved.
+   */
+  clear(preserveHeaders: boolean = false): void {
+    // Reset board and state to empty
     this._position._board = new Array<Piece>(128)
     this._kings = { w: EMPTY, b: EMPTY }
     this._turn = WHITE
@@ -1639,13 +1670,14 @@ export class Game {
       this._header = { ...HEADER_TEMPLATE }
     }
 
-    // Clear any SetUp/FEN tags when resetting to the default position
+    // Clear any SetUp/FEN tags
     this._header['SetUp'] = null
     this._header['FEN'] = null
 
     // Recompute hash and clear position counts
     this._hash = this._computeHash()
     this._positionCount = new Map<bigint, number>()
+
     // Clear per-position metadata when not preserving headers
     if (!preserveHeaders) {
       this._comments = {}

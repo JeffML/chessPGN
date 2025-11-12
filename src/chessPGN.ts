@@ -5,6 +5,7 @@
  * See the LICENSE file for the full text, including disclaimer.
  */
 
+import type { IChessGame } from './IChessGame'
 import { Game } from './Game'
 import { Move } from './Move'
 import { createPrettyMove } from './moveUtils'
@@ -50,6 +51,8 @@ export {
 } from './types'
 export { Move } from './Move'
 export { xoroshiro128 } from './types'
+export type { IChessGame } from './IChessGame'
+export { Game } from './Game'
 
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -341,7 +344,7 @@ export function validateFen(fen: string): { ok: boolean; error?: string } {
   return { ok: true }
 }
 
-export class ChessPGN {
+export class ChessPGN implements IChessGame {
   private _game!: Game
   // Per-position metadata now lives on Game instances
 
@@ -436,12 +439,12 @@ export class ChessPGN {
 
   clear({ preserveHeaders = false } = {}) {
     /*
-     * Delegate resetting internal game state to Game.reset() to keep
+     * Delegate clearing the board to Game.clear() to keep
      * ChessPGN as a thin wrapper over Game internals.
      */
-    this._game.reset(preserveHeaders)
+    this._game.clear(preserveHeaders)
 
-    // Game.reset already clears per-position metadata when appropriate
+    // Game.clear already clears per-position metadata when appropriate
   }
 
   load(fen: string, { skipValidation = false, preserveHeaders = false } = {}) {
@@ -515,8 +518,8 @@ export class ChessPGN {
     }
   }
 
-  reset() {
-    this.load(DEFAULT_POSITION)
+  reset(preserveHeaders?: boolean) {
+    this.load(DEFAULT_POSITION, { preserveHeaders })
   }
 
   get(square: Square): Piece | undefined {
