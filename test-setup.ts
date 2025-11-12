@@ -31,15 +31,23 @@ if (!existsSync(workerOutput)) {
 
 // Cleanup on process exit
 process.on('exit', () => {
-  if (existsSync(workerOutput)) {
-    unlinkSync(workerOutput)
+  try {
+    if (existsSync(workerOutput)) {
+      unlinkSync(workerOutput)
+    }
+  } catch {
+    // Ignore cleanup errors (file may already be deleted by another process)
   }
 })
 
 // Also cleanup on SIGINT/SIGTERM
 const cleanup = () => {
-  if (existsSync(workerOutput)) {
-    unlinkSync(workerOutput)
+  try {
+    if (existsSync(workerOutput)) {
+      unlinkSync(workerOutput)
+    }
+  } catch {
+    // Ignore cleanup errors
   }
   process.exit(0)
 }
