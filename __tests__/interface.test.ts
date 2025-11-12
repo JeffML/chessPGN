@@ -112,12 +112,10 @@ describe('IChessGame Interface', () => {
 
   it('Game state queries work through interface', () => {
     // Test checkmate position (Scholar's mate)
-    const checkmate = 'r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4'
+    const checkmate =
+      'r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4'
 
-    const instances: IChessGame[] = [
-      new ChessPGN(checkmate),
-      new Game(),
-    ]
+    const instances: IChessGame[] = [new ChessPGN(checkmate), new Game()]
     instances[1].load(checkmate)
 
     for (const instance of instances) {
