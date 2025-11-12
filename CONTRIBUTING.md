@@ -1,8 +1,8 @@
-# Contributing to chess.js
+# Contributing to chessPGN
 
 Thank you for considering contributing to the project.
 
-Please use the [issue tracker](https://github.com/jhlywa/chess.js/issues) for:
+Please use the [issue tracker](https://github.com/jeffml/chessPGN/issues) for:
 
 - Bug reports
 - Feature requests
@@ -23,7 +23,7 @@ It is fairly straightforward to get the project up and running locally:
 1. Fork the repository.
 2. Clone your fork:
    ```bash
-   git clone https://github.com/<your-username>/chess.js.git
+   git clone https://github.com/<your-username>/chessPGN.git
    ```
 3. Install the dependencies:
    ```bash
@@ -60,13 +60,13 @@ runs as part of `npm run check`, but you can also run it directly with
 
 If there are any changes, you will need to check that they are intended and
 properly documented. To see the exact changes that have been detected you can do
-a diff between `temp/chess.js.api.md` (new version) and `etc/chess.js.api.md`
+a diff between `temp/chessPGN.api.md` (new version) and `etc/chessPGN.api.md`
 (old version). Once you are happy with them run `npm run api:update` to confirm
 the changes.
 
 ### Documentation
 
-You can view the existing documentation at https://jhlywa.github.io/chess.js
+You can view the existing documentation at https://jeffml.github.io/chessPGN
 
 The documentation is versioned. The file you will need to edit is located at
 `website/docs/index.md`. When the next release is made, a snapshot of this file

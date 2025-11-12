@@ -1,21 +1,21 @@
 ![logo](./chesspgnlogo.png)
 
-# chess.js
+# chessPGN
 
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/jhlywa/chess.js/node.js.yml)](https://github.com/jhlywa/chess.js/actions)
-[![npm](https://img.shields.io/npm/v/chess.js?color=blue)](https://www.npmjs.com/package/chess.js)
-[![npm](https://img.shields.io/npm/dm/chess.js)](https://www.npmjs.com/package/chess.js)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/jeffml/chessPGN/node.js.yml)](https://github.com/jeffml/chessPGN/actions)
+[![npm](https://img.shields.io/npm/v/chessPGN?color=blue)](https://www.npmjs.com/package/chessPGN)
+[![npm](https://img.shields.io/npm/dm/chessPGN)](https://www.npmjs.com/package/chessPGN)
 
-chess.js is a TypeScript chess library used for chess move
+chessPGN is a TypeScript chess library used for chess move
 generation/validation, piece placement/movement, and check/checkmate/stalemate
 detection - basically everything but the AI.
 
-chess.js has been extensively tested in node.js and most modern browsers.
+chessPGN has been extensively tested in node.js and most modern browsers.
 
 ## Documentation
 
 This README provides a quick example, full documentation can be found at
-[https://jhlywa.github.io/chessPGN](https://JeffML.github.io/chessPGN).
+[https://jeffml.github.io/chessPGN](https://JeffML.github.io/chessPGN).
 
 ## Installation
 
@@ -31,9 +31,9 @@ npm install chessPGN
 The code below plays a random game of chess:
 
 ```ts
-import { Chess } from 'chess.js'
+import { ChessPGN } from '@chess-pgn/chessPGN'
 
-const chess = new Chess()
+const chess = new ChessPGN()
 
 while (!chess.isGameOver()) {
   const moves = chess.moves()

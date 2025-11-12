@@ -1,4 +1,4 @@
-# Chess.js has several kinds of methods:
+# chessPGN has several kinds of methods:
 
 - FEN parsing methods
   - Chess constructor

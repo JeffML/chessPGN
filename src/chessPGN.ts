@@ -871,7 +871,7 @@ export class ChessPGN {
      *         promotion: 'q' })
      *
      *
-     * An optional strict argument may be supplied to tell chess.js to
+     * An optional strict argument may be supplied to tell chessPGN to
      * strictly follow the SAN specification.
      */
 

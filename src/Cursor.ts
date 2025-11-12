@@ -1,7 +1,6 @@
 /**
  * @license BSD 2-Clause License
- * Copyright (c) 2025, Jeff Hlywa (jhlywa@gmail.com)
- * Refactored by Jeff Lowery (jlowery2663@gmail.com)
+ * Copyright (c) 2025, Jeff Lowery (jlowery2663@gmail.com)
  * See the LICENSE file for the full text, including disclaimer.
  */
 

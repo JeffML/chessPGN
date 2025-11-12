@@ -1,22 +1,22 @@
-# chess.js
+# chessPGN
 
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/jhlywa/chess.js/node.js.yml)](https://github.com/jhlywa/chess.js/actions)
-[![npm](https://img.shields.io/npm/v/chess.js?color=blue)](https://www.npmjs.com/package/chess.js)
-[![npm](https://img.shields.io/npm/dm/chess.js)](https://www.npmjs.com/package/chess.js)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/jeffml/chessPGN/node.js.yml)](https://github.com/jeffml/chessPGN/actions)
+[![npm](https://img.shields.io/npm/v/chessPGN?color=blue)](https://www.npmjs.com/package/chessPGN)
+[![npm](https://img.shields.io/npm/dm/chessPGN)](https://www.npmjs.com/package/chessPGN)
 
-chess.js is a TypeScript chess library used for chess move
+chessPGN is a TypeScript chess library used for chess move
 generation/validation, piece placement/movement, and check/checkmate/stalemate
 detection - basically everything but the AI.
 
-chess.js has been extensively tested in node.js and most modern browsers.
+chessPGN has been extensively tested in node.js and most modern browsers.
 
 ## Installation
 
-Run the following command to install the most recent version of chess.js from
+Run the following command to install the most recent version of chessPGN from
 NPM:
 
 ```sh
-npm install chess.js
+npm install @chess-pgn/chessPGN
 ```
 
 ## Importing
@@ -24,21 +24,15 @@ npm install chess.js
 ### Import (as ESM)
 
 ```js
-import { Chess } from 'chess.js'
+import { ChessPGN } from '@chess-pgn/chessPGN'
 ```
 
 ECMAScript modules (ESM) can be directly imported in a browser:
 
 ```html
 <script type="module">
-  import { Chess } from 'chess.js'
+  import { ChessPGN } from '@chess-pgn/chessPGN'
 </script>
-```
-
-### Import (as CommonJS)
-
-```js
-const { Chess } = require('chess.js')
 ```
 
 ## Example Code
@@ -46,9 +40,9 @@ const { Chess } = require('chess.js')
 The code below plays a random game of chess:
 
 ```js
-import { Chess } from 'chess.js'
+import { ChessPGN } from '@chess-pgn/chessPGN'
 
-const chess = new Chess()
+const chess = new ChessPGN()
 
 while (!chess.isGameOver()) {
   const moves = chess.moves()
@@ -60,8 +54,8 @@ console.log(chess.pgn())
 
 ## User Interface
 
-By design, chess.js is a headless library and does not include user interface
-elements. Many developers have successfully integrated chess.js with the
+By design, chessPGN is a headless library and does not include user interface
+elements. Many developers have successfully integrated chessPGN with the
 [chessboard.js](http://chessboardjs.com) library. See
 [chessboard.js - Random vs Random](http://chessboardjs.com/examples#5002) for an
 example.
@@ -102,29 +96,29 @@ export const DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w K
 export const SQUARES = ['a8', 'b8', 'c8', ..., 'f1', 'g1', 'h1']
 ```
 
-### Constructor: Chess([ fen ], \{ skipValidation = false \} = \{\})
+### Constructor: ChessPGN[ fen ], \{ skipValidation = false \} = \{\})
 
-The Chess() constructor creates a new chess object that default to the initial
-board position. It accepts two optional parameters : a string which specifies
-the board configuration in
+The ChessPGN()) constructor creates a new chess object that default to the
+initial board position. It accepts two optional parameters : a string which
+specifies the board configuration in
 [Forsyth-Edwards Notation (FEN)](http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation),
 and an object with a `skipValidation` boolean. By default the constructor will
 throw an exception if an invalid FEN string is provided. This behavior can be
 skipped by setting the `skipValidation` boolean.
 
 ```ts
-import { Chess } from 'chess.js'
+import { ChessPGN } from '@chess-pgn/chessPGN'
 
 // an empty constructor defaults the starting position
-let chess = new Chess()
+let chess = new ChessPGN()
 
 // pass in a FEN string to load a particular position
-let chess = new Chess(
+let chess = new ChessPGN(
   'r1k4r/p2nb1p1/2b4p/1p1n1p2/2PP4/3Q1NB1/1P3PPP/R5K1 b - - 0 19',
 )
 
 // the white king is missing from the FEN string below
-let chess = new Chess(
+let chess = new ChessPGN(
   'r1k4r/p2nb1p1/2b4p/1p1n1p2/2PP4/3Q1NB1/1P3PPP/R52 b - - 0 19',
   { skipValidation = true },
 )
@@ -135,7 +129,7 @@ let chess = new Chess(
 Returns a string containing an ASCII diagram of the current position.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 // make some moves
 chess.move('e4')
@@ -163,7 +157,7 @@ can attack the given square. This function takes an optional parameter which can
 change which color the pieces should belong to.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 chess.attackers('f3')
 // -> ['e2', 'g2', 'g1'] (empty squares can be attacked)
@@ -192,7 +186,7 @@ Returns a 2D array representation of the current position. Empty squares are
 represented by `null`.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 chess.board()
 // -> [[{square: 'a8', type: 'r', color: 'b'},
@@ -236,7 +230,7 @@ only included if the side-to-move can legally capture en passant.
 The enpassant square will always be included if forceEnpassantSquare is true.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 // make some moves
 chess.move('e4')
@@ -253,7 +247,7 @@ Returns a list containing the squares where the requested piece is located.
 Returns an empty list if the piece is not on the board.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 chess.findPiece({ type: KING, color: BLACK })
 // -> ['e8']
@@ -285,7 +279,7 @@ Note this does not indicate if such a move is legal or not in the current
 position as checks etc. also need to be considered.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 chess.getCastlingRights(BLACK) // black can castle queenside only
 // -> { 'k': false, 'q': true }
@@ -296,7 +290,7 @@ chess.getCastlingRights(BLACK) // black can castle queenside only
 Retrieve the comment for the current position, if it exists.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 chess.loadPgn('1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *')
 
@@ -309,7 +303,7 @@ chess.getComment()
 Retrieve comments for all positions.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 chess.loadPgn(
   "1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *",
@@ -357,7 +351,7 @@ the verbose move fields. A FEN string of the position _prior_ to the move being
 made is added to the verbose history output.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 chess.move('e4')
 chess.move('e5')
 chess.move('f4')
@@ -418,7 +412,7 @@ chess.history({ verbose: true })
 Returns true or false if the side to move is in check.
 
 ```ts
-const chess = new Chess(
+const chess = new ChessPGN(
   'rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3',
 )
 chess.inCheck()
@@ -430,7 +424,7 @@ chess.inCheck()
 Returns true if the square is attacked by any piece of the given color.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 chess.isAttacked('f3', WHITE)
 // -> true (we can attack empty squares)
 
@@ -451,7 +445,7 @@ chess.isAttacked('c6', BLACK)
 Returns true or false if the side to move has been checkmated.
 
 ```ts
-const chess = new Chess(
+const chess = new ChessPGN(
   'rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3',
 )
 chess.isCheckmate()
@@ -464,7 +458,7 @@ Returns true or false if the game is drawn (50-move rule or insufficient
 material).
 
 ```ts
-const chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
+const chess = new ChessPGN('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
 chess.isDraw()
 // -> true
 ```
@@ -474,7 +468,7 @@ chess.isDraw()
 Returns true or false if the game is drawn by 50-move rule.
 
 ```ts
-const chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
+const chess = new ChessPGN('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
 chess.isDrawByFiftyMoves()
 // -> true
 ```
@@ -485,7 +479,7 @@ Returns true if the game is drawn due to insufficient material (K vs. K, K vs.
 KB, or K vs. KN) otherwise false.
 
 ```ts
-const chess = new Chess('k7/8/n7/8/8/8/8/7K b - - 0 1')
+const chess = new ChessPGN('k7/8/n7/8/8/8/8/7K b - - 0 1')
 chess.isInsufficientMaterial()
 // -> true
 ```
@@ -496,7 +490,7 @@ Returns true if the game has ended via checkmate, stalemate, draw, threefold
 repetition, or insufficient material. Otherwise, returns false.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 chess.isGameOver()
 // -> false
 
@@ -518,7 +512,7 @@ dialog should be triggered. The function takes a from and to square and returns
 true if the move is a promotion and false if not.
 
 ```ts
-const chess = new Chess('8/1PQ2pk1/3p2p1/3qp3/8/4P3/7p/2K5 w - - 0 56')
+const chess = new ChessPGN('8/1PQ2pk1/3p2p1/3qp3/8/4P3/7p/2K5 w - - 0 56')
 chess.isPromotion({ from: 'b7', to: 'b8' })
 // -> true
 ```
@@ -528,7 +522,7 @@ chess.isPromotion({ from: 'b7', to: 'b8' })
 Returns true or false if the side to move has been stalemated.
 
 ```ts
-const chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
+const chess = new ChessPGN('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
 chess.isStalemate()
 // -> true
 ```
@@ -539,7 +533,7 @@ Returns true or false if the current board position has occurred three or more
 times.
 
 ```ts
-const chess = new Chess(
+const chess = new ChessPGN(
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
 )
 // -> true
@@ -571,7 +565,7 @@ passant square and move numbers are defaulted to `- - 0 1` if omitted. Throws an
 exception if the FEN is invalid.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
 
 try {
@@ -600,14 +594,14 @@ themselves be escaped (see `sloppyPgn` example below). Avoid using a
 `newlineChar` that may occur elsewhere in a PGN, such as `.` or `x`, as this
 will result in unexpected behavior.
 
-The `strict` flag is a boolean (default: `false`) that instructs chess.js to
+The `strict` flag is a boolean (default: `false`) that instructs chessPGN to
 only parse moves in Standard Algebraic Notation form. See `.move` documentation
 for more information about non-SAN notations.
 
 The method will throw and exception if the PGN fails to parse.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 const pgn = [
   '[Event "Casual Game"]',
   '[Site "Berlin GER"]',
@@ -679,7 +673,7 @@ move object. Throws an 'Illegal move' exception if the move was illegal.
 #### .move() - Standard Algebraic Notation (SAN)
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 chess.move('e4')
 // -> { color: 'w', from: 'e2', to: 'e4', piece: 'p', san: 'e4' }
@@ -697,7 +691,7 @@ A move object contains `to`, `from` and, `promotion` (only when necessary)
 fields.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 chess.move({ from: 'g2', to: 'g3' })
 // -> { color: 'w', from: 'g2', to: 'g3', piece: 'p', san: 'g3' }
@@ -711,7 +705,7 @@ verify that all supplied moves adhere to the Standard Algebraic Notation
 specification.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 // permissive parser accepts various forms of algebraic notation
 chess.move('e2e4')
@@ -748,7 +742,7 @@ optional object which can be used to generate detailed move objects or to
 restrict the move generator to specific squares or pieces.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 chess.moves()
 // -> ['a3', 'a4', 'b3', 'b4', 'c3', 'c4', 'd3', 'd4', 'e3', 'e4',
 //     'f3', 'f4', 'g3', 'g4', 'h3', 'h4', 'Na3', 'Nc3', 'Nf3', 'Nh3']
@@ -805,7 +799,7 @@ Returns the game in PGN format. Options is an optional parameter which may
 include max width and/or a newline character settings.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 chess.setHeader('White', 'Plunky')
 chess.setHeader('Black', 'Plinkie')
 chess.move('e4')
@@ -870,7 +864,7 @@ chess.remove('e1')
 Delete and return the comment for the current position, if it exists.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 chess.loadPgn('1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *')
 
@@ -889,7 +883,7 @@ chess.getComment()
 Delete and return comments for all positions.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 chess.loadPgn(
   "1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *",
@@ -946,7 +940,7 @@ chess.setCastlingRights(WHITE, { [KING]: false, [QUEEN]: true })
 Comment on the current position.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 chess.move('e4')
 chess.setComment("king's pawn opening")
@@ -984,7 +978,7 @@ chess.setTurn('b')
 Returns the color of the square ('light' or 'dark').
 
 ```ts
-const chess = Chess()
+const chess = ChessPGN()
 chess.squareColor('h1')
 // -> 'light'
 chess.squareColor('a7')
@@ -1009,7 +1003,7 @@ Takeback the last half-move, returning a move object if successful, otherwise
 null.
 
 ```ts
-const chess = new Chess()
+const chess = new ChessPGN()
 
 chess.fen()
 // -> 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -1042,7 +1036,7 @@ This static function returns a validation object specifying validity or the
 errors found within the FEN string.
 
 ```ts
-import { validateFen } from 'chess.js'
+import { validateFen } from 'chessPGN'
 
 validateFen('2n1r3/p1k2pp1/B1p3b1/P7/5bP1/2N1B3/1P2KP2/2R5 b - - 4 25')
 // -> { ok: true }
