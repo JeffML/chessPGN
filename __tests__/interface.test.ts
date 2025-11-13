@@ -81,6 +81,96 @@ describe('IChessGame Interface', () => {
     }
   })
 
+  it('removeHeader works through interface', () => {
+    const instances: IChessGame[] = [new ChessPGN(), new Game()]
+
+    for (const instance of instances) {
+      instance.setHeader('Event', 'Test Event')
+      instance.setHeader('Site', 'Test Site')
+
+      const removed = instance.removeHeader('Event')
+      expect(removed).toBe(true)
+
+      const headers = instance.getHeaders()
+      expect(headers['Event']).toBe('?') // Should revert to default
+      expect(headers['Site']).toBe('Test Site')
+
+      // Try removing non-existent custom header
+      const removedCustom = instance.removeHeader('CustomHeader')
+      expect(removedCustom).toBe(false)
+    }
+  })
+
+  it('getComments and removeComments work through interface', () => {
+    const instances: IChessGame[] = [new ChessPGN(), new Game()]
+
+    for (const instance of instances) {
+      instance.move('e4')
+      instance.setComment('First move')
+      instance.move('e5')
+      instance.setComment('Response')
+      instance.move('Nf3')
+      instance.setComment('Third move')
+
+      const comments = instance.getComments()
+      expect(comments.length).toBe(3)
+      expect(comments.some((c) => c.comment === 'First move')).toBe(true)
+      expect(comments.some((c) => c.comment === 'Response')).toBe(true)
+      expect(comments.some((c) => c.comment === 'Third move')).toBe(true)
+
+      const removed = instance.removeComments()
+      expect(removed.length).toBe(3)
+      expect(instance.getComments().length).toBe(0)
+    }
+  })
+
+  it('suffix annotation methods work through interface', () => {
+    const instances: IChessGame[] = [new ChessPGN(), new Game()]
+
+    for (const instance of instances) {
+      instance.move('e4')
+      instance.setSuffixAnnotation('!!')
+      expect(instance.getSuffixAnnotation()).toBe('!!')
+
+      instance.move('e5')
+      instance.setSuffixAnnotation('?')
+      expect(instance.getSuffixAnnotation()).toBe('?')
+
+      // Remove annotation
+      instance.undo()
+      const removed = instance.removeSuffixAnnotation()
+      expect(removed).toBe('!!')
+      expect(instance.getSuffixAnnotation()).toBeUndefined()
+    }
+  })
+
+  it('history method works through interface', () => {
+    const instances: IChessGame[] = [new ChessPGN(), new Game()]
+
+    for (const instance of instances) {
+      const moves = ['e4', 'e5', 'Nf3', 'Nc6']
+      moves.forEach((move) => instance.move(move))
+
+      // Test string history
+      const history = instance.history()
+      expect(history).toEqual(['e4', 'e5', 'Nf3', 'Nc6'])
+
+      // Test verbose history
+      const verboseHistory = instance.history({ verbose: true })
+      expect(verboseHistory.length).toBe(4)
+      expect(verboseHistory[0].san).toBe('e4')
+      expect(verboseHistory[0].from).toBe('e2')
+      expect(verboseHistory[0].to).toBe('e4')
+      expect(verboseHistory[1].san).toBe('e5')
+      expect(verboseHistory[2].san).toBe('Nf3')
+      expect(verboseHistory[3].san).toBe('Nc6')
+
+      // Test non-verbose history
+      const nonVerboseHistory = instance.history({ verbose: false })
+      expect(nonVerboseHistory).toEqual(['e4', 'e5', 'Nf3', 'Nc6'])
+    }
+  })
+
   it('Can find pieces using interface', () => {
     const instances: IChessGame[] = [new ChessPGN(), new Game()]
 

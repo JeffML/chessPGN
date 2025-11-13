@@ -1,4 +1,4 @@
-import type { Color, Piece, PieceSymbol, Square } from './types'
+import type { Color, Piece, PieceSymbol, Square, Suffix } from './types'
 import type { Move } from './Move'
 
 /**
@@ -167,6 +167,13 @@ export interface IChessGame {
   setHeader(key: string, value: string): Record<string, string>
 
   /**
+   * Remove a PGN header tag
+   * @param key - Header name to remove
+   * @returns true if header existed and was removed
+   */
+  removeHeader(key: string): boolean
+
+  /**
    * Get all PGN header tags
    * @returns Object containing all headers
    */
@@ -193,6 +200,55 @@ export interface IChessGame {
    * @returns Removed comment or undefined
    */
   removeComment(fen?: string): string | undefined
+
+  /**
+   * Get all comments for all positions in the game
+   * @returns Array of objects with fen and comment (and optional suffixAnnotation)
+   */
+  getComments(): {
+    fen: string
+    comment?: string
+    suffixAnnotation?: string
+  }[]
+
+  /**
+   * Remove all comments from the game
+   * @returns Array of removed comments with their FEN positions
+   */
+  removeComments(): { fen: string; comment: string }[]
+
+  // Suffix Annotations
+  /**
+   * Get the suffix annotation for a position
+   * @param fen - Optional FEN string to get annotation for specific position
+   * @returns Suffix annotation or undefined
+   */
+  getSuffixAnnotation(fen?: string): Suffix | undefined
+
+  /**
+   * Set the suffix annotation for a position
+   * @param suffix - Suffix annotation to set
+   * @param fen - Optional FEN string to set annotation for specific position
+   */
+  setSuffixAnnotation(suffix: Suffix, fen?: string): void
+
+  /**
+   * Remove the suffix annotation for a position
+   * @param fen - Optional FEN string to remove annotation from specific position
+   * @returns Removed suffix annotation or undefined
+   */
+  removeSuffixAnnotation(fen?: string): Suffix | undefined
+
+  // Move History
+  /**
+   * Get the move history
+   * @param options - Optional configuration (verbose for full Move objects)
+   * @returns Array of moves in SAN notation or full Move objects
+   */
+  history(): string[]
+  history(options: { verbose: true }): Move[]
+  history(options: { verbose: false }): string[]
+  history(options: { verbose: boolean }): string[] | Move[]
 
   // PGN operations
   /**
