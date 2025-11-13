@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chessPGN - Advanced Features</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Left Column - TOC */
+        .sidebar {
+            width: 280px;
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .sidebar-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #ecf0f1;
+        }
+
+        .sidebar-subtitle {
+            font-size: 14px;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+
+        .toc {
+            list-style: none;
+        }
+
+        .toc > li {
+            margin-bottom: 8px;
+        }
+
+        .toc a {
+            color: #ecf0f1;
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .toc a:hover {
+            background: #34495e;
+            padding-left: 16px;
+        }
+
+        .toc .toc-sub {
+            list-style: none;
+            margin-top: 5px;
+            margin-left: 15px;
+        }
+
+        .toc .toc-sub a {
+            font-size: 13px;
+            color: #bdc3c7;
+        }
+
+        /* Right Column - Content */
+        .content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 40px 60px;
+            background: white;
+            max-width: 1200px;
+        }
+
+        .content h1 {
+            font-size: 36px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .content h2 {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .content h3 {
+            font-size: 22px;
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        .content h4 {
+            font-size: 18px;
+            color: #34495e;
+            margin-top: 25px;
+            margin-bottom: 12px;
+        }
+
+        .content p {
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .content ul, .content ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+
+        .content li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .content code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            color: #e74c3c;
+        }
+
+        .content pre {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .content pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+            font-size: 14px;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .content table th {
+            background: #34495e;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .content table td {
+            padding: 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .content table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 20px;
+            margin: 20px 0;
+            color: #555;
+            font-style: italic;
+        }
+
+        .content a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .content a:hover {
+            text-decoration: underline;
+        }
+
+        /* Syntax highlighting for keywords */
+        .keyword { color: #c678dd; }
+        .string { color: #98c379; }
+        .comment { color: #5c6370; font-style: italic; }
+        .function { color: #61afef; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+            
+            .content {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Section spacing */
+        section {
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Column - Table of Contents -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">♟</div>
+                <div class="sidebar-title">chessPGN</div>
+                <div class="sidebar-subtitle">Advanced Features</div>
+            </div>
+            
+            <ul class="toc">
+                <li>
+                    <a href="#ichessgame-interface">IChessGame Interface</a>
+                    <ul class="toc-sub">
+                        <li><a href="#purpose">Purpose</a></li>
+                        <li><a href="#available-methods">Available Methods</a></li>
+                        <li><a href="#usage-example">Usage Example</a></li>
+                        <li><a href="#implementation-details">Implementation Details</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#loadpgn-method">loadPgn() Method</a>
+                    <ul class="toc-sub">
+                        <li><a href="#signature">Signature</a></li>
+                        <li><a href="#parameters">Parameters</a></li>
+                        <li><a href="#behavior">Behavior</a></li>
+                        <li><a href="#examples">Examples</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#cursor">Cursor for Multi-Game PGN</a>
+                    <ul class="toc-sub">
+                        <li><a href="#why-use-cursor">Why Use Cursor</a></li>
+                        <li><a href="#creating-cursor">Creating a Cursor</a></li>
+                        <li><a href="#cursor-options">Cursor Options</a></li>
+                        <li><a href="#basic-iteration">Basic Iteration</a></li>
+                        <li><a href="#advanced-navigation">Advanced Navigation</a></li>
+                        <li><a href="#performance">Performance Optimization</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Right Column - Content -->
+        <main class="content">
+            <h1>Advanced Features</h1>
+            <p>This document describes advanced features in chessPGN including the common interface, PGN loading, and the multi-game cursor.</p>
+
+            <section id="ichessgame-interface">
+                <h2>IChessGame Interface</h2>
+                <p>The <code>IChessGame</code> interface defines the common API contract shared between <code>ChessPGN</code> (the legacy wrapper class) and <code>Game</code> (the core implementation class). This interface enables polymorphic usage of both classes and provides type safety when writing code that works with either implementation.</p>
+
+                <h3 id="purpose">Purpose</h3>
+                <ul>
+                    <li><strong>Type Safety</strong>: Ensures both <code>ChessPGN</code> and <code>Game</code> implement the same core methods</li>
+                    <li><strong>Polymorphism</strong>: Write functions that accept either class implementation</li>
+                    <li><strong>API Consistency</strong>: Guarantees consistent behavior across implementations</li>
+                </ul>
+
+                <h3 id="available-methods">Available Methods</h3>
+
+                <h4>Position Manipulation</h4>
+                <pre><code>interface IChessGame {
+  // Load a position from FEN notation
+  load(
+    fen: string,
+    options?: {
+      skipValidation?: boolean
+      preserveHeaders?: boolean
+    },
+  ): void
+
+  // Get the FEN string for the current position
+  fen(options?: { forceEnpassantSquare?: boolean }): string
+
+  // Reset the game to the starting position
+  reset(preserveHeaders?: boolean): void
+}</code></pre>
+
+                <h4>Board Queries</h4>
+                <pre><code>interface IChessGame {
+  // Get the piece at a specific square
+  get(square: Square): Piece | undefined
+
+  // Find all squares containing a specific piece
+  findPiece(piece: Piece): Square[]
+
+  // Get a 2D array representation of the board
+  board(): ({ square: Square; type: PieceSymbol; color: Color } | null)[][]
+}</code></pre>
+
+                <h4>Move Operations</h4>
+                <pre><code>interface IChessGame {
+  // Make a move on the board
+  move(
+    move: string | { from: string; to: string; promotion?: string } | null,
+    options?: { strict?: boolean },
+  ): Move
+
+  // Undo the last move
+  undo(): Move | null
+
+  // Get move history
+  history(): string[]
+  history(options: { verbose: true }): Move[]
+  history(options: { verbose: false }): string[]
+  history(options: { verbose: boolean }): string[] | Move[]
+}</code></pre>
+
+                <h4>Game State Queries</h4>
+                <pre><code>interface IChessGame {
+  isCheck(): boolean
+  isCheckmate(): boolean
+  isStalemate(): boolean
+  isDraw(): boolean
+  isGameOver(): boolean
+}</code></pre>
+
+                <h4>Headers and Comments</h4>
+                <pre><code>interface IChessGame {
+  // Header manipulation
+  setHeader(key: string, value: string): Record&lt;string, string&gt;
+  getHeaders(): Record&lt;string, string&gt;
+  removeHeader(key: string): boolean
+
+  // Comment manipulation
+  getComment(fen?: string): string | undefined
+  setComment(comment: string, fen?: string): void
+  removeComment(fen?: string): string | undefined
+
+  // Bulk comment operations
+  getComments(): { fen: string; comment?: string; suffixAnnotation?: string }[]
+  removeComments(): { fen: string; comment: string }[]
+
+  // Suffix annotations (!!, !, !?, ?!, ?, ??)
+  getSuffixAnnotation(fen?: string): Suffix | undefined
+  setSuffixAnnotation(suffix: Suffix, fen?: string): void
+  removeSuffixAnnotation(fen?: string): Suffix | undefined
+}</code></pre>
+
+                <h4>PGN Operations</h4>
+                <pre><code>interface IChessGame {
+  pgn(options?: { newline?: string; maxWidth?: number }): string
+}</code></pre>
+
+                <h3 id="usage-example">Usage Example</h3>
+                <pre><code>import { ChessPGN, Game, IChessGame } from 'chessPGN'
+
+// Function that works with any IChessGame implementation
+function playOpening(game: IChessGame): string {
+  game.move('e4')
+  game.move('e5')
+  game.move('Nf3')
+  game.move('Nc6')
+  return game.fen()
+}
+
+// Works with ChessPGN
+const chess = new ChessPGN()
+const chessFen = playOpening(chess)
+
+// Works with Game
+const game = new Game()
+const gameFen = playOpening(game)
+
+// Both produce the same result
+console.log(chessFen === gameFen) // true</code></pre>
+
+                <h4>Working with Headers</h4>
+                <pre><code>function analyzeGame(game: IChessGame) {
+  // Add headers
+  game.setHeader('Event', 'World Championship')
+  game.setHeader('White', 'Carlsen')
+  game.setHeader('Black', 'Nepomniachtchi')
+
+  // Get all headers
+  const headers = game.getHeaders()
+  console.log(headers)
+
+  // Remove a header
+  const removed = game.removeHeader('Black')
+  console.log(removed) // true
+}</code></pre>
+
+                <h4>Working with Move History</h4>
+                <pre><code>function printHistory(game: IChessGame) {
+  game.move('e4')
+  game.move('e5')
+  game.move('Nf3')
+  game.move('Nc6')
+
+  // Get history as SAN strings
+  const sanMoves = game.history()
+  console.log(sanMoves) // ['e4', 'e5', 'Nf3', 'Nc6']
+
+  // Get verbose history with full move details
+  const verboseMoves = game.history({ verbose: true })
+  verboseMoves.forEach((move) => {
+    console.log(`${move.from} -> ${move.to}`)
+    console.log(`  Piece: ${move.piece}`)
+    console.log(`  Captured: ${move.captured || 'none'}`)
+  })
+}</code></pre>
+
+                <h4>Working with Comments and Annotations</h4>
+                <pre><code>function annotateGame(game: IChessGame) {
+  game.move('e4')
+  game.setComment('The most popular opening move')
+  game.setSuffixAnnotation('!!') // Brilliant move
+
+  game.move('e5')
+  game.setComment('Symmetric response')
+
+  // Get all comments
+  const comments = game.getComments()
+  comments.forEach((entry) => {
+    console.log(`Position: ${entry.fen}`)
+    console.log(`Comment: ${entry.comment}`)
+    console.log(`Annotation: ${entry.suffixAnnotation}`)
+  })
+
+  // Remove all comments
+  const removed = game.removeComments()
+  console.log(`Removed ${removed.length} comments`)
+}</code></pre>
+
+                <h3 id="implementation-details">Implementation Details</h3>
+                <p>The <code>ChessPGN</code> class is a legacy wrapper around the <code>Game</code> class. Most methods in <code>ChessPGN</code> delegate directly to the underlying <code>Game</code> instance, maintaining backward compatibility while reducing code duplication. This delegation pattern ensures:</p>
+                <ul>
+                    <li><strong>Consistent Behavior</strong>: Both classes produce identical results for all interface methods</li>
+                    <li><strong>Single Source of Truth</strong>: Core logic lives in <code>Game</code>, reducing maintenance burden</li>
+                    <li><strong>Verified Parity</strong>: Comprehensive parity tests run across 469 real games to ensure identical behavior</li>
+                </ul>
+                <p>When in doubt, either class can be used interchangeably for standard chess operations. Use <code>ChessPGN</code> if you need hash tracking or explicit castling rights manipulation.</p>
+            </section>
+
+            <section id="loadpgn-method">
+                <h2>loadPgn() Method</h2>
+                <p>The <code>loadPgn()</code> method loads a game from a PGN (Portable Game Notation) string. This method parses the PGN headers and moves, setting up the game state accordingly.</p>
+
+                <h3 id="signature">Signature</h3>
+                <pre><code>loadPgn(
+  pgn: string,
+  options?: {
+    strict?: boolean
+    newlineChar?: string
+  }
+): void</code></pre>
+
+                <h3 id="parameters">Parameters</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>pgn</code></td>
+                            <td>string</td>
+                            <td>(required)</td>
+                            <td>PGN string to parse</td>
+                        </tr>
+                        <tr>
+                            <td><code>options.strict</code></td>
+                            <td>boolean</td>
+                            <td>false</td>
+                            <td>Enable strict PGN parsing mode</td>
+                        </tr>
+                        <tr>
+                            <td><code>options.newlineChar</code></td>
+                            <td>string</td>
+                            <td>'\r?\n'</td>
+                            <td>Custom newline character pattern</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 id="behavior">Behavior</h3>
+
+                <h4>Permissive Mode (default, <code>strict: false</code>)</h4>
+                <ul>
+                    <li>Attempts to parse non-standard PGN formats</li>
+                    <li>Accepts FEN tags regardless of case (e.g., "fen", "FEN", "Fen")</li>
+                    <li>Loads custom starting positions even without a <code>[SetUp "1"]</code> tag</li>
+                    <li>Accepts various algebraic notation formats:
+                        <ul>
+                            <li>Standard algebraic notation (SAN): <code>e4</code>, <code>Nf3</code>, <code>O-O</code></li>
+                            <li>Long algebraic notation: <code>e2e4</code>, <code>Ng1f3</code></li>
+                            <li>Notation with hyphens: <code>e2-e4</code></li>
+                            <li>Piece capture without 'x': <code>Nf6</code> instead of <code>Nxf6</code></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h4>Strict Mode (<code>strict: true</code>)</h4>
+                <ul>
+                    <li>Enforces PGN specification compliance</li>
+                    <li>Requires <code>[SetUp "1"]</code> tag when using custom starting positions</li>
+                    <li>Requires <code>[FEN "..."]</code> tag when <code>SetUp</code> is present</li>
+                    <li>Only accepts standard algebraic notation</li>
+                    <li>Throws errors on invalid moves or malformed PGN</li>
+                </ul>
+
+                <h3 id="examples">Examples</h3>
+
+                <h4>Basic Usage</h4>
+                <pre><code>import { ChessPGN } from 'chessPGN'
+
+const chess = new ChessPGN()
+const pgn = `[Event "Casual Game"]
+[Site "New York"]
+[Date "2025.01.15"]
+[White "Alice"]
+[Black "Bob"]
+[Result "1-0"]
+
+1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 1-0`
+
+chess.loadPgn(pgn)
+console.log(chess.getHeaders())
+// { Event: 'Casual Game', Site: 'New York', ... }
+console.log(chess.fen())
+// Position after the last move</code></pre>
+
+                <h4>Loading Custom Starting Position</h4>
+                <pre><code>const chess = new ChessPGN()
+const pgn = `[SetUp "1"]
+[FEN "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2"]
+
+2. Nf3 Nc6`
+
+chess.loadPgn(pgn, { strict: true })</code></pre>
+
+                <h4>Error Handling</h4>
+                <pre><code>try {
+  chess.loadPgn(invalidPgn, { strict: true })
+} catch (error) {
+  console.error('Invalid PGN:', error.message)
+}</code></pre>
+            </section>
+
+            <section id="cursor">
+                <h2>Cursor for Multi-Game PGN Files</h2>
+                <p>The <code>Cursor</code> class provides efficient iteration over large PGN files containing multiple games. It supports lazy parsing, caching, error handling, and optional worker thread parallelization.</p>
+
+                <h3 id="why-use-cursor">Why Use Cursor?</h3>
+                <ul>
+                    <li><strong>Memory Efficient</strong>: Parses games on-demand instead of loading entire file</li>
+                    <li><strong>Fast</strong>: Optional worker thread support for parallel parsing (3-5x speedup)</li>
+                    <li><strong>Error Tolerant</strong>: Continue processing even when individual games fail to parse</li>
+                    <li><strong>Flexible Navigation</strong>: Forward/backward iteration and seeking</li>
+                    <li><strong>Async Support</strong>: Implements async iteration protocol</li>
+                </ul>
+
+                <h3 id="creating-cursor">Creating a Cursor</h3>
+
+                <h4>From PGN String</h4>
+                <pre><code>import { indexPgnGames } from 'chessPGN'
+
+const pgnFile = `
+[Event "Game 1"]
+...
+1. e4 e5
+
+[Event "Game 2"]
+...
+1. d4 d5
+`
+
+const cursor = indexPgnGames(pgnFile, {
+  start: 0,              // Start at first game (default)
+  length: 10,            // Load 10 games (default: all)
+  workers: true,         // Enable worker threads (default: false)
+  workerBatchSize: 5,    // Games per batch (default: 10)
+  strict: false,         // Permissive parsing (default)
+  onError: (err, idx) => console.error(`Game ${idx}: ${err.message}`),
+})</code></pre>
+
+                <h3 id="cursor-options">Cursor Options</h3>
+                <pre><code>interface CursorOptions {
+  start?: number              // Starting game index (default: 0)
+  length?: number             // Number of games to load (default: all)
+  prefetch?: number           // Games to prefetch (default: 1)
+  includeMetadata?: boolean   // Load headers/comments (default: true)
+  cacheSize?: number          // Max games in memory (default: 10)
+  lazyParse?: boolean         // Parse on access (default: true)
+  strict?: boolean            // Strict parsing (default: false)
+  workers?: boolean | number  // Enable workers (default: false)
+  workerBatchSize?: number    // Games per batch (default: 10)
+  onError?: (error: Error, gameIndex: number) => void
+}</code></pre>
+
+                <h3 id="basic-iteration">Basic Iteration</h3>
+
+                <h4>Synchronous Iteration</h4>
+                <pre><code>const cursor = indexPgnGames(pgnFile)
+
+while (cursor.hasNext()) {
+  const game = cursor.next()
+  if (game) {
+    console.log(game.getHeaders())
+    console.log(game.fen())
+  }
+}
+
+console.log(`Processed ${cursor.position} games`)
+console.log(`Errors: ${cursor.errors.length}`)</code></pre>
+
+                <h4>Async Iteration (with Workers)</h4>
+                <pre><code>const cursor = indexPgnGames(pgnFile, { workers: true })
+
+for await (const game of cursor) {
+  console.log(game.getHeaders()['Event'])
+  console.log(game.fen())
+}
+
+// Clean up worker threads
+await cursor.terminate()</code></pre>
+
+                <h3 id="advanced-navigation">Advanced Navigation</h3>
+
+                <h4>Backward Iteration</h4>
+                <pre><code>// Move forward
+cursor.next()
+cursor.next()
+cursor.next()
+
+// Move backward
+if (cursor.hasBefore()) {
+  const previousGame = cursor.before()
+}</code></pre>
+
+                <h4>Seeking</h4>
+                <pre><code>// Jump to specific game
+cursor.seek(42)
+const game = cursor.next() // Game #42
+
+// Reset to beginning
+cursor.reset()</code></pre>
+
+                <h4>Filtering</h4>
+                <pre><code>// Find next game matching criteria
+const whiteWins = cursor.findNext((headers) => {
+  return headers['Result'] === '1-0' && headers['White'] === 'Carlsen, Magnus'
+})</code></pre>
+
+                <h3 id="performance">Performance Optimization</h3>
+
+                <h4>Worker Thread Usage</h4>
+                <p>Worker threads provide significant speedup for large files:</p>
+                <pre><code>// Standard parsing
+const cursor1 = indexPgnGames(largePgn) // ~48ms per game
+
+// With 4 worker threads
+const cursor2 = indexPgnGames(largePgn, { workers: 4 }) // ~15ms per game
+
+// Benchmark showed 3.3x speedup on 469-game file</code></pre>
+
+                <p><strong>Best Practices:</strong></p>
+                <ul>
+                    <li>Use workers for files with 50+ games</li>
+                    <li>Optimal worker count: 2-6 (depends on CPU cores)</li>
+                    <li>Adjust <code>workerBatchSize</code> based on game complexity (5-10 typical)</li>
+                    <li>Always call <code>terminate()</code> when done with cursor</li>
+                </ul>
+
+                <h4>Complete Example</h4>
+                <pre><code>import * as fs from 'fs'
+import { indexPgnGames } from 'chessPGN'
+
+async function analyzeGames(filename: string) {
+  const pgn = fs.readFileSync(filename, 'utf8')
+
+  const cursor = indexPgnGames(pgn, {
+    workers: 4,
+    workerBatchSize: 8,
+    onError: (err, idx) => console.error(`Game ${idx}: ${err}`),
+  })
+
+  let whiteWins = 0
+  let blackWins = 0
+  let draws = 0
+
+  for await (const game of cursor) {
+    const headers = game.getHeaders()
+    const result = headers['Result']
+
+    if (result === '1-0') whiteWins++
+    else if (result === '0-1') blackWins++
+    else if (result === '1/2-1/2') draws++
+
+    // Analyze final position
+    if (game.isCheckmate()) {
+      console.log(`Checkmate in game: ${headers['Event']}`)
+    }
+  }
+
+  console.log(`Statistics:`)
+  console.log(`  White wins: ${whiteWins}`)
+  console.log(`  Black wins: ${blackWins}`)
+  console.log(`  Draws: ${draws}`)
+  console.log(`  Total: ${cursor.position}`)
+  console.log(`  Errors: ${cursor.errors.length}`)
+
+  await cursor.terminate() // Clean up workers
+}
+
+analyzeGames('world_championship_2025.pgn')</code></pre>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

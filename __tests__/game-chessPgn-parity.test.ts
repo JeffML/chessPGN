@@ -348,9 +348,7 @@ describe('Game vs ChessPGN API Parity', () => {
         expect(compareHistoryResults(game, chess)).toBe(true)
 
         // Compare verbose history
-        expect(compareHistoryResults(game, chess, { verbose: true })).toBe(
-          true,
-        )
+        expect(compareHistoryResults(game, chess, { verbose: true })).toBe(true)
 
         // Compare non-verbose history explicitly
         expect(compareHistoryResults(game, chess, { verbose: false })).toBe(

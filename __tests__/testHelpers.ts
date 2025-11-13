@@ -208,7 +208,9 @@ export function compareCommentsResults(game: Game, chess: ChessPGN): boolean {
   if (gameComments.length !== chessComments.length) return false
 
   // Sort by FEN for consistent comparison
-  const gameSorted = [...gameComments].sort((a, b) => a.fen.localeCompare(b.fen))
+  const gameSorted = [...gameComments].sort((a, b) =>
+    a.fen.localeCompare(b.fen),
+  )
   const chessSorted = [...chessComments].sort((a, b) =>
     a.fen.localeCompare(b.fen),
   )

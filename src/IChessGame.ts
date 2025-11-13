@@ -3,15 +3,15 @@ import type { Move } from './Move'
 
 /**
  * Common interface for chess game implementations.
- * 
+ *
  * This interface defines the core public API contract shared between ChessPGN
  * (legacy wrapper) and Game (core implementation). Both classes implement
  * these methods to provide consistent chess game functionality.
- * 
+ *
  * Note: This interface includes only methods that are truly shared between both
  * classes. Some methods like hash(), setCastlingRights(), and getCastlingRights()
  * are ChessPGN-specific and not included here.
- * 
+ *
  * @interface IChessGame
  */
 export interface IChessGame {
