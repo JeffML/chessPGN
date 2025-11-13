@@ -1418,7 +1418,8 @@ export class Game implements IChessGame {
 
   removeHeader(key: string): boolean {
     if (key in this._header) {
-      this._header[key] = (SEVEN_TAG_ROSTER as Record<string, string>)[key] || null
+      this._header[key] =
+        (SEVEN_TAG_ROSTER as Record<string, string>)[key] || null
       return true
     }
     return false
@@ -1816,6 +1817,35 @@ export class Game implements IChessGame {
       delete this._comments[fen]
       return { fen: fen, comment: comment }
     })
+  }
+
+  history(): string[]
+  history({ verbose }: { verbose: true }): Move[]
+  history({ verbose }: { verbose: false }): string[]
+  history({ verbose }: { verbose: boolean }): string[] | Move[]
+  history({ verbose = false }: { verbose?: boolean } = {}) {
+    const reversedHistory = []
+    const moveHistory = []
+
+    while (this._history.length > 0) {
+      reversedHistory.push(this._undoMove())
+    }
+
+    while (true) {
+      const move = reversedHistory.pop()
+      if (!move) {
+        break
+      }
+
+      if (verbose) {
+        moveHistory.push(createPrettyMove(this, move))
+      } else {
+        moveHistory.push(this._moveToSan(move, this._moves()))
+      }
+      this._makeMove(move)
+    }
+
+    return moveHistory
   }
 
   /*

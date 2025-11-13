@@ -1036,29 +1036,11 @@ export class ChessPGN implements IChessGame {
   history({ verbose }: { verbose: true }): Move[]
   history({ verbose }: { verbose: false }): string[]
   history({ verbose }: { verbose: boolean }): string[] | Move[]
-  history({ verbose = false }: { verbose?: boolean } = {}) {
-    const reversedHistory = []
-    const moveHistory = []
-
-    while (this._history.length > 0) {
-      reversedHistory.push(this._undoMove())
+  history({ verbose = false }: { verbose?: boolean } = {}): string[] | Move[] {
+    if (verbose) {
+      return this._game.history({ verbose: true })
     }
-
-    while (true) {
-      const move = reversedHistory.pop()
-      if (!move) {
-        break
-      }
-
-      if (verbose) {
-        moveHistory.push(this._createMove(move))
-      } else {
-        moveHistory.push(this._moveToSan(move, this._moves()))
-      }
-      this._makeMove(move)
-    }
-
-    return moveHistory
+    return this._game.history({ verbose: false })
   }
 
   /*
