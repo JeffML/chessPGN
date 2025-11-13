@@ -857,11 +857,7 @@ export class ChessPGN implements IChessGame {
   }
 
   removeHeader(key: string): boolean {
-    if (key in this._game._header) {
-      this._game._header[key] = SEVEN_TAG_ROSTER[key] || null
-      return true
-    }
-    return false
+    return this._game.removeHeader(key)
   }
 
   // return only non-null headers (omit placemarker nulls)

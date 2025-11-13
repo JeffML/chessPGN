@@ -1416,6 +1416,14 @@ export class Game implements IChessGame {
     return headers
   }
 
+  removeHeader(key: string): boolean {
+    if (key in this._header) {
+      this._header[key] = (SEVEN_TAG_ROSTER as Record<string, string>)[key] || null
+      return true
+    }
+    return false
+  }
+
   /**
    * Generate FEN string from current position
    */
