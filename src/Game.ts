@@ -1924,8 +1924,8 @@ export class Game implements IChessGame {
 
   /**
    * Make a move on the board.
-   * @param move - SAN string (e.g., 'e4'), move object ({ from: 'e2', to: 'e4' }), or null for null move
-   * @param options - { strict: boolean } - whether to strictly validate SAN format
+   * @param move - SAN string (e.g., 'e4'), move object (\{ from: 'e2', to: 'e4' \}), or null for null move
+   * @param options - \{ strict: boolean \} - whether to strictly validate SAN format
    * @returns Move object with full details
    * @throws Error if move is invalid
    */

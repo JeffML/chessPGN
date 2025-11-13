@@ -14,7 +14,7 @@ export const BITS: Record<string, number>;
 export const BLACK = "b";
 
 // @public (undocumented)
-export class ChessPGN {
+export class ChessPGN implements IChessGame {
     constructor(fen?: string, { skipValidation }?: {
         skipValidation?: boolean | undefined;
     });
@@ -220,7 +220,7 @@ export class ChessPGN {
     removeHeader(key: string): boolean;
     removeSuffixAnnotation(fen?: string): Suffix | undefined;
     // (undocumented)
-    reset(): void;
+    reset(preserveHeaders?: boolean): void;
     // (undocumented)
     setCastlingRights(color: Color, rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>): boolean;
     // (undocumented)
@@ -246,6 +246,347 @@ export const DEFAULT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w K
 
 // @public (undocumented)
 export const FLAGS: Record<string, string>;
+
+// @public
+export class Game implements IChessGame {
+    // Warning: (ae-forgotten-export) The symbol "Node_2" needs to be exported by the entry point chessPGN.d.ts
+    constructor(headers?: Record<string, string>, root?: Node_2);
+    // (undocumented)
+    ascii(): string;
+    // (undocumented)
+    _attacked(color: Color, square: number): boolean;
+    // (undocumented)
+    _attacked(color: Color, square: number, verbose: false): boolean;
+    // (undocumented)
+    _attacked(color: Color, square: number, verbose: true): Square[];
+    // (undocumented)
+    attackers(square: Square, attackedBy?: Color): Square[];
+    // (undocumented)
+    board(): ({
+        square: Square;
+        type: PieceSymbol;
+        color: Color;
+    } | null)[][];
+    // (undocumented)
+    get _board(): Piece[];
+    // (undocumented)
+    _castling: Record<Color, number>;
+    // (undocumented)
+    _castlingKey(): bigint;
+    clear(preserveHeaders?: boolean): void;
+    // (undocumented)
+    _clear(sq: number): void;
+    // (undocumented)
+    _comments: Record<string, string>;
+    // (undocumented)
+    _computeHash(): bigint;
+    // (undocumented)
+    _decPositionCount(hash: bigint): void;
+    // (undocumented)
+    _epKey(): bigint;
+    // (undocumented)
+    _epSquare: number;
+    fen({ forceEnpassantSquare, }?: {
+        forceEnpassantSquare?: boolean;
+    }): string;
+    // (undocumented)
+    _fenEpSquare: number;
+    // (undocumented)
+    findPiece(piece: Piece): Square[];
+    // (undocumented)
+    get(square: Square): Piece | undefined;
+    // (undocumented)
+    getComment(fen?: string): string | undefined;
+    // (undocumented)
+    getComments(): {
+        fen: string;
+        comment?: string;
+        suffixAnnotation?: string;
+    }[];
+    // (undocumented)
+    getHeaders(): Record<string, string>;
+    // (undocumented)
+    getSuffixAnnotation(fen?: string): Suffix | undefined;
+    // (undocumented)
+    _halfMoves: number;
+    // (undocumented)
+    _hash: bigint;
+    // @deprecated (undocumented)
+    header(...args: string[]): Record<string, string | null>;
+    // (undocumented)
+    _header: Record<string, string | null>;
+    // (undocumented)
+    history(): string[];
+    // (undocumented)
+    history({ verbose }: {
+        verbose: true;
+    }): Move[];
+    // (undocumented)
+    history({ verbose }: {
+        verbose: false;
+    }): string[];
+    // (undocumented)
+    history({ verbose }: {
+        verbose: boolean;
+    }): string[] | Move[];
+    // Warning: (ae-forgotten-export) The symbol "History_2" needs to be exported by the entry point chessPGN.d.ts
+    //
+    // (undocumented)
+    _history: History_2[];
+    // (undocumented)
+    inCheck(): boolean;
+    // (undocumented)
+    _incPositionCount(): void;
+    // @internal
+    static _inferPieceType(san: string): PieceSymbol | undefined;
+    // (undocumented)
+    isAttacked(square: Square, attackedBy: Color): boolean;
+    // (undocumented)
+    isCheck(): boolean;
+    // (undocumented)
+    isCheckmate(): boolean;
+    // (undocumented)
+    isCheckmate(legalMoves: InternalMove[]): boolean;
+    // (undocumented)
+    isDraw(): boolean;
+    // (undocumented)
+    isDraw(legalMoves: InternalMove[]): boolean;
+    // (undocumented)
+    isDrawByFiftyMoves(): boolean;
+    // (undocumented)
+    isGameOver(): boolean;
+    // (undocumented)
+    isGameOver(legalMoves: InternalMove[]): boolean;
+    // (undocumented)
+    isInsufficientMaterial(): boolean;
+    // (undocumented)
+    _isKingAttacked(color: Color): boolean;
+    // (undocumented)
+    isStalemate(): boolean;
+    // (undocumented)
+    isStalemate(legalMoves: InternalMove[]): boolean;
+    // (undocumented)
+    isThreefoldRepetition(): boolean;
+    // (undocumented)
+    _kings: Record<Color, number>;
+    load(fen: string, { skipValidation }?: {
+        skipValidation?: boolean;
+    }): void;
+    // (undocumented)
+    _makeMove(move: InternalMove): void;
+    move(move: string | {
+        from: string;
+        to: string;
+        promotion?: string;
+    } | null, { strict }?: {
+        strict?: boolean;
+    }): Move;
+    // @internal
+    _moveFromSan(move: string, strict?: boolean): InternalMove | null;
+    // (undocumented)
+    _moveNumber: number;
+    // (undocumented)
+    _movePiece(from: number, to: number): void;
+    moves(): string[];
+    // (undocumented)
+    moves({ square }: {
+        square: Square;
+    }): string[];
+    // (undocumented)
+    moves({ piece }: {
+        piece: PieceSymbol;
+    }): string[];
+    // (undocumented)
+    moves({ square, piece }: {
+        square: Square;
+        piece: PieceSymbol;
+    }): string[];
+    // (undocumented)
+    moves({ verbose, square }: {
+        verbose: true;
+        square?: Square;
+    }): Move[];
+    // (undocumented)
+    moves({ verbose, square }: {
+        verbose: false;
+        square?: Square;
+    }): string[];
+    // (undocumented)
+    moves({ verbose, square, }: {
+        verbose?: boolean;
+        square?: Square;
+    }): string[] | Move[];
+    // (undocumented)
+    moves({ verbose, piece }: {
+        verbose: true;
+        piece?: PieceSymbol;
+    }): Move[];
+    // (undocumented)
+    moves({ verbose, piece }: {
+        verbose: false;
+        piece?: PieceSymbol;
+    }): string[];
+    // (undocumented)
+    moves({ verbose, piece, }: {
+        verbose?: boolean;
+        piece?: PieceSymbol;
+    }): string[] | Move[];
+    // (undocumented)
+    moves({ verbose, square, piece, }: {
+        verbose: true;
+        square?: Square;
+        piece?: PieceSymbol;
+    }): Move[];
+    // (undocumented)
+    moves({ verbose, square, piece, }: {
+        verbose: false;
+        square?: Square;
+        piece?: PieceSymbol;
+    }): string[];
+    // (undocumented)
+    moves({ verbose, square, piece, }: {
+        verbose?: boolean;
+        square?: Square;
+        piece?: PieceSymbol;
+    }): string[] | Move[];
+    // (undocumented)
+    moves({ square, piece }: {
+        square?: Square;
+        piece?: PieceSymbol;
+    }): Move[];
+    // (undocumented)
+    _moves({ legal, piece, square, }?: {
+        legal?: boolean;
+        piece?: PieceSymbol;
+        square?: Square;
+    }): InternalMove[];
+    // @internal
+    _moveToSan(move: InternalMove, moves: InternalMove[]): string;
+    pgn({ newline, maxWidth, }?: {
+        newline?: string;
+        maxWidth?: number;
+    }): string;
+    // (undocumented)
+    _pieceKey(i: number): bigint;
+    // Warning: (ae-forgotten-export) The symbol "Position" needs to be exported by the entry point chessPGN.d.ts
+    //
+    // (undocumented)
+    _position: Position;
+    // (undocumented)
+    _positionCount: Map<bigint, number>;
+    _pruneComments(): void;
+    // (undocumented)
+    _push(move: InternalMove): void;
+    // (undocumented)
+    removeComment(fen?: string): string | undefined;
+    // (undocumented)
+    removeComments(): {
+        fen: string;
+        comment: string;
+    }[];
+    // (undocumented)
+    removeHeader(key: string): boolean;
+    // (undocumented)
+    removeSuffixAnnotation(fen?: string): Suffix | undefined;
+    reset(preserveHeaders?: boolean): void;
+    // (undocumented)
+    _set(sq: number, piece: Piece): void;
+    // (undocumented)
+    setComment(comment: string, fen?: string): void;
+    // @internal
+    _setCommentRaw(comment: string, fen?: string): void;
+    // (undocumented)
+    setHeader(key: string, value: string): Record<string, string>;
+    // (undocumented)
+    setSuffixAnnotation(suffix: Suffix, fen?: string): void;
+    // @internal
+    static _strippedSan(move: string): string;
+    // (undocumented)
+    _suffixes: Record<string, Suffix>;
+    // (undocumented)
+    _turn: Color;
+    undo(): Move | null;
+    // (undocumented)
+    _undoMove(): InternalMove | null;
+    // (undocumented)
+    _updateCastlingRights(): void;
+    // (undocumented)
+    _updateEnPassantSquare(): void;
+}
+
+// @public
+export interface IChessGame {
+    ascii(): string;
+    attackers(square: Square, attackedBy?: Color): Square[];
+    board(): ({
+        square: Square;
+        type: PieceSymbol;
+        color: Color;
+    } | null)[][];
+    fen(options?: {
+        forceEnpassantSquare?: boolean;
+    }): string;
+    findPiece(piece: Piece): Square[];
+    get(square: Square): Piece | undefined;
+    getComment(fen?: string): string | undefined;
+    getComments(): {
+        fen: string;
+        comment?: string;
+        suffixAnnotation?: string;
+    }[];
+    getHeaders(): Record<string, string>;
+    getSuffixAnnotation(fen?: string): Suffix | undefined;
+    history(): string[];
+    // (undocumented)
+    history(options: {
+        verbose: true;
+    }): Move[];
+    // (undocumented)
+    history(options: {
+        verbose: false;
+    }): string[];
+    // (undocumented)
+    history(options: {
+        verbose: boolean;
+    }): string[] | Move[];
+    inCheck(): boolean;
+    isAttacked(square: Square, attackedBy: Color): boolean;
+    isCheck(): boolean;
+    isCheckmate(): boolean;
+    isDraw(): boolean;
+    isDrawByFiftyMoves(): boolean;
+    isGameOver(): boolean;
+    isInsufficientMaterial(): boolean;
+    isStalemate(): boolean;
+    isThreefoldRepetition(): boolean;
+    load(fen: string, options?: {
+        skipValidation?: boolean;
+        preserveHeaders?: boolean;
+    }): void;
+    move(move: string | {
+        from: string;
+        to: string;
+        promotion?: string;
+    } | null, options?: {
+        strict?: boolean;
+    }): Move;
+    pgn(options?: {
+        newline?: string;
+        maxWidth?: number;
+    }): string;
+    removeComment(fen?: string): string | undefined;
+    removeComments(): {
+        fen: string;
+        comment: string;
+    }[];
+    removeHeader(key: string): boolean;
+    removeSuffixAnnotation(fen?: string): Suffix | undefined;
+    reset(preserveHeaders?: boolean): void;
+    setComment(comment: string, fen?: string): void;
+    setHeader(key: string, value: string): Record<string, string>;
+    setSuffixAnnotation(suffix: Suffix, fen?: string): void;
+    undo(): Move | null;
+}
 
 // @public (undocumented)
 export type InternalMove = {
