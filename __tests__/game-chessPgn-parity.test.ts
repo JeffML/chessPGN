@@ -16,6 +16,9 @@ import {
   compareGameState,
   compareFindPieceResults,
   compareGetResults,
+  compareHistoryResults,
+  compareHeadersResults,
+  compareCommentsResults,
 } from './testHelpers'
 
 describe('Game vs ChessPGN API Parity', () => {
@@ -326,6 +329,133 @@ describe('Game vs ChessPGN API Parity', () => {
         for (const square of squares) {
           expect(compareGetResults(game, chess, square)).toBe(true)
         }
+      }
+    })
+  })
+
+  describe('history() method', () => {
+    it('should return identical results for 10 games', () => {
+      const cursor = createCursorForTesting(pgn, 0, 10)
+
+      for (let i = 0; i < 10; i++) {
+        const game = cursor.next()
+        expect(game).not.toBeNull()
+        if (!game) break
+
+        const chess = createMatchingChessPgn(game)
+
+        // Compare string history
+        expect(compareHistoryResults(game, chess)).toBe(true)
+
+        // Compare verbose history
+        expect(compareHistoryResults(game, chess, { verbose: true })).toBe(true)
+
+        // Compare non-verbose history explicitly
+        expect(compareHistoryResults(game, chess, { verbose: false })).toBe(
+          true,
+        )
+      }
+    })
+  })
+
+  describe('getHeaders() method', () => {
+    it('should return identical results for 10 games', () => {
+      const cursor = createCursorForTesting(pgn, 0, 10)
+
+      for (let i = 0; i < 10; i++) {
+        const game = cursor.next()
+        expect(game).not.toBeNull()
+        if (!game) break
+
+        const chess = createMatchingChessPgn(game)
+
+        expect(compareHeadersResults(game, chess)).toBe(true)
+      }
+    })
+  })
+
+  describe('removeHeader() method', () => {
+    it('should behave identically for both implementations', () => {
+      const cursor = createCursorForTesting(pgn, 0, 5)
+
+      for (let i = 0; i < 5; i++) {
+        const game = cursor.next()
+        expect(game).not.toBeNull()
+        if (!game) break
+
+        const chess = createMatchingChessPgn(game)
+
+        // Try removing a standard header
+        const gameResult1 = game.removeHeader('Event')
+        const chessResult1 = chess.removeHeader('Event')
+        expect(gameResult1).toBe(chessResult1)
+
+        // Verify headers match after removal
+        expect(compareHeadersResults(game, chess)).toBe(true)
+
+        // Try removing a non-existent header
+        const gameResult2 = game.removeHeader('NonExistent')
+        const chessResult2 = chess.removeHeader('NonExistent')
+        expect(gameResult2).toBe(chessResult2)
+      }
+    })
+  })
+
+  describe('getComments() method', () => {
+    it('should return identical results for 10 games', () => {
+      const cursor = createCursorForTesting(pgn, 0, 10)
+
+      for (let i = 0; i < 10; i++) {
+        const game = cursor.next()
+        expect(game).not.toBeNull()
+        if (!game) break
+
+        const chess = createMatchingChessPgn(game)
+
+        expect(compareCommentsResults(game, chess)).toBe(true)
+      }
+    })
+  })
+
+  describe('comment and suffix annotation methods', () => {
+    it('should behave identically when setting and getting', () => {
+      const cursor = createCursorForTesting(pgn, 0, 5)
+
+      for (let i = 0; i < 5; i++) {
+        const game = cursor.next()
+        expect(game).not.toBeNull()
+        if (!game) break
+
+        const chess = createMatchingChessPgn(game)
+
+        // Set comment on both
+        game.setComment('Test comment')
+        chess.setComment('Test comment')
+
+        // Get comment from both
+        expect(game.getComment()).toBe(chess.getComment())
+        expect(game.getComment()).toBe('Test comment')
+
+        // Set suffix annotation on both
+        game.setSuffixAnnotation('!!')
+        chess.setSuffixAnnotation('!!')
+
+        // Get suffix annotation from both
+        expect(game.getSuffixAnnotation()).toBe(chess.getSuffixAnnotation())
+        expect(game.getSuffixAnnotation()).toBe('!!')
+
+        // Compare all comments
+        expect(compareCommentsResults(game, chess)).toBe(true)
+
+        // Remove suffix annotation
+        const gameRemoved = game.removeSuffixAnnotation()
+        const chessRemoved = chess.removeSuffixAnnotation()
+        expect(gameRemoved).toBe(chessRemoved)
+        expect(gameRemoved).toBe('!!')
+
+        // Verify suffix is removed
+        expect(game.getSuffixAnnotation()).toBe(chess.getSuffixAnnotation())
+        expect(game.getSuffixAnnotation()).toBeUndefined()
       }
     })
   })

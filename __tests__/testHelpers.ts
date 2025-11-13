@@ -161,3 +161,59 @@ export function compareFindPieceResults(
 
   return JSON.stringify(gameSorted) === JSON.stringify(chessSorted)
 }
+
+/**
+ * Compare history() results between Game and ChessPGN
+ */
+export function compareHistoryResults(
+  game: Game,
+  chess: ChessPGN,
+  options?: { verbose?: boolean },
+): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const gameHistory = game.history(options as any)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chessHistory = chess.history(options as any)
+
+  if (gameHistory.length !== chessHistory.length) return false
+
+  // For string arrays, compare values
+  if (typeof gameHistory[0] === 'string') {
+    return JSON.stringify(gameHistory) === JSON.stringify(chessHistory)
+  }
+
+  // For Move arrays, compare SAN
+  const gameSans = (gameHistory as unknown as Move[]).map((m) => m.san)
+  const chessSans = (chessHistory as unknown as Move[]).map((m) => m.san)
+  return JSON.stringify(gameSans) === JSON.stringify(chessSans)
+}
+
+/**
+ * Compare getHeaders() results between Game and ChessPGN
+ */
+export function compareHeadersResults(game: Game, chess: ChessPGN): boolean {
+  const gameHeaders = game.getHeaders()
+  const chessHeaders = chess.getHeaders()
+
+  return JSON.stringify(gameHeaders) === JSON.stringify(chessHeaders)
+}
+
+/**
+ * Compare getComments() results between Game and ChessPGN
+ */
+export function compareCommentsResults(game: Game, chess: ChessPGN): boolean {
+  const gameComments = game.getComments()
+  const chessComments = chess.getComments()
+
+  if (gameComments.length !== chessComments.length) return false
+
+  // Sort by FEN for consistent comparison
+  const gameSorted = [...gameComments].sort((a, b) =>
+    a.fen.localeCompare(b.fen),
+  )
+  const chessSorted = [...chessComments].sort((a, b) =>
+    a.fen.localeCompare(b.fen),
+  )
+
+  return JSON.stringify(gameSorted) === JSON.stringify(chessSorted)
+}

@@ -130,6 +130,7 @@ export class Game implements IChessGame {
      * castling rights, turn, etc.
      */
     this.load(DEFAULT_POSITION, { skipValidation: true })
+    this._incPositionCount() // Count the initial position
 
     // Initialize headers with template + provided headers
     this._header = { ...HEADER_TEMPLATE }
@@ -143,6 +144,7 @@ export class Game implements IChessGame {
      */
     if (headers && headers['SetUp'] === '1' && headers['FEN']) {
       this.load(headers['FEN'], { skipValidation: true })
+      this._incPositionCount() // Count the custom starting position
     }
 
     /*
@@ -178,7 +180,7 @@ export class Game implements IChessGame {
       }
 
       if (node.comment !== undefined) {
-        this._comments[this.fen()] = node.comment
+        this._setCommentRaw(node.comment)
       }
 
       /* Follow the main line (first variation) */
@@ -1414,6 +1416,15 @@ export class Game implements IChessGame {
     return headers
   }
 
+  removeHeader(key: string): boolean {
+    if (key in this._header) {
+      this._header[key] =
+        (SEVEN_TAG_ROSTER as Record<string, string>)[key] || null
+      return true
+    }
+    return false
+  }
+
   /**
    * Generate FEN string from current position
    */
@@ -1724,10 +1735,19 @@ export class Game implements IChessGame {
 
   setComment(comment: string, fen?: string): void {
     /**
-     * Store the comment exactly as provided by the caller. Caller may be the
-     * PGN parser (which expects raw braces preserved) or the user API which
-     * may sanitize before calling.
+     * Sanitize user-provided comments by replacing braces with brackets to
+     * prevent malformed PGN output. This is the public API that users call.
      */
+    const sanitized = comment.replace(/\{/g, '[').replace(/\}/g, ']')
+    this._comments[fen ?? this.fen()] = sanitized
+  }
+
+  /**
+   * Internal method to set comment without sanitization.
+   * Used by PGN parser which handles comment formatting itself.
+   * @internal
+   */
+  _setCommentRaw(comment: string, fen?: string): void {
     this._comments[fen ?? this.fen()] = comment
   }
 
@@ -1797,6 +1817,35 @@ export class Game implements IChessGame {
       delete this._comments[fen]
       return { fen: fen, comment: comment }
     })
+  }
+
+  history(): string[]
+  history({ verbose }: { verbose: true }): Move[]
+  history({ verbose }: { verbose: false }): string[]
+  history({ verbose }: { verbose: boolean }): string[] | Move[]
+  history({ verbose = false }: { verbose?: boolean } = {}) {
+    const reversedHistory = []
+    const moveHistory = []
+
+    while (this._history.length > 0) {
+      reversedHistory.push(this._undoMove())
+    }
+
+    while (true) {
+      const move = reversedHistory.pop()
+      if (!move) {
+        break
+      }
+
+      if (verbose) {
+        moveHistory.push(createPrettyMove(this, move))
+      } else {
+        moveHistory.push(this._moveToSan(move, this._moves()))
+      }
+      this._makeMove(move)
+    }
+
+    return moveHistory
   }
 
   /*
@@ -1924,6 +1973,7 @@ export class Game implements IChessGame {
     const prettyMove = createPrettyMove(this, moveObj)
 
     this._makeMove(moveObj)
+    this._incPositionCount() // Track position occurrence for repetition detection
     return prettyMove
   }
 
@@ -1977,7 +2027,7 @@ export class Game implements IChessGame {
 
     const moves = []
     let moveString = ''
-    let moveNumber = 1
+    let moveNumber = this._moveNumber
 
     /* Special case of a commented starting position with no moves */
     if (reversedHistory.length === 0) {
