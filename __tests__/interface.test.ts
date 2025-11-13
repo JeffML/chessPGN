@@ -148,4 +148,90 @@ describe('IChessGame Interface', () => {
       'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3',
     )
   })
+
+  it('ASCII method works through interface', () => {
+    const instances: IChessGame[] = [new ChessPGN(), new Game()]
+
+    for (const instance of instances) {
+      const ascii = instance.ascii()
+      // Check for pieces with proper spacing (two spaces between pieces)
+      expect(ascii).toContain('r  n  b  q  k  b  n  r')
+      expect(ascii).toContain('p  p  p  p  p  p  p  p')
+      expect(ascii).toContain('P  P  P  P  P  P  P  P')
+      expect(ascii).toContain('R  N  B  Q  K  B  N  R')
+    }
+  })
+
+  it('Attack query methods work through interface', () => {
+    const instances: IChessGame[] = [new ChessPGN(), new Game()]
+
+    for (const instance of instances) {
+      // After e4, d7 and d8 are attacked by the pawn on e4's diagonal
+      instance.move('e4')
+
+      // Check attackers method
+      const attackers = instance.attackers('d5', 'w')
+      expect(attackers).toContain('e4')
+
+      // Check isAttacked method
+      expect(instance.isAttacked('d5', 'w')).toBe(true)
+      expect(instance.isAttacked('a1', 'b')).toBe(false)
+    }
+  })
+
+  it('inCheck alias works through interface', () => {
+    const checkFen =
+      'rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b KQkq - 0 2'
+    const instances: IChessGame[] = [new ChessPGN(), new Game()]
+
+    for (const instance of instances) {
+      instance.load(checkFen)
+      instance.move('Qh4+')
+
+      // Both isCheck() and inCheck() should return true
+      expect(instance.isCheck()).toBe(true)
+      expect(instance.inCheck()).toBe(true)
+    }
+  })
+
+  it('Draw condition methods work through interface', () => {
+    const instances: IChessGame[] = [new ChessPGN(), new Game()]
+
+    // Test insufficient material (K vs K)
+    const insufficientMaterial = '8/8/8/4k3/4K3/8/8/8 w - - 0 1'
+
+    for (const instance of instances) {
+      instance.load(insufficientMaterial)
+      expect(instance.isInsufficientMaterial()).toBe(true)
+      expect(instance.isDraw()).toBe(true)
+    }
+  })
+
+  it('Fifty-move rule works through interface', () => {
+    // Position with 100 half-moves (50 full moves)
+    const fiftyMoveFen = '8/8/8/4k3/4K3/8/8/8 w - - 100 60'
+    const instances: IChessGame[] = [new ChessPGN(), new Game()]
+
+    for (const instance of instances) {
+      instance.load(fiftyMoveFen)
+      expect(instance.isDrawByFiftyMoves()).toBe(true)
+      expect(instance.isDraw()).toBe(true)
+    }
+  })
+
+  it('Threefold repetition works through interface', () => {
+    const instances: IChessGame[] = [new ChessPGN(), new Game()]
+
+    for (const instance of instances) {
+      // Use the same moves as the existing threefold test
+      const moves = 'Nf3 Nf6 Ng1 Ng8 Nf3 Nf6 Ng1 Ng8'.split(/\s+/)
+      moves.forEach((move) => {
+        instance.move(move)
+      })
+
+      // After all 8 moves, position has occurred 3 times
+      expect(instance.isThreefoldRepetition()).toBe(true)
+      expect(instance.isDraw()).toBe(true)
+    }
+  })
 })

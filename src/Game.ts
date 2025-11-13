@@ -130,6 +130,7 @@ export class Game implements IChessGame {
      * castling rights, turn, etc.
      */
     this.load(DEFAULT_POSITION, { skipValidation: true })
+    this._incPositionCount() // Count the initial position
 
     // Initialize headers with template + provided headers
     this._header = { ...HEADER_TEMPLATE }
@@ -143,6 +144,7 @@ export class Game implements IChessGame {
      */
     if (headers && headers['SetUp'] === '1' && headers['FEN']) {
       this.load(headers['FEN'], { skipValidation: true })
+      this._incPositionCount() // Count the custom starting position
     }
 
     /*
@@ -1924,6 +1926,7 @@ export class Game implements IChessGame {
     const prettyMove = createPrettyMove(this, moveObj)
 
     this._makeMove(moveObj)
+    this._incPositionCount() // Track position occurrence for repetition detection
     return prettyMove
   }
 

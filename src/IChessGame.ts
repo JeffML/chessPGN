@@ -60,6 +60,29 @@ export interface IChessGame {
    */
   board(): ({ square: Square; type: PieceSymbol; color: Color } | null)[][]
 
+  /**
+   * Get ASCII string representation of the board
+   * @returns ASCII art board representation
+   */
+  ascii(): string
+
+  // Attack queries
+  /**
+   * Get all squares attacking a given square
+   * @param square - Square being attacked
+   * @param attackedBy - Optional color of attacking pieces
+   * @returns Array of squares with pieces attacking the target
+   */
+  attackers(square: Square, attackedBy?: Color): Square[]
+
+  /**
+   * Check if a square is attacked by a specific color
+   * @param square - Square to check
+   * @param attackedBy - Color of attacking pieces
+   * @returns true if square is attacked
+   */
+  isAttacked(square: Square, attackedBy: Color): boolean
+
   // Move operations
   /**
    * Make a move on the board
@@ -87,6 +110,12 @@ export interface IChessGame {
   isCheck(): boolean
 
   /**
+   * Alias for isCheck() - check if current side to move is in check
+   * @returns true if in check
+   */
+  inCheck(): boolean
+
+  /**
    * Check if the current position is checkmate
    * @returns true if checkmate
    */
@@ -97,6 +126,24 @@ export interface IChessGame {
    * @returns true if stalemate
    */
   isStalemate(): boolean
+
+  /**
+   * Check if the position has insufficient material for checkmate
+   * @returns true if insufficient material
+   */
+  isInsufficientMaterial(): boolean
+
+  /**
+   * Check if the position has occurred three times (draw by repetition)
+   * @returns true if threefold repetition
+   */
+  isThreefoldRepetition(): boolean
+
+  /**
+   * Check if fifty moves have been made without capture or pawn move
+   * @returns true if fifty-move rule applies
+   */
+  isDrawByFiftyMoves(): boolean
 
   /**
    * Check if the game is drawn (by any condition)
