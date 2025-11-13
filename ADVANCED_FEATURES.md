@@ -75,6 +75,12 @@ interface IChessGame {
 
   // Undo the last move
   undo(): Move | null
+
+  // Get move history
+  history(): string[]
+  history(options: { verbose: true }): Move[]
+  history(options: { verbose: false }): string[]
+  history(options: { verbose: boolean }): string[] | Move[]
 }
 ```
 
@@ -94,12 +100,24 @@ interface IChessGame {
 
 ```typescript
 interface IChessGame {
+  // Header manipulation
   setHeader(key: string, value: string): Record<string, string>
   getHeaders(): Record<string, string>
+  removeHeader(key: string): boolean
 
+  // Comment manipulation
   getComment(fen?: string): string | undefined
   setComment(comment: string, fen?: string): void
   removeComment(fen?: string): string | undefined
+
+  // Bulk comment operations
+  getComments(): { fen: string; comment?: string; suffixAnnotation?: string }[]
+  removeComments(): { fen: string; comment: string }[]
+
+  // Suffix annotations (!!, !, !?, ?!, ?, ??)
+  getSuffixAnnotation(fen?: string): Suffix | undefined
+  setSuffixAnnotation(suffix: Suffix, fen?: string): void
+  removeSuffixAnnotation(fen?: string): Suffix | undefined
 }
 ```
 
@@ -137,12 +155,99 @@ const gameFen = playOpening(game)
 console.log(chessFen === gameFen) // true
 ```
 
+### Additional Examples
+
+#### Working with Headers
+
+```typescript
+function analyzeGame(game: IChessGame) {
+  // Add headers
+  game.setHeader('Event', 'World Championship')
+  game.setHeader('White', 'Carlsen')
+  game.setHeader('Black', 'Nepomniachtchi')
+
+  // Get all headers
+  const headers = game.getHeaders()
+  console.log(headers)
+
+  // Remove a header
+  const removed = game.removeHeader('Black')
+  console.log(removed) // true
+}
+```
+
+#### Working with Move History
+
+```typescript
+function printHistory(game: IChessGame) {
+  game.move('e4')
+  game.move('e5')
+  game.move('Nf3')
+  game.move('Nc6')
+
+  // Get history as SAN strings
+  const sanMoves = game.history()
+  console.log(sanMoves) // ['e4', 'e5', 'Nf3', 'Nc6']
+
+  // Get verbose history with full move details
+  const verboseMoves = game.history({ verbose: true })
+  verboseMoves.forEach((move) => {
+    console.log(`${move.from} -> ${move.to}`)
+    console.log(`  Piece: ${move.piece}`)
+    console.log(`  Captured: ${move.captured || 'none'}`)
+  })
+}
+```
+
+#### Working with Comments and Annotations
+
+```typescript
+function annotateGame(game: IChessGame) {
+  game.move('e4')
+  game.setComment('The most popular opening move')
+  game.setSuffixAnnotation('!!') // Brilliant move
+
+  game.move('e5')
+  game.setComment('Symmetric response')
+
+  // Get all comments
+  const comments = game.getComments()
+  comments.forEach((entry) => {
+    console.log(`Position: ${entry.fen}`)
+    console.log(`Comment: ${entry.comment}`)
+    console.log(`Annotation: ${entry.suffixAnnotation}`)
+  })
+
+  // Remove all comments
+  const removed = game.removeComments()
+  console.log(`Removed ${removed.length} comments`)
+}
+```
+
 ### Notes
 
 - Some methods like `hash()`, `setCastlingRights()`, and `getCastlingRights()`
   are **ChessPGN-specific** and not part of the interface
 - Both classes have been verified to produce identical results for all interface
   methods through extensive parity testing
+
+### Implementation Details
+
+The `ChessPGN` class is a legacy wrapper around the `Game` class. Most methods
+in `ChessPGN` delegate directly to the underlying `Game` instance, maintaining
+backward compatibility while reducing code duplication. This delegation pattern
+ensures:
+
+- **Consistent Behavior**: Both classes produce identical results for all
+  interface methods
+- **Single Source of Truth**: Core logic lives in `Game`, reducing maintenance
+  burden
+- **Verified Parity**: Comprehensive parity tests run across 469 real games to
+  ensure identical behavior
+
+When in doubt, either class can be used interchangeably for standard chess
+operations. Use `ChessPGN` if you need hash tracking or explicit castling rights
+manipulation.
 
 ---
 
