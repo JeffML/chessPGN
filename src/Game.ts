@@ -1980,7 +1980,7 @@ export class Game implements IChessGame {
 
     const moves = []
     let moveString = ''
-    let moveNumber = 1
+    let moveNumber = this._moveNumber
 
     /* Special case of a commented starting position with no moves */
     if (reversedHistory.length === 0) {
