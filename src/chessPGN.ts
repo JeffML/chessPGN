@@ -9,12 +9,8 @@ import type { IChessGame } from './IChessGame'
 import { Game } from './Game'
 import { Move } from './Move'
 import { createPrettyMove } from './moveUtils'
-import { renderHeaders } from './pgnRenderer'
 import { parse } from './pgn'
 import {
-  WHITE,
-  BLACK,
-  PAWN,
   QUEEN,
   KING,
   Color,
@@ -165,46 +161,6 @@ const HEADER_TEMPLATE = {
  *    array comes in. It provides an offset (in this case 16) to add to E7 (20)
  *    to check for blocking pieces. E7 (20) + 16 = E6 (36) + 16 = E5 (52) etc.
  */
-
-// prettier-ignore
-const ATTACKS = [
-  20, 0, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0, 0,20, 0,
-   0,20, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0,20, 0, 0,
-   0, 0,20, 0, 0, 0, 0, 24,  0, 0, 0, 0,20, 0, 0, 0,
-   0, 0, 0,20, 0, 0, 0, 24,  0, 0, 0,20, 0, 0, 0, 0,
-   0, 0, 0, 0,20, 0, 0, 24,  0, 0,20, 0, 0, 0, 0, 0,
-   0, 0, 0, 0, 0,20, 2, 24,  2,20, 0, 0, 0, 0, 0, 0,
-   0, 0, 0, 0, 0, 2,53, 56, 53, 2, 0, 0, 0, 0, 0, 0,
-  24,24,24,24,24,24,56,  0, 56,24,24,24,24,24,24, 0,
-   0, 0, 0, 0, 0, 2,53, 56, 53, 2, 0, 0, 0, 0, 0, 0,
-   0, 0, 0, 0, 0,20, 2, 24,  2,20, 0, 0, 0, 0, 0, 0,
-   0, 0, 0, 0,20, 0, 0, 24,  0, 0,20, 0, 0, 0, 0, 0,
-   0, 0, 0,20, 0, 0, 0, 24,  0, 0, 0,20, 0, 0, 0, 0,
-   0, 0,20, 0, 0, 0, 0, 24,  0, 0, 0, 0,20, 0, 0, 0,
-   0,20, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0,20, 0, 0,
-  20, 0, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0, 0,20
-];
-
-// prettier-ignore
-const RAYS = [
-   17,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0, 15, 0,
-    0, 17,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0, 15,  0, 0,
-    0,  0, 17,  0,  0,  0,  0, 16,  0,  0,  0,  0, 15,  0,  0, 0,
-    0,  0,  0, 17,  0,  0,  0, 16,  0,  0,  0, 15,  0,  0,  0, 0,
-    0,  0,  0,  0, 17,  0,  0, 16,  0,  0, 15,  0,  0,  0,  0, 0,
-    0,  0,  0,  0,  0, 17,  0, 16,  0, 15,  0,  0,  0,  0,  0, 0,
-    0,  0,  0,  0,  0,  0, 17, 16, 15,  0,  0,  0,  0,  0,  0, 0,
-    1,  1,  1,  1,  1,  1,  1,  0, -1, -1,  -1,-1, -1, -1, -1, 0,
-    0,  0,  0,  0,  0,  0,-15,-16,-17,  0,  0,  0,  0,  0,  0, 0,
-    0,  0,  0,  0,  0,-15,  0,-16,  0,-17,  0,  0,  0,  0,  0, 0,
-    0,  0,  0,  0,-15,  0,  0,-16,  0,  0,-17,  0,  0,  0,  0, 0,
-    0,  0,  0,-15,  0,  0,  0,-16,  0,  0,  0,-17,  0,  0,  0, 0,
-    0,  0,-15,  0,  0,  0,  0,-16,  0,  0,  0,  0,-17,  0,  0, 0,
-    0,-15,  0,  0,  0,  0,  0,-16,  0,  0,  0,  0,  0,-17,  0, 0,
-  -15,  0,  0,  0,  0,  0,  0,-16,  0,  0,  0,  0,  0,  0,-17
-];
-
-const PIECE_MASKS = { p: 0x1, n: 0x2, b: 0x4, r: 0x8, q: 0x10, k: 0x20 }
 
 const SYMBOLS = 'pnbrqkPNBRQK'
 
@@ -616,83 +572,12 @@ export class ChessPGN implements IChessGame {
   private _attacked(color: Color, square: number): boolean
   private _attacked(color: Color, square: number, verbose: false): boolean
   private _attacked(color: Color, square: number, verbose: true): Square[]
-  private _attacked(color: Color, square: number, verbose?: boolean) {
-    const attackers: Square[] = []
-    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-      // did we run off the end of the board
-      if (i & 0x88) {
-        i += 7
-        continue
-      }
-
-      // if empty square or wrong color
-      if (this._board[i] === undefined || this._board[i].color !== color) {
-        continue
-      }
-
-      const piece = this._board[i]
-      const difference = i - square
-
-      // skip - to/from square are the same
-      if (difference === 0) {
-        continue
-      }
-
-      const index = difference + 119
-
-      if (ATTACKS[index] & PIECE_MASKS[piece.type]) {
-        if (piece.type === PAWN) {
-          if (
-            (difference > 0 && piece.color === WHITE) ||
-            (difference <= 0 && piece.color === BLACK)
-          ) {
-            if (!verbose) {
-              return true
-            } else {
-              attackers.push(algebraic(i))
-            }
-          }
-          continue
-        }
-
-        // if the piece is a knight or a king
-        if (piece.type === 'n' || piece.type === 'k') {
-          if (!verbose) {
-            return true
-          } else {
-            attackers.push(algebraic(i))
-            continue
-          }
-        }
-
-        const offset = RAYS[index]
-        let j = i + offset
-
-        let blocked = false
-        while (j !== square) {
-          if (this._board[j] != null) {
-            blocked = true
-            break
-          }
-          j += offset
-        }
-
-        if (!blocked) {
-          if (!verbose) {
-            return true
-          } else {
-            attackers.push(algebraic(i))
-            continue
-          }
-        }
-      }
-    }
-
-    if (verbose) {
-      return attackers
-    } else {
-      return false
-    }
+  private _attacked(
+    color: Color,
+    square: number,
+    verbose?: boolean,
+  ): boolean | Square[] {
+    return this._game._attacked(color, square, verbose as true)
   }
 
   attackers(square: Square, attackedBy?: Color): Square[] {
@@ -956,150 +841,7 @@ export class ChessPGN implements IChessGame {
     newline = '\n',
     maxWidth = 0,
   }: { newline?: string; maxWidth?: number } = {}): string {
-    /*
-     * using the specification from http://www.chessclub.com/help/PGN-spec
-     * example for html usage: .pgn({ max_width: 72, newline_char: "<br />" })
-     */
-
-    const result: string[] = []
-    const { lines: headerLines, headerExists } = renderHeaders(
-      this._game._header,
-      newline,
-    )
-    // append header lines
-    result.push(...headerLines)
-
-    if (headerExists && this._history.length) {
-      result.push(newline)
-    }
-
-    const appendComment = (moveString: string) => {
-      const comment = this._game.getComment()
-      if (typeof comment !== 'undefined') {
-        const delimiter = moveString.length > 0 ? ' ' : ''
-        moveString = `${moveString}${delimiter}{${comment}}`
-      }
-      return moveString
-    }
-
-    // pop all of history onto reversed_history
-    const reversedHistory = []
-    while (this._history.length > 0) {
-      reversedHistory.push(this._undoMove())
-    }
-
-    const moves = []
-    let moveString = ''
-
-    // special case of a commented starting position with no moves
-    if (reversedHistory.length === 0) {
-      moves.push(appendComment(''))
-    }
-
-    // build the list of moves.  a move_string looks like: "3. e3 e6"
-    while (reversedHistory.length > 0) {
-      moveString = appendComment(moveString)
-      const move = reversedHistory.pop()
-
-      // make TypeScript stop complaining about move being undefined
-      if (!move) {
-        break
-      }
-
-      // if the position started with black to move, start PGN with #. ...
-      if (!this._history.length && move.color === 'b') {
-        const prefix = `${this._moveNumber}. ...`
-        // is there a comment preceding the first move?
-        moveString = moveString ? `${moveString} ${prefix}` : prefix
-      } else if (move.color === 'w') {
-        // store the previous generated move_string if we have one
-        if (moveString.length) {
-          moves.push(moveString)
-        }
-        moveString = this._moveNumber + '.'
-      }
-
-      moveString =
-        moveString + ' ' + this._moveToSan(move, this._moves({ legal: true }))
-      this._makeMove(move)
-    }
-
-    // are there any other leftover moves?
-    if (moveString.length) {
-      moves.push(appendComment(moveString))
-    }
-
-    // is there a result? (there ALWAYS has to be a result according to spec; see Seven Tag Roster)
-    moves.push(this._game._header.Result || '*')
-
-    /*
-     * history should be back to what it was before we started generating PGN,
-     * so join together moves
-     */
-    if (maxWidth === 0) {
-      return result.join('') + moves.join(' ')
-    }
-
-    // TODO (jah): huh?
-    const strip = function () {
-      if (result.length > 0 && result[result.length - 1] === ' ') {
-        result.pop()
-        return true
-      }
-      return false
-    }
-
-    // NB: this does not preserve comment whitespace.
-    const wrapComment = function (width: number, move: string) {
-      for (const token of move.split(' ')) {
-        if (!token) {
-          continue
-        }
-        if (width + token.length > maxWidth) {
-          while (strip()) {
-            width--
-          }
-          result.push(newline)
-          width = 0
-        }
-        result.push(token)
-        width += token.length
-        result.push(' ')
-        width++
-      }
-      if (strip()) {
-        width--
-      }
-      return width
-    }
-
-    // wrap the PGN output at max_width
-    let currentWidth = 0
-    for (let i = 0; i < moves.length; i++) {
-      if (currentWidth + moves[i].length > maxWidth) {
-        if (moves[i].includes('{')) {
-          currentWidth = wrapComment(currentWidth, moves[i])
-          continue
-        }
-      }
-      // if the current move will push past max_width
-      if (currentWidth + moves[i].length > maxWidth && i !== 0) {
-        // don't end the line with whitespace
-        if (result[result.length - 1] === ' ') {
-          result.pop()
-        }
-
-        result.push(newline)
-        currentWidth = 0
-      } else if (i !== 0) {
-        result.push(' ')
-        currentWidth++
-      }
-      result.push(moves[i])
-      currentWidth += moves[i].length
-    }
-
-    return result.join('')
+    return this._game.pgn({ newline, maxWidth })
   }
 
   /**
