@@ -943,7 +943,7 @@ export class ChessPGN implements IChessGame {
       }
 
       if (node.comment !== undefined) {
-        this._game.setComment(node.comment)
+        this._game._setCommentRaw(node.comment)
       }
 
       node = node.variations[0]
@@ -1094,8 +1094,8 @@ export class ChessPGN implements IChessGame {
   }
 
   setComment(comment: string) {
-    // Preserve original behavior: sanitize braces from user-supplied comments
-    this._game.setComment(comment.replace('{', '[').replace('}', ']'))
+    // Delegate to Game, which handles sanitization
+    this._game.setComment(comment)
   }
 
   /**

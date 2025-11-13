@@ -180,7 +180,7 @@ export class Game implements IChessGame {
       }
 
       if (node.comment !== undefined) {
-        this._comments[this.fen()] = node.comment
+        this._setCommentRaw(node.comment)
       }
 
       /* Follow the main line (first variation) */
@@ -1726,10 +1726,19 @@ export class Game implements IChessGame {
 
   setComment(comment: string, fen?: string): void {
     /**
-     * Store the comment exactly as provided by the caller. Caller may be the
-     * PGN parser (which expects raw braces preserved) or the user API which
-     * may sanitize before calling.
+     * Sanitize user-provided comments by replacing braces with brackets to
+     * prevent malformed PGN output. This is the public API that users call.
      */
+    const sanitized = comment.replace(/\{/g, '[').replace(/\}/g, ']')
+    this._comments[fen ?? this.fen()] = sanitized
+  }
+
+  /**
+   * Internal method to set comment without sanitization.
+   * Used by PGN parser which handles comment formatting itself.
+   * @internal
+   */
+  _setCommentRaw(comment: string, fen?: string): void {
     this._comments[fen ?? this.fen()] = comment
   }
 
