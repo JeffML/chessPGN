@@ -1,4 +1,4 @@
-![logo](./cpl.png)
+![logo](./chesspgnlogo.png)
 
 # chessPGN
 
