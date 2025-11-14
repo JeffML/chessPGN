@@ -2,9 +2,10 @@
 
 # chessPGN
 
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/jeffml/chessPGN/node.js.yml)](https://github.com/jeffml/chessPGN/actions)
-[![npm](https://img.shields.io/npm/v/chessPGN?color=blue)](https://www.npmjs.com/package/chessPGN)
-[![npm](https://img.shields.io/npm/dm/chessPGN)](https://www.npmjs.com/package/chessPGN)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/JeffML/chessPGN/node.js.yml)](https://github.com/JeffML/chessPGN/actions)
+[![npm](https://img.shields.io/npm/v/@chess-pgn/chess-pgn?color=blue)](https://www.npmjs.com/package/@chess-pgn/chess-pgn)
+[![npm](https://img.shields.io/npm/dm/@chess-pgn/chess-pgn)](https://www.npmjs.com/package/@chess-pgn/chess-pgn)
+[![GitHub stars](https://img.shields.io/github/stars/JeffML/chessPGN)](https://github.com/JeffML/chessPGN/stargazers)
 
 chessPGN is a TypeScript chess library used for chess move
 generation/validation, piece placement/movement, and check/checkmate/stalemate
