@@ -258,7 +258,10 @@
       <nav class="sidebar">
         <div class="sidebar-header">
           <div class="logo" style="display: inline-block">
-            <img src="./chesspgnlogo.png" style="border-radius: 50%" />
+            <img
+              src="../chesspgnlogo.png"
+              style="border-radius: 50%; transform-origin: center"
+            />
           </div>
           <div class="sidebar-title">chessPGN</div>
           <div class="sidebar-subtitle">Advanced Features</div>
@@ -311,10 +314,11 @@
           <h2>IChessGame Interface</h2>
           <p>
             The <code>IChessGame</code> interface defines the common API
-            contract shared between <code>ChessPGN</code> (the legacy wrapper
-            class) and <code>Game</code> (the core implementation class). This
-            interface enables polymorphic usage of both classes and provides
-            type safety when writing code that works with either implementation.
+            contract shared between <code>ChessPGN</code> (the chess.js
+            compatible wrapper class) and <code>Game</code> (the core
+            implementation class). This interface enables polymorphic usage of
+            both classes and provides type safety when writing code that works
+            with either implementation.
           </p>
 
           <h3 id="purpose">Purpose</h3>
