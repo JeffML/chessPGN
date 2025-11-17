@@ -14,9 +14,10 @@ interface, PGN loading, and the multi-game cursor.
 ## IChessGame Interface
 
 The `IChessGame` interface defines the common API contract shared between
-`ChessPGN` (the chess.js compatible wrapper class ) and `Game` (the core implementation
-class). This interface enables polymorphic usage of both classes and provides
-type safety when writing code that works with either implementation.
+`ChessPGN` (the [chess.js](https://github.com/jhlywa/chess.js) compatible
+wrapper class ) and `Game` (the core implementation class). This interface
+enables polymorphic usage of both classes and provides type safety when writing
+code that works with either implementation.
 
 ### Purpose
 
