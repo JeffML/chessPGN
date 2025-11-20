@@ -50,6 +50,10 @@ export { xoroshiro128 } from './types'
 export type { IChessGame } from './IChessGame'
 export { Game } from './Game'
 
+// Re-export Cursor functionality for multi-game PGN parsing
+export { indexPgnGames, CursorImpl } from './Cursor'
+export type { Cursor, CursorOptions } from './Cursor'
+
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
