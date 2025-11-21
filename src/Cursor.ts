@@ -8,7 +8,9 @@ import { Game } from './Game'
 import { processPgnToGame } from './pgnProcessor'
 import { parse } from './pgn'
 import { parseHeaders } from './headerParser'
-import { WorkerPool } from './WorkerPool'
+
+// Type-only import - WorkerPool will be dynamically loaded when needed
+type WorkerPool = any
 
 /**
  * Options for configuring a cursor over multi-game PGN files
@@ -101,14 +103,32 @@ export class CursorImpl implements Cursor {
     this.cache = new Map()
     this.totalGames = indices.length
 
-    // Initialize worker pool if workers enabled
+    // Initialize worker pool if workers enabled (Node.js only)
     if (this.options.workers) {
-      const workerCount =
-        typeof this.options.workers === 'number' ? this.options.workers : 4
-      this.workerPool = new WorkerPool(workerCount, {
-        batchSize: this.options.workerBatchSize,
-        strict: this.options.strict,
-      })
+      // Check if we're in a browser environment
+      const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined'
+      
+      if (isBrowser) {
+        console.warn('[chessPGN] Worker threads are not supported in browsers. Falling back to single-threaded parsing.')
+        this.options.workers = false
+      } else {
+        /*
+         * Dynamically import WorkerPool only in Node.js
+         * This is a sync require in Node.js - the dynamic import happens at build time via tree-shaking
+         */
+        try {
+          const workerPoolModule = eval("require('./WorkerPool')")
+          const workerCount =
+            typeof this.options.workers === 'number' ? this.options.workers : 4
+          this.workerPool = new workerPoolModule.WorkerPool(workerCount, {
+            batchSize: this.options.workerBatchSize,
+            strict: this.options.strict,
+          })
+        } catch (err) {
+          console.warn('[chessPGN] Failed to load WorkerPool:', err)
+          this.options.workers = false
+        }
+      }
     }
   }
 
