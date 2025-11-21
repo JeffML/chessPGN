@@ -1,13 +1,18 @@
 {
   "name": "@chess-pgn/chess-pgn",
   "description": "Chess library with enhanced PGN support for parsing large, multi-game PGN files.",
-  "version": "0.1.0-beta.3",
+  "version": "0.1.0",
   "license": "BSD-2-Clause",
   "main": "dist/cjs/chessPGN.js",
   "module": "dist/esm/chessPGN.js",
   "types": "dist/types/chessPGN.d.ts",
   "homepage": "https://github.com/JeffML/chessPGN",
-  "keywords": ["chess", "pgn", "typescript", "parser"],
+  "keywords": [
+    "chess",
+    "pgn",
+    "typescript",
+    "parser"
+  ],
   "author": "Jeff Lowery <jlowery2663@gmail.com>",
   "scripts": {
     "prepare": "npm run build",
