@@ -6,3 +6,4 @@ temp/
 src/pgn.js
 src/pgn.d.ts
 src/workerParser.js
+*.tgz
