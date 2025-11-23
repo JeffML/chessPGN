@@ -75,7 +75,7 @@ export class CursorImpl implements Cursor {
   private currentPosition: number
   private cache: Map<number, Game>
   private options: Required<CursorOptions>
-  private workerPool?: any // WorkerPool type - conditionally loaded
+  private workerPool?: unknown // WorkerPool type - conditionally loaded (future feature)
   public errors: Array<{ index: number; error: Error }> = []
   public totalGames?: number
 
@@ -157,7 +157,7 @@ export class CursorImpl implements Cursor {
    */
   async terminate(): Promise<void> {
     if (this.workerPool) {
-      await this.workerPool.terminate()
+      await (this.workerPool as { terminate: () => Promise<void> }).terminate()
       this.workerPool = undefined
     }
   }
@@ -234,7 +234,13 @@ export class CursorImpl implements Cursor {
 
       try {
         // Parse batch with workers
-        const results = await this.workerPool.parseGames(batch)
+        const results = await (
+          this.workerPool as {
+            parseGames: (
+              batch: Array<{ index: number; pgn: string }>,
+            ) => Promise<Array<{ index: number; game: Game | null }>>
+          }
+        ).parseGames(batch)
 
         // Yield results in order
         for (const result of results) {

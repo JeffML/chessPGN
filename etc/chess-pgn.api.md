@@ -242,6 +242,95 @@ export class ChessPGN implements IChessGame {
 export type Color = 'w' | 'b';
 
 // @public
+export interface Cursor {
+    // (undocumented)
+    [Symbol.asyncIterator]?(): AsyncIterableIterator<Game>;
+    // (undocumented)
+    before?(): Game | null;
+    // (undocumented)
+    errors: Array<{
+        index: number;
+        error: Error;
+    }>;
+    // (undocumented)
+    findNext?(predicate: (headers: Record<string, string>) => boolean): Game | null;
+    // (undocumented)
+    hasBefore?(): boolean;
+    // (undocumented)
+    hasNext(): boolean;
+    // (undocumented)
+    next(): Game | null;
+    // (undocumented)
+    position: number;
+    // (undocumented)
+    reset?(): void;
+    // (undocumented)
+    seek?(index: number): boolean;
+    // (undocumented)
+    totalGames?: number;
+}
+
+// @public
+export class CursorImpl implements Cursor {
+    // (undocumented)
+    [Symbol.asyncIterator](): AsyncIterableIterator<Game>;
+    // Warning: (ae-forgotten-export) The symbol "GameIndex" needs to be exported by the entry point chessPGN.d.ts
+    constructor(pgn: string, indices: GameIndex[], options?: CursorOptions);
+    // (undocumented)
+    before(): Game | null;
+    // (undocumented)
+    errors: Array<{
+        index: number;
+        error: Error;
+    }>;
+    // (undocumented)
+    findNext(predicate: (headers: Record<string, string>) => boolean): Game | null;
+    // (undocumented)
+    hasBefore(): boolean;
+    // (undocumented)
+    hasNext(): boolean;
+    // (undocumented)
+    next(): Game | null;
+    pgn({ newline, maxWidth, }?: {
+        newline?: string;
+        maxWidth?: number;
+    }): string;
+    // (undocumented)
+    get position(): number;
+    // (undocumented)
+    reset(): void;
+    // (undocumented)
+    seek(index: number): boolean;
+    terminate(): Promise<void>;
+    // (undocumented)
+    totalGames?: number;
+}
+
+// @public
+export interface CursorOptions {
+    // (undocumented)
+    cacheSize?: number;
+    // (undocumented)
+    includeMetadata?: boolean;
+    // (undocumented)
+    lazyParse?: boolean;
+    // (undocumented)
+    length?: number;
+    // (undocumented)
+    onError?: (error: Error, gameIndex: number) => void;
+    // (undocumented)
+    prefetch?: number;
+    // (undocumented)
+    start?: number;
+    // (undocumented)
+    strict?: boolean;
+    // (undocumented)
+    workerBatchSize?: number;
+    // (undocumented)
+    workers?: boolean | number;
+}
+
+// @public
 export const DEFAULT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 // @public (undocumented)
@@ -587,6 +676,9 @@ export interface IChessGame {
     setSuffixAnnotation(suffix: Suffix, fen?: string): void;
     undo(): Move | null;
 }
+
+// @public
+export function indexPgnGames(pgn: string): GameIndex[];
 
 // @public (undocumented)
 export type InternalMove = {
