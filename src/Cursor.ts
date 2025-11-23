@@ -100,21 +100,26 @@ export class CursorImpl implements Cursor {
     this.cache = new Map()
     this.totalGames = indices.length
 
-    /* 
+    /*
      * Worker pool initialization is disabled in browsers
      * WorkerPool uses Node.js worker_threads which are not available in browsers
      * For browser environments, single-threaded parsing is used automatically
      */
     if (this.options.workers) {
-      const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined'
-      
+      const isBrowser =
+        typeof window !== 'undefined' && typeof window.document !== 'undefined'
+
       if (isBrowser) {
-        console.warn('[chessPGN] Worker threads are not supported in browsers. Using single-threaded parsing.')
+        console.warn(
+          '[chessPGN] Worker threads are not supported in browsers. Using single-threaded parsing.',
+        )
         this.options.workers = false
       } else {
         /* Workers are only supported in Node.js - see WorkerPool.ts */
         /* This code path will be tree-shaken out in browser builds */
-        throw new Error('Worker pool support requires separate Node.js-only build. Coming in future release.')
+        throw new Error(
+          'Worker pool support requires separate Node.js-only build. Coming in future release.',
+        )
       }
     }
   }
