@@ -5,6 +5,7 @@
  */
 
 import { Game } from './Game'
+import type { IChessGame } from './IChessGame'
 import { processPgnToGame } from './pgnProcessor'
 import { parse } from './pgn'
 import { parseHeaders } from './headerParser'
@@ -39,11 +40,11 @@ interface GameIndex {
  */
 export interface Cursor {
   // Core navigation
-  next(): Game | null
+  next(): IChessGame | null
   hasNext(): boolean
 
   // Optional backward navigation (Phase 2)
-  before?(): Game | null
+  before?(): IChessGame | null
   hasBefore?(): boolean
 
   // Position tracking
@@ -57,13 +58,13 @@ export interface Cursor {
   // Filtering (Phase 2)
   findNext?(
     predicate: (headers: Record<string, string>) => boolean,
-  ): Game | null
+  ): IChessGame | null
 
   // Error tracking
   errors: Array<{ index: number; error: Error }>
 
   // Async iteration support (Phase 3)
-  [Symbol.asyncIterator]?(): AsyncIterableIterator<Game>
+  [Symbol.asyncIterator]?(): AsyncIterableIterator<IChessGame>
 }
 
 /**
@@ -129,7 +130,7 @@ export class CursorImpl implements Cursor {
     return this.currentPosition > this.options.start
   }
 
-  before(): Game | null {
+  before(): IChessGame | null {
     if (!this.hasBefore()) {
       return null
     }
@@ -163,7 +164,7 @@ export class CursorImpl implements Cursor {
   }
 
   // Core navigation
-  public next(): Game | null {
+  public next(): IChessGame | null {
     if (!this.hasNext()) return null
     const idx = this.currentPosition
     const g = this.parseGame(idx)
@@ -188,7 +189,7 @@ export class CursorImpl implements Cursor {
   // Phase 2: Filtering
   findNext(
     predicate: (headers: Record<string, string>) => boolean,
-  ): Game | null {
+  ): IChessGame | null {
     while (this.hasNext()) {
       const index = this.gameIndices[this.currentPosition]
       if (index.headers && predicate(index.headers)) {
@@ -200,7 +201,7 @@ export class CursorImpl implements Cursor {
   }
 
   // Phase 3: Async iteration
-  async *[Symbol.asyncIterator](): AsyncIterableIterator<Game> {
+  async *[Symbol.asyncIterator](): AsyncIterableIterator<IChessGame> {
     if (!this.workerPool) {
       // No workers - use synchronous path
       while (this.hasNext()) {

@@ -244,22 +244,22 @@ export type Color = 'w' | 'b';
 // @public
 export interface Cursor {
     // (undocumented)
-    [Symbol.asyncIterator]?(): AsyncIterableIterator<Game>;
+    [Symbol.asyncIterator]?(): AsyncIterableIterator<IChessGame>;
     // (undocumented)
-    before?(): Game | null;
+    before?(): IChessGame | null;
     // (undocumented)
     errors: Array<{
         index: number;
         error: Error;
     }>;
     // (undocumented)
-    findNext?(predicate: (headers: Record<string, string>) => boolean): Game | null;
+    findNext?(predicate: (headers: Record<string, string>) => boolean): IChessGame | null;
     // (undocumented)
     hasBefore?(): boolean;
     // (undocumented)
     hasNext(): boolean;
     // (undocumented)
-    next(): Game | null;
+    next(): IChessGame | null;
     // (undocumented)
     position: number;
     // (undocumented)
@@ -273,24 +273,24 @@ export interface Cursor {
 // @public
 export class CursorImpl implements Cursor {
     // (undocumented)
-    [Symbol.asyncIterator](): AsyncIterableIterator<Game>;
+    [Symbol.asyncIterator](): AsyncIterableIterator<IChessGame>;
     // Warning: (ae-forgotten-export) The symbol "GameIndex" needs to be exported by the entry point chessPGN.d.ts
     constructor(pgn: string, indices: GameIndex[], options?: CursorOptions);
     // (undocumented)
-    before(): Game | null;
+    before(): IChessGame | null;
     // (undocumented)
     errors: Array<{
         index: number;
         error: Error;
     }>;
     // (undocumented)
-    findNext(predicate: (headers: Record<string, string>) => boolean): Game | null;
+    findNext(predicate: (headers: Record<string, string>) => boolean): IChessGame | null;
     // (undocumented)
     hasBefore(): boolean;
     // (undocumented)
     hasNext(): boolean;
     // (undocumented)
-    next(): Game | null;
+    next(): IChessGame | null;
     pgn({ newline, maxWidth, }?: {
         newline?: string;
         maxWidth?: number;
