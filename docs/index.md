@@ -255,23 +255,26 @@ manipulation.
 
 ## Move Class
 
-The `Move` class represents a chess move with rich metadata including position information, piece details, notation representations, and FEN snapshots of the board before and after the move. Move objects are returned by `move()`, `undo()`, and `history({ verbose: true })` methods.
+The `Move` class represents a chess move with rich metadata including position
+information, piece details, notation representations, and FEN snapshots of the
+board before and after the move. Move objects are returned by `move()`,
+`undo()`, and `history({ verbose: true })` methods.
 
 ### Properties
 
-| Property    | Type           | Description                                                |
-| ----------- | -------------- | ---------------------------------------------------------- |
-| `color`     | `Color`        | The color of the piece moved (`'w'` or `'b'`)             |
-| `from`      | `Square`       | Starting square (e.g., `'e2'`, `'g8'`)                     |
-| `to`        | `Square`       | Destination square (e.g., `'e4'`, `'f6'`)                  |
-| `piece`     | `PieceSymbol`  | Piece type moved (`'k'`, `'q'`, `'r'`, `'b'`, `'n'`, `'p'`) |
-| `captured`  | `PieceSymbol?` | Piece type captured, if any                                |
-| `promotion` | `PieceSymbol?` | Piece type promoted to, if any                             |
+| Property    | Type           | Description                                                  |
+| ----------- | -------------- | ------------------------------------------------------------ |
+| `color`     | `Color`        | The color of the piece moved (`'w'` or `'b'`)                |
+| `from`      | `Square`       | Starting square (e.g., `'e2'`, `'g8'`)                       |
+| `to`        | `Square`       | Destination square (e.g., `'e4'`, `'f6'`)                    |
+| `piece`     | `PieceSymbol`  | Piece type moved (`'k'`, `'q'`, `'r'`, `'b'`, `'n'`, `'p'`)  |
+| `captured`  | `PieceSymbol?` | Piece type captured, if any                                  |
+| `promotion` | `PieceSymbol?` | Piece type promoted to, if any                               |
 | `san`       | `string`       | Move in standard algebraic notation (e.g., `'Nf3'`, `'O-O'`) |
-| `lan`       | `string`       | Move in long algebraic notation (e.g., `'e2e4'`, `'g1f3'`) |
-| `before`    | `string`       | FEN string of position before the move                     |
-| `after`     | `string`       | FEN string of position after the move                      |
-| `flags`     | `string`       | **Deprecated** - Use move descriptor methods instead       |
+| `lan`       | `string`       | Move in long algebraic notation (e.g., `'e2e4'`, `'g1f3'`)   |
+| `before`    | `string`       | FEN string of position before the move                       |
+| `after`     | `string`       | FEN string of position after the move                        |
+| `flags`     | `string`       | **Deprecated** - Use move descriptor methods instead         |
 
 ### Methods
 
@@ -279,13 +282,13 @@ Move objects provide convenient methods for querying move characteristics:
 
 ```typescript
 class Move {
-  isCapture(): boolean         // Returns true if move captures a piece
-  isPromotion(): boolean       // Returns true if pawn promoted
-  isEnPassant(): boolean       // Returns true if en passant capture
-  isKingsideCastle(): boolean  // Returns true if kingside castling (O-O)
+  isCapture(): boolean // Returns true if move captures a piece
+  isPromotion(): boolean // Returns true if pawn promoted
+  isEnPassant(): boolean // Returns true if en passant capture
+  isKingsideCastle(): boolean // Returns true if kingside castling (O-O)
   isQueensideCastle(): boolean // Returns true if queenside castling (O-O-O)
-  isBigPawn(): boolean         // Returns true if pawn moved two squares
-  isNullMove(): boolean        // Returns true if null move
+  isBigPawn(): boolean // Returns true if pawn moved two squares
+  isNullMove(): boolean // Returns true if null move
 }
 ```
 
@@ -299,16 +302,16 @@ import { ChessPGN } from '@chess-pgn/chess-pgn'
 const game = new ChessPGN()
 const move = game.move('e4')
 
-console.log(move.san)    // 'e4'
-console.log(move.lan)    // 'e2e4'
-console.log(move.piece)  // 'p' (pawn)
-console.log(move.from)   // 'e2'
-console.log(move.to)     // 'e4'
-console.log(move.color)  // 'w' (white)
+console.log(move.san) // 'e4'
+console.log(move.lan) // 'e2e4'
+console.log(move.piece) // 'p' (pawn)
+console.log(move.from) // 'e2'
+console.log(move.to) // 'e4'
+console.log(move.color) // 'w' (white)
 
 // Check move characteristics
-console.log(move.isBigPawn())  // true (pawn moved two squares)
-console.log(move.isCapture())  // false
+console.log(move.isBigPawn()) // true (pawn moved two squares)
+console.log(move.isCapture()) // false
 ```
 
 #### Verbose Move History
@@ -349,9 +352,9 @@ game.load('rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2')
 
 const move = game.move('exd5')
 
-console.log(move.san)       // 'exd5'
-console.log(move.captured)  // 'p' (captured pawn)
-console.log(move.isCapture())  // true
+console.log(move.san) // 'exd5'
+console.log(move.captured) // 'p' (captured pawn)
+console.log(move.isCapture()) // true
 ```
 
 #### Promotions
@@ -362,10 +365,10 @@ game.load('4k3/P7/8/8/8/8/8/4K3 w - - 0 1')
 
 const move = game.move('a8=Q')
 
-console.log(move.san)        // 'a8=Q'
-console.log(move.lan)        // 'a7a8q'
-console.log(move.promotion)  // 'q' (queen)
-console.log(move.isPromotion())  // true
+console.log(move.san) // 'a8=Q'
+console.log(move.lan) // 'a7a8q'
+console.log(move.promotion) // 'q' (queen)
+console.log(move.isPromotion()) // true
 ```
 
 #### Castling
@@ -375,14 +378,14 @@ const game = new ChessPGN()
 game.load('r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1')
 
 const kingsideCastle = game.move('O-O')
-console.log(kingsideCastle.san)  // 'O-O'
-console.log(kingsideCastle.isKingsideCastle())  // true
+console.log(kingsideCastle.san) // 'O-O'
+console.log(kingsideCastle.isKingsideCastle()) // true
 
 game.undo()
 
 const queensideCastle = game.move('O-O-O')
-console.log(queensideCastle.san)  // 'O-O-O'
-console.log(queensideCastle.isQueensideCastle())  // true
+console.log(queensideCastle.san) // 'O-O-O'
+console.log(queensideCastle.isQueensideCastle()) // true
 ```
 
 #### Analyzing Position Transitions
@@ -412,7 +415,7 @@ function analyzeMove(move: Move): void {
   if (move.isCapture()) {
     console.log(`Captured piece: ${move.captured}`)
   }
-  
+
   if (move.isPromotion()) {
     console.log(`Promoted to: ${move.promotion}`)
   }
@@ -420,12 +423,13 @@ function analyzeMove(move: Move): void {
 
 const game = new ChessPGN()
 const move = game.move('e4')
-analyzeMove(move)  // Type-safe!
+analyzeMove(move) // Type-safe!
 ```
 
 ### Deprecation Notice
 
-The `flags` property is deprecated and will be removed in version 2.0.0. Use the move descriptor methods (`isCapture()`, `isPromotion()`, etc.) instead:
+The `flags` property is deprecated and will be removed in version 2.0.0. Use the
+move descriptor methods (`isCapture()`, `isPromotion()`, etc.) instead:
 
 ```typescript
 // ❌ Deprecated approach
@@ -816,11 +820,11 @@ analyzeGames('world_championship_2025.pgn')
 ```typescript
 interface Cursor {
   // Core navigation
-  next(): Game | null
+  next(): IChessGame | null
   hasNext(): boolean
 
   // Backward navigation
-  before(): Game | null
+  before(): IChessGame | null
   hasBefore(): boolean
 
   // Position tracking
@@ -832,13 +836,15 @@ interface Cursor {
   reset(): void
 
   // Filtering
-  findNext(predicate: (headers: Record<string, string>) => boolean): Game | null
+  findNext(
+    predicate: (headers: Record<string, string>) => boolean,
+  ): IChessGame | null
 
   // Error tracking
   errors: Array<{ index: number; error: Error }>
 
   // Async iteration
-  [Symbol.asyncIterator](): AsyncIterableIterator<Game>
+  [Symbol.asyncIterator](): AsyncIterableIterator<IChessGame>
 
   // Cleanup (when using workers)
   terminate(): Promise<void>

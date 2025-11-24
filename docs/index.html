@@ -280,6 +280,14 @@
             </ul>
           </li>
           <li>
+            <a href="#move-class">Move Class</a>
+            <ul class="toc-sub">
+              <li><a href="#move-properties">Properties</a></li>
+              <li><a href="#move-methods">Methods</a></li>
+              <li><a href="#move-examples">Usage Examples</a></li>
+            </ul>
+          </li>
+          <li>
             <a href="#loadpgn-method">loadPgn() Method</a>
             <ul class="toc-sub">
               <li><a href="#signature">Signature</a></li>
@@ -533,6 +541,197 @@ console.log(chessFen === gameFen) // true</code></pre>
             chess operations. Use <code>ChessPGN</code> if you need hash
             tracking or explicit castling rights manipulation.
           </p>
+        </section>
+
+        <section id="move-class">
+          <h2>Move Class</h2>
+          <p>
+            The <code>Move</code> class represents a chess move with rich
+            metadata including position information, piece details, notation
+            representations, and FEN snapshots of the board before and after the
+            move. Move objects are returned by <code>move()</code>,
+            <code>undo()</code>, and
+            <code>history({ verbose: true })</code> methods.
+          </p>
+
+          <h3 id="move-properties">Properties</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>color</code></td>
+                <td><code>Color</code></td>
+                <td>
+                  The color of the piece moved (<code>'w'</code> or
+                  <code>'b'</code>)
+                </td>
+              </tr>
+              <tr>
+                <td><code>from</code></td>
+                <td><code>Square</code></td>
+                <td>
+                  Starting square (e.g., <code>'e2'</code>, <code>'g8'</code>)
+                </td>
+              </tr>
+              <tr>
+                <td><code>to</code></td>
+                <td><code>Square</code></td>
+                <td>
+                  Destination square (e.g., <code>'e4'</code>,
+                  <code>'f6'</code>)
+                </td>
+              </tr>
+              <tr>
+                <td><code>piece</code></td>
+                <td><code>PieceSymbol</code></td>
+                <td>
+                  Piece type moved (<code>'k'</code>, <code>'q'</code>,
+                  <code>'r'</code>, <code>'b'</code>, <code>'n'</code>,
+                  <code>'p'</code>)
+                </td>
+              </tr>
+              <tr>
+                <td><code>captured</code></td>
+                <td><code>PieceSymbol?</code></td>
+                <td>Piece type captured, if any</td>
+              </tr>
+              <tr>
+                <td><code>promotion</code></td>
+                <td><code>PieceSymbol?</code></td>
+                <td>Piece type promoted to, if any</td>
+              </tr>
+              <tr>
+                <td><code>san</code></td>
+                <td><code>string</code></td>
+                <td>
+                  Move in standard algebraic notation (e.g., <code>'Nf3'</code>,
+                  <code>'O-O'</code>)
+                </td>
+              </tr>
+              <tr>
+                <td><code>lan</code></td>
+                <td><code>string</code></td>
+                <td>
+                  Move in long algebraic notation (e.g., <code>'e2e4'</code>,
+                  <code>'g1f3'</code>)
+                </td>
+              </tr>
+              <tr>
+                <td><code>before</code></td>
+                <td><code>string</code></td>
+                <td>FEN string of position before the move</td>
+              </tr>
+              <tr>
+                <td><code>after</code></td>
+                <td><code>string</code></td>
+                <td>FEN string of position after the move</td>
+              </tr>
+              <tr>
+                <td><code>flags</code></td>
+                <td><code>string</code></td>
+                <td>
+                  <strong>Deprecated</strong> - Use move descriptor methods
+                  instead
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 id="move-methods">Methods</h3>
+          <p>
+            Move objects provide convenient methods for querying move
+            characteristics:
+          </p>
+          <pre><code>class Move {
+  isCapture(): boolean         // Returns true if move captures a piece
+  isPromotion(): boolean       // Returns true if pawn promoted
+  isEnPassant(): boolean       // Returns true if en passant capture
+  isKingsideCastle(): boolean  // Returns true if kingside castling (O-O)
+  isQueensideCastle(): boolean // Returns true if queenside castling (O-O-O)
+  isBigPawn(): boolean         // Returns true if pawn moved two squares
+  isNullMove(): boolean        // Returns true if null move
+}</code></pre>
+
+          <h3 id="move-examples">Usage Examples</h3>
+
+          <h4>Making a Move</h4>
+          <pre><code>import { ChessPGN } from '@chess-pgn/chess-pgn'
+
+const game = new ChessPGN()
+const move = game.move('e4')
+
+console.log(move.san)    // 'e4'
+console.log(move.lan)    // 'e2e4'
+console.log(move.piece)  // 'p' (pawn)
+console.log(move.from)   // 'e2'
+console.log(move.to)     // 'e4'
+console.log(move.color)  // 'w' (white)
+
+// Check move characteristics
+console.log(move.isBigPawn())  // true (pawn moved two squares)
+console.log(move.isCapture())  // false</code></pre>
+
+          <h4>Verbose Move History</h4>
+          <pre><code>const game = new ChessPGN()
+game.move('e4')
+game.move('e5')
+game.move('Nf3')
+game.move('Nc6')
+
+// Get detailed move history
+const moves = game.history({ verbose: true })
+
+moves.forEach((move) => {
+  console.log(`${move.san}: ${move.piece} from ${move.from} to ${move.to}`)
+  if (move.captured) {
+    console.log(`  Captured ${move.captured}`)
+  }
+})</code></pre>
+
+          <h4>Capturing Moves</h4>
+          <pre><code>const game = new ChessPGN()
+game.load('rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 2')
+
+const move = game.move('exd5')
+
+console.log(move.san)       // 'exd5'
+console.log(move.captured)  // 'p' (captured pawn)
+console.log(move.isCapture())  // true</code></pre>
+
+          <h4>Promotions and Castling</h4>
+          <pre><code>// Promotion
+const game = new ChessPGN()
+game.load('4k3/P7/8/8/8/8/8/4K3 w - - 0 1')
+const move = game.move('a8=Q')
+
+console.log(move.promotion)  // 'q' (queen)
+console.log(move.isPromotion())  // true
+
+// Castling
+game.load('r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1')
+const castleMove = game.move('O-O')
+console.log(castleMove.isKingsideCastle())  // true</code></pre>
+
+          <h4>Deprecation Notice</h4>
+          <p>
+            The <code>flags</code> property is deprecated and will be removed in
+            version 2.0.0. Use the move descriptor methods instead:
+          </p>
+          <pre><code>// ❌ Deprecated approach
+if (move.flags.includes('c')) {
+  console.log('Capture')
+}
+
+// ✅ Recommended approach
+if (move.isCapture()) {
+  console.log('Capture')
+}</code></pre>
         </section>
 
         <section id="loadpgn-method">
