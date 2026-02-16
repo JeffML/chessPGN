@@ -34,7 +34,12 @@ PGN parsing capabilities with worker thread support.
 - Async iteration support
 - Error tolerance and caching
 - Performance: 3-5x speedup with workers
-- **Returns IChessGame, not Game** - Better API abstraction
+- **CRITICAL**: `indexPgnGames()` returns metadata objects, NOT `IChessGame` instances
+  - Objects have shape: `{ startOffset: number, endOffset: number, headers: {...} }`
+  - Access headers via `.headers` property, not `.header()` method
+  - To get full `IChessGame` instance, must call `loadPgn()` separately
+  - Use for metadata scanning when you don't need full game API
+  - Example: `for await (const game of cursor) { const white = game.headers.White; }`
 
 ### Type System
 
