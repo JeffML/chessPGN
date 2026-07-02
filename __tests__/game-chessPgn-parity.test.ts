@@ -459,4 +459,36 @@ describe('Game vs ChessPGN API Parity', () => {
       }
     })
   })
+
+  describe('moveList() method', () => {
+    it('should return identical results for 10 games', () => {
+      const cursor = createCursorForTesting(pgn, 0, 10)
+
+      for (let i = 0; i < 10; i++) {
+        const game = cursor.next()
+        expect(game).not.toBeNull()
+        if (!game) break
+
+        const chess = createMatchingChessPgn(game)
+
+        expect(game.moveList()).toBe(chess.moveList())
+      }
+    })
+
+    it('should not contain header tags', () => {
+      const cursor = createCursorForTesting(pgn, 0, 5)
+
+      for (let i = 0; i < 5; i++) {
+        const game = cursor.next()
+        expect(game).not.toBeNull()
+        if (!game) break
+
+        const ml = game.moveList()
+        expect(ml).not.toContain('[')
+        expect(ml).not.toContain(']')
+        // Should contain a move number (may be preceded by a comment)
+        expect(ml).toMatch(/1\./)
+      }
+    })
+  })
 })

@@ -875,8 +875,8 @@ interface Cursor {
 Annotates a loaded chess game in-place with opening data from the
 [eco.json](https://github.com/JeffML/eco.json) database (~15,800 named
 variations). The function identifies the deepest named opening position in the
-game's move history and optionally writes ECO headers, a boundary comment, and
-a novelty NAG.
+game's move history and optionally writes ECO headers, a boundary comment, and a
+novelty NAG.
 
 > **Requires the optional peer dependency** `@chess-openings/eco.json`:
 >
@@ -900,20 +900,20 @@ async function annotateOpenings(
 
 ### Parameters
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `game` | `IChessGame` | A loaded game instance (all moves already played) |
-| `options` | `AnnotateOpeningsOptions` | Optional annotation settings |
+| Parameter | Type                      | Description                                       |
+| --------- | ------------------------- | ------------------------------------------------- |
+| `game`    | `IChessGame`              | A loaded game instance (all moves already played) |
+| `options` | `AnnotateOpeningsOptions` | Optional annotation settings                      |
 
 ### AnnotateOpeningsOptions
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `headers` | `'replace' \| 'additive' \| false` | `'replace'` | How to write ECO/Opening/Variation headers |
-| `origPrefix` | `string` | `'Orig'` | Prefix for saved original tags in replace mode |
-| `customPrefix` | `string` | `'EcoJson'` | Prefix for custom tags in additive mode |
-| `boundaryComment` | `boolean` | `true` | Insert `{ ECO: Opening name }` comment at last in-book move |
-| `noveltyNag` | `boolean` | `false` | Insert `$146` novelty NAG on first out-of-book move |
+| Option            | Type                               | Default     | Description                                                 |
+| ----------------- | ---------------------------------- | ----------- | ----------------------------------------------------------- |
+| `headers`         | `'replace' \| 'additive' \| false` | `'replace'` | How to write ECO/Opening/Variation headers                  |
+| `origPrefix`      | `string`                           | `'Orig'`    | Prefix for saved original tags in replace mode              |
+| `customPrefix`    | `string`                           | `'EcoJson'` | Prefix for custom tags in additive mode                     |
+| `boundaryComment` | `boolean`                          | `true`      | Insert `{ ECO: Opening name }` comment at last in-book move |
+| `noveltyNag`      | `boolean`                          | `false`     | Insert `$146` novelty NAG on first out-of-book move         |
 
 #### `headers` modes
 
@@ -967,7 +967,7 @@ await annotateOpenings(chess, { headers: 'additive' })
 
 ```typescript
 await annotateOpenings(chess, {
-  noveltyNag: true,   // marks first out-of-book move with $146
+  noveltyNag: true, // marks first out-of-book move with $146
   boundaryComment: true,
 })
 ```

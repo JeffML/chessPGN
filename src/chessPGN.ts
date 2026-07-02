@@ -845,6 +845,10 @@ export class ChessPGN implements IChessGame {
     return this._game._undoMove()
   }
 
+  moveList(options?: { newline?: string; maxWidth?: number }): string {
+    return this._game.moveList(options)
+  }
+
   pgn({
     newline = '\n',
     maxWidth = 0,
