@@ -325,3 +325,24 @@ export const ROOKS = {
 // Suffix annotation list used for per-position suffix annotations (e.g. '!', '?', '!!')
 export const SUFFIX_LIST = ['!', '?', '!!', '!?', '?!', '??'] as const
 export type Suffix = (typeof SUFFIX_LIST)[number]
+
+/**
+ * Options for annotateOpenings()
+ */
+export interface AnnotateOpeningsOptions {
+  /** How to write ECO/Opening/Variation headers.
+   *  'replace' — overwrite existing tags, saving originals as OrigECO/OrigOpening/OrigVariation
+   *  'additive' — leave originals, write to EcoJsonECO/EcoJsonOpening/EcoJsonVariation
+   *  false — skip header annotation entirely
+   *  @default 'replace'
+   */
+  headers?: 'replace' | 'additive' | false
+  /** Prefix used when saving original header values in replace mode. @default 'Orig' */
+  origPrefix?: string
+  /** Prefix used for custom header names in additive mode. @default 'EcoJson' */
+  customPrefix?: string
+  /** Insert an opening name comment at the last in-book move. @default true */
+  boundaryComment?: boolean
+  /** Insert a $146 novelty NAG on the first out-of-book move. @default false */
+  noveltyNag?: boolean
+}
