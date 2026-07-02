@@ -165,10 +165,7 @@ export async function annotateOpenings(
       // For now, prepend $146 to the comment at that position
       const targetFen = moves[noveltyMoveIdx].after
       const existing = game.getComment(targetFen)
-      game.setComment(
-        existing ? `$146 ${existing}` : '$146',
-        targetFen,
-      )
+      game.setComment(existing ? `$146 ${existing}` : '$146', targetFen)
     }
   }
 }

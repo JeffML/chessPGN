@@ -37,6 +37,20 @@ npm install @chess-pgn/chess-pgn
 
 ## 🚀 Quick Start
 
+### ♻️ Drop-in Replacement for chess.js
+
+**chessPGN** is a drop-in replacement for
+[chess.js](https://github.com/jhlywa/chess.js). Simply swap the import:
+
+```typescript
+// import { Chess } from 'chess.js'
+import { ChessPGN as Chess } from '@chess-pgn/chess-pgn'
+```
+
+The ChessPGN class implements the same API as chess.js, so existing code works
+without further changes. You gain multi-game PGN parsing, worker thread support,
+and TypeScript-first types — with no rewrites required.
+
 ### Basic Game
 
 ```typescript
