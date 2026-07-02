@@ -54,6 +54,10 @@ export { Game } from './Game'
 export { indexPgnGames, CursorImpl } from './Cursor'
 export type { Cursor, CursorOptions } from './Cursor'
 
+// Opening annotation (requires optional peer dep @chess-openings/eco.json)
+export { annotateOpenings } from './openings'
+export type { AnnotateOpeningsOptions } from './types'
+
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
@@ -841,6 +845,10 @@ export class ChessPGN implements IChessGame {
     return this._game._undoMove()
   }
 
+  moveList(options?: { newline?: string; maxWidth?: number }): string {
+    return this._game.moveList(options)
+  }
+
   pgn({
     newline = '\n',
     maxWidth = 0,
@@ -1071,24 +1079,24 @@ export class ChessPGN implements IChessGame {
     this._game._pruneComments()
   }
 
-  getComment(): string | undefined {
-    return this._game.getComment()
+  getComment(fen?: string): string | undefined {
+    return this._game.getComment(fen)
   }
 
-  setComment(comment: string) {
+  setComment(comment: string, fen?: string): void {
     // Delegate to Game, which handles sanitization
-    this._game.setComment(comment)
+    this._game.setComment(comment, fen)
   }
 
   /**
    * @deprecated Renamed to `removeComment` for consistency
    */
-  deleteComment(): string | undefined {
-    return this.removeComment()
+  deleteComment(fen?: string): string | undefined {
+    return this.removeComment(fen)
   }
 
-  removeComment(): string | undefined {
-    return this._game.removeComment()
+  removeComment(fen?: string): string | undefined {
+    return this._game.removeComment(fen)
   }
 
   getComments(): {

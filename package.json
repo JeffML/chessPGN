@@ -17,7 +17,7 @@
     "fen",
     "chess-game",
     "multi-game-pgn",
-    "chess-js",
+    "chess.js",
     "chess-moves",
     "game-parser",
     "worker-threads",
@@ -47,7 +47,16 @@
   "engines": {
     "node": ">=22.15.0"
   },
+  "peerDependencies": {
+    "@chess-openings/eco.json": ">=2.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@chess-openings/eco.json": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@chess-openings/eco.json": "^2.2.0",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.29.0",
     "@microsoft/api-extractor": "^7.53.1",

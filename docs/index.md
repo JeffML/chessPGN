@@ -9,6 +9,7 @@ interface, PGN loading, and the multi-game cursor.
 - [Move Class](#move-class)
 - [loadPgn() Method](#loadpgn-method)
 - [Cursor for Multi-Game PGN Files](#cursor-for-multi-game-pgn-files)
+- [annotateOpenings() Function](#annotateopenings-function)
 
 ---
 
@@ -866,3 +867,143 @@ interface Cursor {
 - [PGN Specification](http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm)
 - [Worker Thread Performance](./WORKERS.md)
 - [API Documentation](https://jeffml.github.io/chessPGN)
+
+---
+
+## annotateOpenings() Function
+
+Annotates a loaded chess game in-place with opening data from the
+[eco.json](https://github.com/JeffML/eco.json) database (~15,800 named
+variations). The function identifies the deepest named opening position in the
+game's move history and optionally writes ECO headers, a boundary comment, and a
+novelty NAG.
+
+> **Requires the optional peer dependency** `@chess-openings/eco.json`:
+>
+> ```bash
+> npm install @chess-openings/eco.json
+> ```
+>
+> The opening book (~468 KB gzipped) is fetched from GitHub on first call and
+> cached for the lifetime of the process.
+
+### Signature
+
+```typescript
+import { annotateOpenings } from '@chess-pgn/chess-pgn'
+
+async function annotateOpenings(
+  game: IChessGame,
+  options?: AnnotateOpeningsOptions,
+): Promise<void>
+```
+
+### Parameters
+
+| Parameter | Type                      | Description                                       |
+| --------- | ------------------------- | ------------------------------------------------- |
+| `game`    | `IChessGame`              | A loaded game instance (all moves already played) |
+| `options` | `AnnotateOpeningsOptions` | Optional annotation settings                      |
+
+### AnnotateOpeningsOptions
+
+| Option            | Type                               | Default     | Description                                                 |
+| ----------------- | ---------------------------------- | ----------- | ----------------------------------------------------------- |
+| `headers`         | `'replace' \| 'additive' \| false` | `'replace'` | How to write ECO/Opening/Variation headers                  |
+| `origPrefix`      | `string`                           | `'Orig'`    | Prefix for saved original tags in replace mode              |
+| `customPrefix`    | `string`                           | `'EcoJson'` | Prefix for custom tags in additive mode                     |
+| `boundaryComment` | `boolean`                          | `true`      | Insert `{ ECO: Opening name }` comment at last in-book move |
+| `noveltyNag`      | `boolean`                          | `false`     | Insert `$146` novelty NAG on first out-of-book move         |
+
+#### `headers` modes
+
+- **`'replace'`** — Overwrites `ECO`, `Opening`, and `Variation` tags. Original
+  values are saved as `OrigECO`, `OrigOpening`, `OrigVariation`.
+- **`'additive'`** — Leaves original tags unchanged; writes eco.json values to
+  `EcoJsonECO`, `EcoJsonOpening`, `EcoJsonVariation`, `EcoJsonSubVariation`.
+- **`false`** — Skips header annotation entirely.
+
+### Examples
+
+#### Basic Usage
+
+```typescript
+import { ChessPGN, annotateOpenings } from '@chess-pgn/chess-pgn'
+
+const chess = new ChessPGN()
+chess.loadPgn(`
+  [White "Kasparov"]
+  [Black "Karpov"]
+
+  1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 *
+`)
+
+await annotateOpenings(chess)
+
+console.log(chess.getHeaders())
+// {
+//   White: 'Kasparov',
+//   Black: 'Karpov',
+//   ECO: 'C84',
+//   Opening: 'Ruy Lopez',
+//   Variation: 'Closed Defense',
+//   ...
+// }
+
+console.log(chess.pgn())
+// ... 5. O-O {C84: Ruy Lopez: Closed Defense} Be7 *
+```
+
+#### Additive Mode (preserve existing headers)
+
+```typescript
+await annotateOpenings(chess, { headers: 'additive' })
+
+// Adds EcoJsonECO, EcoJsonOpening, EcoJsonVariation
+// Leaves original ECO/Opening/Variation untouched
+```
+
+#### With Novelty NAG
+
+```typescript
+await annotateOpenings(chess, {
+  noveltyNag: true, // marks first out-of-book move with $146
+  boundaryComment: true,
+})
+```
+
+#### Annotating Multiple Games
+
+`annotateOpenings()` mutates a single game in-place. For multi-game PGN files,
+iterate with `indexPgnGames()` and collect annotated PGN strings:
+
+```typescript
+import { ChessPGN, indexPgnGames, annotateOpenings } from '@chess-pgn/chess-pgn'
+
+const pgnContent = fs.readFileSync('games.pgn', 'utf-8')
+const cursor = indexPgnGames(pgnContent)
+
+const annotated: string[] = []
+
+for (const metadata of cursor) {
+  const chess = new ChessPGN()
+  chess.loadPgn(pgnContent.slice(metadata.startOffset, metadata.endOffset))
+  await annotateOpenings(chess)
+  annotated.push(chess.pgn())
+}
+
+fs.writeFileSync('annotated.pgn', annotated.join('\n\n'))
+```
+
+> The opening book is fetched once and cached automatically — no per-game
+> network overhead after the first call.
+
+### Notes
+
+- The function walks the move history **backward from the end** to find the
+  deepest named opening position, not the first.
+- If no named opening is found, the game is left unmodified.
+- `$146` (novelty) is embedded as a comment `$146` prepended to the position's
+  existing comment, since `IChessGame` does not yet expose a `setNag()` method.
+- The eco.json opening book includes ~15,800 named variations across ECO
+  categories A–E plus interpolated variations.

@@ -257,4 +257,12 @@ export interface IChessGame {
    * @returns PGN string
    */
   pgn(options?: { newline?: string; maxWidth?: number }): string
+
+  /**
+   * Return the move sequence string without PGN headers.
+   * Example: `"1. e4 e5 2. Nf3 Nc6 3. Bb5 *"`
+   * @param options - Same formatting options as pgn()
+   * @returns Move list string
+   */
+  moveList(options?: { newline?: string; maxWidth?: number }): string
 }

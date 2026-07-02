@@ -1994,6 +1994,12 @@ export class Game implements IChessGame {
    * @param options - Formatting options (newline character and max width)
    * @returns PGN string representation of the game
    */
+  moveList(options?: { newline?: string; maxWidth?: number }): string {
+    const p = this.pgn(options)
+    const last = p.lastIndexOf(']')
+    return last === -1 ? p.trim() : p.slice(last + 1).trim()
+  }
+
   pgn({
     newline = '\n',
     maxWidth = 0,

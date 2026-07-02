@@ -4,6 +4,18 @@
 
 ```ts
 
+// @public
+export function annotateOpenings(game: IChessGame, options?: AnnotateOpeningsOptions): Promise<void>;
+
+// @public (undocumented)
+export interface AnnotateOpeningsOptions {
+    boundaryComment?: boolean;
+    customPrefix?: string;
+    headers?: 'replace' | 'additive' | false;
+    noveltyNag?: boolean;
+    origPrefix?: string;
+}
+
 // @public (undocumented)
 export const BISHOP = "b";
 
@@ -125,6 +137,11 @@ export class ChessPGN implements IChessGame {
     } | null, { strict }?: {
         strict?: boolean;
     }): Move;
+    // (undocumented)
+    moveList(options?: {
+        newline?: string;
+        maxWidth?: number;
+    }): string;
     // (undocumented)
     moveNumber(): number;
     // (undocumented)
@@ -472,6 +489,10 @@ export class Game implements IChessGame {
     }): Move;
     // @internal
     _moveFromSan(move: string, strict?: boolean): InternalMove | null;
+    moveList(options?: {
+        newline?: string;
+        maxWidth?: number;
+    }): string;
     // (undocumented)
     _moveNumber: number;
     // (undocumented)
@@ -551,6 +572,7 @@ export class Game implements IChessGame {
     }): InternalMove[];
     // @internal
     _moveToSan(move: InternalMove, moves: InternalMove[]): string;
+    // (undocumented)
     pgn({ newline, maxWidth, }?: {
         newline?: string;
         maxWidth?: number;
@@ -659,6 +681,10 @@ export interface IChessGame {
     } | null, options?: {
         strict?: boolean;
     }): Move;
+    moveList(options?: {
+        newline?: string;
+        maxWidth?: number;
+    }): string;
     pgn(options?: {
         newline?: string;
         maxWidth?: number;
