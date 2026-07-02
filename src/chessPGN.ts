@@ -1079,24 +1079,24 @@ export class ChessPGN implements IChessGame {
     this._game._pruneComments()
   }
 
-  getComment(): string | undefined {
-    return this._game.getComment()
+  getComment(fen?: string): string | undefined {
+    return this._game.getComment(fen)
   }
 
-  setComment(comment: string) {
+  setComment(comment: string, fen?: string): void {
     // Delegate to Game, which handles sanitization
-    this._game.setComment(comment)
+    this._game.setComment(comment, fen)
   }
 
   /**
    * @deprecated Renamed to `removeComment` for consistency
    */
-  deleteComment(): string | undefined {
-    return this.removeComment()
+  deleteComment(fen?: string): string | undefined {
+    return this.removeComment(fen)
   }
 
-  removeComment(): string | undefined {
-    return this._game.removeComment()
+  removeComment(fen?: string): string | undefined {
+    return this._game.removeComment(fen)
   }
 
   getComments(): {

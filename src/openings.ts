@@ -8,17 +8,21 @@
  */
 
 import type { IChessGame } from './IChessGame'
+import { Game } from './Game'
 import type { AnnotateOpeningsOptions } from './types'
 
 // ─── eco.json dynamic import ─────────────────────────────────────────────────
 
 type EcoJsonModule = {
   openingBook: () => Promise<Record<string, unknown>>
-  findOpening: (
+  lookupByMoves: (
+    game: IChessGame,
     ob: Record<string, unknown>,
-    fen: string,
-    pb?: Record<string, unknown>,
-  ) => { name: string; eco: string } | null
+    options?: { maxMovesBack?: number; positionBook?: Record<string, unknown> },
+  ) => {
+    opening?: { name: string; eco: string; moves?: string }
+    movesBack: number
+  }
   getPositionBook: (ob: Record<string, unknown>) => Record<string, unknown>
   splitOpeningName: (name: string) => {
     opening: string
@@ -36,6 +40,22 @@ async function loadEcoJson(): Promise<EcoJsonModule> {
         'Install it with: npm install @chess-openings/eco.json',
     )
   }
+}
+
+function parseSanTokensFromOpeningLine(line: string): string[] {
+  return line
+    .replace(/\{[^}]*\}/g, ' ')
+    .replace(/\$\d+/g, ' ')
+    .split(/\s+/)
+    .filter(
+      (token) =>
+        token.length > 0 &&
+        !/^\d+\.(\.\.)?$/.test(token) &&
+        token !== '*' &&
+        token !== '1-0' &&
+        token !== '0-1' &&
+        token !== '1/2-1/2',
+    )
 }
 
 // Cached once per process.
@@ -93,20 +113,41 @@ export async function annotateOpenings(
   } = options ?? {}
 
   const { ecoJson, ob, pb } = await getBooks()
-  const { findOpening, splitOpeningName } = ecoJson
+  const { lookupByMoves, splitOpeningName } = ecoJson
 
   // Get verbose history — each Move has .san and .after (FEN after the move)
   const moves = game.history({ verbose: true })
 
-  // Walk forward to find the deepest named opening position
-  let deepestOpening: { name: string; eco: string } | null = null
-  let deepestMoveIdx = -1
+  // Run lookup on a throwaway clone so we never mutate the caller's game state.
+  const probe = new Game()
+  for (const move of moves) {
+    probe.move(move.san)
+  }
 
-  for (let i = 0; i < moves.length; i++) {
-    const found = findOpening(ob, moves[i].after, pb)
-    if (found) {
-      deepestOpening = found
-      deepestMoveIdx = i
+  // Ask eco.json to find the nearest named opening by walking backward.
+  const lookup = lookupByMoves(probe, ob, { positionBook: pb })
+  const deepestOpening = lookup.opening ?? null
+  const fallbackDeepestMoveIdx = deepestOpening
+    ? Math.max(-1, moves.length - 1 - lookup.movesBack)
+    : -1
+
+  // Prefer the canonical endpoint from opening.moves when available.
+  let deepestMoveIdx = fallbackDeepestMoveIdx
+  if (deepestOpening?.moves) {
+    const openingSans = parseSanTokensFromOpeningLine(deepestOpening.moves)
+    if (openingSans.length > 0) {
+      let matched = 0
+      while (
+        matched < openingSans.length &&
+        matched < moves.length &&
+        openingSans[matched] === moves[matched].san
+      ) {
+        matched++
+      }
+
+      if (matched > 0) {
+        deepestMoveIdx = matched - 1
+      }
     }
   }
 
