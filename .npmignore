@@ -1,6 +1,7 @@
 .github/
 coverage/
 __tests__/
+temp/
 debug.sh
 benchmarks/
 website/
