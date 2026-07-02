@@ -45,7 +45,7 @@ export class ChessPGN implements IChessGame {
         preserveHeaders?: boolean | undefined;
     }): void;
     // @deprecated (undocumented)
-    deleteComment(): string | undefined;
+    deleteComment(fen?: string): string | undefined;
     // @deprecated (undocumented)
     deleteComments(): {
         fen: string;
@@ -65,7 +65,7 @@ export class ChessPGN implements IChessGame {
         [QUEEN]: boolean;
     };
     // (undocumented)
-    getComment(): string | undefined;
+    getComment(fen?: string): string | undefined;
     // (undocumented)
     getComments(): {
         fen: string;
@@ -227,7 +227,7 @@ export class ChessPGN implements IChessGame {
     // (undocumented)
     remove(square: Square): Piece | undefined;
     // (undocumented)
-    removeComment(): string | undefined;
+    removeComment(fen?: string): string | undefined;
     // (undocumented)
     removeComments(): {
         fen: string;
@@ -241,7 +241,7 @@ export class ChessPGN implements IChessGame {
     // (undocumented)
     setCastlingRights(color: Color, rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>): boolean;
     // (undocumented)
-    setComment(comment: string): void;
+    setComment(comment: string, fen?: string): void;
     // (undocumented)
     setHeader(key: string, value: string): Record<string, string>;
     setSuffixAnnotation(suffix: Suffix, fen?: string): void;
