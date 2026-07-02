@@ -39,9 +39,9 @@ async function loadEcoJson(): Promise<EcoJsonModule> {
 }
 
 // Cached once per process.
-let _openingBook: Record<string, unknown> | null = null
-let _positionBook: Record<string, unknown> | null = null
-let _ecoJson: EcoJsonModule | null = null
+let cachedOpeningBook: Record<string, unknown> | null = null
+let cachedPositionBook: Record<string, unknown> | null = null
+let cachedEcoJson: EcoJsonModule | null = null
 
 /**
  * Load and cache the eco.json module and opening book.
@@ -52,17 +52,17 @@ async function getBooks(): Promise<{
   ob: Record<string, unknown>
   pb: Record<string, unknown>
 }> {
-  if (!_ecoJson) {
-    _ecoJson = await loadEcoJson()
+  if (!cachedEcoJson) {
+    cachedEcoJson = await loadEcoJson()
   }
-  if (!_openingBook) {
-    _openingBook = await _ecoJson.openingBook()
-    _positionBook = _ecoJson.getPositionBook(_openingBook)
+  if (!cachedOpeningBook) {
+    cachedOpeningBook = await cachedEcoJson.openingBook()
+    cachedPositionBook = cachedEcoJson.getPositionBook(cachedOpeningBook)
   }
   return {
-    ecoJson: _ecoJson,
-    ob: _openingBook,
-    pb: _positionBook!,
+    ecoJson: cachedEcoJson,
+    ob: cachedOpeningBook,
+    pb: cachedPositionBook!,
   }
 }
 
@@ -161,8 +161,10 @@ export async function annotateOpenings(
   if (noveltyNag && deepestOpening) {
     const noveltyMoveIdx = deepestMoveIdx + 1
     if (noveltyMoveIdx < moves.length) {
-      // TODO: use game.setNag(146, fen) once setNag() is added to IChessGame
-      // For now, prepend $146 to the comment at that position
+      /*
+       * TODO: use game.setNag(146, fen) once setNag() is added to IChessGame.
+       * For now, prepend $146 to the comment at that position.
+       */
       const targetFen = moves[noveltyMoveIdx].after
       const existing = game.getComment(targetFen)
       game.setComment(existing ? `$146 ${existing}` : '$146', targetFen)

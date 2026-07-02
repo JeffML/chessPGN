@@ -326,11 +326,10 @@ export const ROOKS = {
 export const SUFFIX_LIST = ['!', '?', '!!', '!?', '?!', '??'] as const
 export type Suffix = (typeof SUFFIX_LIST)[number]
 
-/**
- * Options for annotateOpenings()
- */
+// Options for annotateOpenings()
 export interface AnnotateOpeningsOptions {
-  /** How to write ECO/Opening/Variation headers.
+  /**
+   * How to write ECO/Opening/Variation headers.
    *  'replace' — overwrite existing tags, saving originals as OrigECO/OrigOpening/OrigVariation
    *  'additive' — leave originals, write to EcoJsonECO/EcoJsonOpening/EcoJsonVariation
    *  false — skip header annotation entirely

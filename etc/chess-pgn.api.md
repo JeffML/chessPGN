@@ -4,6 +4,18 @@
 
 ```ts
 
+// @public
+export function annotateOpenings(game: IChessGame, options?: AnnotateOpeningsOptions): Promise<void>;
+
+// @public
+export interface AnnotateOpeningsOptions {
+    boundaryComment?: boolean;
+    customPrefix?: string;
+    headers?: 'replace' | 'additive' | false;
+    noveltyNag?: boolean;
+    origPrefix?: string;
+}
+
 // @public (undocumented)
 export const BISHOP = "b";
 

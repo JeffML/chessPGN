@@ -54,6 +54,10 @@ export { Game } from './Game'
 export { indexPgnGames, CursorImpl } from './Cursor'
 export type { Cursor, CursorOptions } from './Cursor'
 
+// Opening annotation (requires optional peer dep @chess-openings/eco.json)
+export { annotateOpenings } from './openings'
+export type { AnnotateOpeningsOptions } from './types'
+
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
