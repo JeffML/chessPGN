@@ -187,7 +187,7 @@ describe('IChessGame Interface', () => {
   it('Can load and reset positions using interface', () => {
     const instances: IChessGame[] = [new ChessPGN(), new Game()]
 
-    const testFen = '8/8/8/4k3/4K3/8/8/8 w - - 0 1'
+    const testFen = '4k3/8/8/8/8/8/8/4K3 w - - 0 1'
 
     for (const instance of instances) {
       instance.load(testFen)
@@ -286,7 +286,7 @@ describe('IChessGame Interface', () => {
     const instances: IChessGame[] = [new ChessPGN(), new Game()]
 
     // Test insufficient material (K vs K)
-    const insufficientMaterial = '8/8/8/4k3/4K3/8/8/8 w - - 0 1'
+    const insufficientMaterial = '4k3/8/8/8/8/8/8/4K3 w - - 0 1'
 
     for (const instance of instances) {
       instance.load(insufficientMaterial)
@@ -297,7 +297,7 @@ describe('IChessGame Interface', () => {
 
   it('Fifty-move rule works through interface', () => {
     // Position with 100 half-moves (50 full moves)
-    const fiftyMoveFen = '8/8/8/4k3/4K3/8/8/8 w - - 100 60'
+    const fiftyMoveFen = '4k3/8/8/8/8/8/8/4K3 w - - 100 60'
     const instances: IChessGame[] = [new ChessPGN(), new Game()]
 
     for (const instance of instances) {

@@ -305,6 +305,25 @@ export function validateFen(fen: string): { ok: boolean; error?: string } {
     }
   }
 
+  // 12th criterion: is the side to move already delivering check?
+  // The side to move should not be attacking the opponent's king —
+  // that means the opponent's last move left their king in check,
+  // and it should be the opponent's turn to respond.
+  try {
+    const tempGame = new Game()
+    tempGame.load(fen, { skipValidation: true })
+    const them = tokens[1] === 'w' ? 'b' : 'w'
+    if (tempGame._isKingAttacked(them as Color)) {
+      return {
+        ok: false,
+        error:
+          'Invalid FEN: side to move is already delivering check',
+      }
+    }
+  } catch {
+    // If loading fails, don't override — structural checks already ran
+  }
+
   return { ok: true }
 }
 

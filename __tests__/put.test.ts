@@ -157,7 +157,9 @@ test('put - occupying white en passant square clears it', () => {
   chess.put({ type: KNIGHT, color: BLACK }, 'f3')
   expect(chess.moves()).not.toContain('gxf3')
 
-  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
+  const cmp1 = new ChessPGN()
+  cmp1.load(chess.fen(), { skipValidation: true })
+  expect(chess.hash()).toEqual(cmp1.hash())
 })
 
 test('put - occupying white starting square clears en passant square', () => {
@@ -190,7 +192,9 @@ test('put - replacing black pawn clears white en passant square 2', () => {
   chess.put({ type: BISHOP, color: BLACK }, 'b4')
   expect(chess.moves()).not.toContain('bxc3')
 
-  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
+  const cmp2 = new ChessPGN()
+  cmp2.load(chess.fen(), { skipValidation: true })
+  expect(chess.hash()).toEqual(cmp2.hash())
 })
 
 test('put - replacing black pawn clears en passant square', () => {
@@ -212,7 +216,9 @@ test('put - occupying black en passant square clears it', () => {
   chess.put({ type: KNIGHT, color: WHITE }, 'f6')
   expect(chess.moves()).not.toContain('gxf6')
 
-  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
+  const cmp3 = new ChessPGN()
+  cmp3.load(chess.fen(), { skipValidation: true })
+  expect(chess.hash()).toEqual(cmp3.hash())
 })
 
 test('put - occupying black starting square clears en passant square', () => {
@@ -245,5 +251,7 @@ test('put - replacing white pawn clears black en passant square 2', () => {
   chess.put({ type: BISHOP, color: WHITE }, 'b5')
   expect(chess.moves()).not.toContain('bxc6')
 
-  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
+  const cmp4 = new ChessPGN()
+  cmp4.load(chess.fen(), { skipValidation: true })
+  expect(chess.hash()).toEqual(cmp4.hash())
 })
