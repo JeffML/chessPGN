@@ -33,7 +33,9 @@ export class ChessPGN implements IChessGame {
     // (undocumented)
     ascii(): string;
     // (undocumented)
-    attackers(square: Square, attackedBy?: Color): Square[];
+    attackers(square: Square, attackedBy?: Color, options?: {
+        xray?: boolean;
+    }): Square[];
     // (undocumented)
     board(): ({
         square: Square;
@@ -97,7 +99,9 @@ export class ChessPGN implements IChessGame {
     // (undocumented)
     inCheck(): boolean;
     // (undocumented)
-    isAttacked(square: Square, attackedBy: Color): boolean;
+    isAttacked(square: Square, attackedBy: Color, options?: {
+        xray?: boolean;
+    }): boolean;
     // (undocumented)
     isCheck(): boolean;
     // (undocumented)
@@ -360,13 +364,11 @@ export class Game implements IChessGame {
     // (undocumented)
     ascii(): string;
     // (undocumented)
-    _attacked(color: Color, square: number): boolean;
+    _attacked(color: Color, square: number, verbose?: boolean, xray?: boolean): boolean | Square[];
     // (undocumented)
-    _attacked(color: Color, square: number, verbose: false): boolean;
-    // (undocumented)
-    _attacked(color: Color, square: number, verbose: true): Square[];
-    // (undocumented)
-    attackers(square: Square, attackedBy?: Color): Square[];
+    attackers(square: Square, attackedBy?: Color, { xray }?: {
+        xray?: boolean;
+    }): Square[];
     // (undocumented)
     board(): ({
         square: Square;
@@ -446,7 +448,9 @@ export class Game implements IChessGame {
     // @internal
     static _inferPieceType(san: string): PieceSymbol | undefined;
     // (undocumented)
-    isAttacked(square: Square, attackedBy: Color): boolean;
+    isAttacked(square: Square, attackedBy: Color, { xray }?: {
+        xray?: boolean;
+    }): boolean;
     // (undocumented)
     isCheck(): boolean;
     // (undocumented)
@@ -628,7 +632,9 @@ export class Game implements IChessGame {
 // @public
 export interface IChessGame {
     ascii(): string;
-    attackers(square: Square, attackedBy?: Color): Square[];
+    attackers(square: Square, attackedBy?: Color, options?: {
+        xray?: boolean;
+    }): Square[];
     board(): ({
         square: Square;
         type: PieceSymbol;
@@ -661,7 +667,9 @@ export interface IChessGame {
         verbose: boolean;
     }): string[] | Move[];
     inCheck(): boolean;
-    isAttacked(square: Square, attackedBy: Color): boolean;
+    isAttacked(square: Square, attackedBy: Color, options?: {
+        xray?: boolean;
+    }): boolean;
     isCheck(): boolean;
     isCheckmate(): boolean;
     isDraw(): boolean;

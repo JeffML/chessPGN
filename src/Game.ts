@@ -246,10 +246,12 @@ export class Game implements IChessGame {
     return squares
   }
 
-  _attacked(color: Color, square: number): boolean
-  _attacked(color: Color, square: number, verbose: false): boolean
-  _attacked(color: Color, square: number, verbose: true): Square[]
-  _attacked(color: Color, square: number, verbose?: boolean) {
+  _attacked(
+    color: Color,
+    square: number,
+    verbose?: boolean,
+    xray?: boolean,
+  ): boolean | Square[] {
     const attackers: Square[] = []
     for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       // did we run off the end of the board
@@ -302,15 +304,51 @@ export class Game implements IChessGame {
         let j = i + offset
 
         let blocked = false
+        let counted = false
         while (j !== square) {
-          if (this._board[j] != null) {
-            blocked = true
-            break
+          const blocker = this._board[j]
+          if (blocker != null) {
+            if (xray) {
+              // Can only xray through sliding pieces (not knights or own king)
+              if (
+                blocker.type === 'n' ||
+                (blocker.type === 'k' && blocker.color === color)
+              ) {
+                blocked = true
+                break
+              }
+              // Check if blocker attacks in same direction toward target
+              const blockerIndex = j - square + 119
+              if (
+                blockerIndex >= 0 &&
+                blockerIndex < ATTACKS.length &&
+                (ATTACKS[blockerIndex] & PIECE_MASKS[blocker.type]) !== 0
+              ) {
+                // Blocker forms a battery — attacker counts, continue scanning
+                if (!counted) {
+                  if (verbose) {
+                    attackers.push(algebraic(i))
+                    counted = true
+                  } else {
+                    return true
+                  }
+                }
+                // Continue past the blocker to find more batteries
+                j += offset
+                continue
+              }
+              // Blocker exists but doesn't attack in this direction
+              blocked = true
+              break
+            } else {
+              blocked = true
+              break
+            }
           }
           j += offset
         }
 
-        if (!blocked) {
+        if (!blocked && !counted) {
           if (!verbose) {
             return true
           } else {
@@ -327,21 +365,29 @@ export class Game implements IChessGame {
       return false
     }
   }
-  attackers(square: Square, attackedBy?: Color): Square[] {
+  attackers(
+    square: Square,
+    attackedBy?: Color,
+    { xray = false }: { xray?: boolean } = {},
+  ): Square[] {
     if (!attackedBy) {
-      return this._attacked(this._turn, Ox88[square], true)
+      return this._attacked(this._turn, Ox88[square], true, xray) as Square[]
     } else {
-      return this._attacked(attackedBy, Ox88[square], true)
+      return this._attacked(attackedBy, Ox88[square], true, xray) as Square[]
     }
   }
 
-  isAttacked(square: Square, attackedBy: Color): boolean {
-    return this._attacked(attackedBy, Ox88[square])
+  isAttacked(
+    square: Square,
+    attackedBy: Color,
+    { xray = false }: { xray?: boolean } = {},
+  ): boolean {
+    return this._attacked(attackedBy, Ox88[square], false, xray) as boolean
   }
 
   _isKingAttacked(color: Color): boolean {
     const square = this._kings[color]
-    return square === -1 ? false : this._attacked(swapColor(color), square)
+    return square === -1 ? false : (this._attacked(swapColor(color), square) as boolean)
   }
 
   isCheck(): boolean {
