@@ -216,3 +216,48 @@ test('attackers - readme tests', () => {
   chess.load('4k3/4n3/8/8/8/8/4R3/4K3 w - - 0 1')
   expect(chess.attackers('c6', BLACK)).to.have.members(['e7'])
 })
+
+test('attackers - xray through enemy piece (battery)', () => {
+  // White rook on a1, Black queen on a2, target a8
+  // Without xray: queen blocks the rook's attack
+  // With xray: rook attacks through queen (battery)
+  const chess = new ChessPGN('4k3/8/8/8/8/8/q7/R3K3 w - - 0 1')
+  expect(chess.attackers('a8', WHITE)).toEqual([])
+  expect(chess.attackers('a8', WHITE, { xray: true })).to.have.members(['a1'])
+  expect(chess.isAttacked('a8', WHITE, { xray: true })).toBe(true)
+})
+
+test('attackers - xray does not pass through own king', () => {
+  // White rook on a1, White king on a2, target a8
+  // Own king blocks — can't xray through it
+  const chess = new ChessPGN('4k3/8/8/8/8/8/K7/R7 w - - 0 1')
+  expect(chess.attackers('a8', WHITE, { xray: true })).toEqual([])
+})
+
+test('attackers - xray does not pass through knight', () => {
+  // White rook on a1, Black knight on a3, target a8
+  // Knight can't attack along files — no battery
+  const chess = new ChessPGN('4k3/8/8/8/8/n7/8/R3K3 w - - 0 1')
+  expect(chess.attackers('a8', WHITE, { xray: true })).toEqual([])
+})
+
+test('attackers - xray through friendly piece (battery)', () => {
+  // White rook on a1, White queen on a2, target a8
+  // Friendly queen forms a battery — rook counts
+  const chess = new ChessPGN('4k3/8/8/8/8/8/Q7/R3K3 w - - 0 1')
+  expect(chess.attackers('a8', WHITE, { xray: true })).to.have.members(['a1', 'a2'])
+})
+
+test('attackers - xray multiple batteries', () => {
+  // White rook on a1, White queen on a3, Black rook on a5, target a8
+  // Both white rook and queen xray through the black rook
+  const chess = new ChessPGN('4k3/8/8/r7/8/Q7/8/R3K3 w - - 0 1')
+  expect(chess.attackers('a8', WHITE, { xray: true })).to.have.members(['a1', 'a3'])
+})
+
+test('attackers - xray diagonal battery', () => {
+  // White bishop on a1, Black queen on c3, target e5
+  const chess = new ChessPGN('4k3/8/8/4b3/8/2q5/8/B3K3 w - - 0 1')
+  expect(chess.attackers('e5', WHITE)).toEqual([])
+  expect(chess.attackers('e5', WHITE, { xray: true })).to.have.members(['a1'])
+})

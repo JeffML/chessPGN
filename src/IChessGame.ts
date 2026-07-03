@@ -71,17 +71,19 @@ export interface IChessGame {
    * Get all squares attacking a given square
    * @param square - Square being attacked
    * @param attackedBy - Optional color of attacking pieces
+   * @param options - Optional: { xray?: boolean } for battery/xray support
    * @returns Array of squares with pieces attacking the target
    */
-  attackers(square: Square, attackedBy?: Color): Square[]
+  attackers(square: Square, attackedBy?: Color, options?: { xray?: boolean }): Square[]
 
   /**
    * Check if a square is attacked by a specific color
    * @param square - Square to check
    * @param attackedBy - Color of attacking pieces
+   * @param options - Optional: { xray?: boolean } for battery/xray support
    * @returns true if square is attacked
    */
-  isAttacked(square: Square, attackedBy: Color): boolean
+  isAttacked(square: Square, attackedBy: Color, options?: { xray?: boolean }): boolean
 
   // Move operations
   /**

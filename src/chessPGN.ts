@@ -607,8 +607,12 @@ export class ChessPGN implements IChessGame {
     return this._game._attacked(color, square, verbose as true)
   }
 
-  attackers(square: Square, attackedBy?: Color): Square[] {
-    return this._game.attackers(square, attackedBy)
+  attackers(
+    square: Square,
+    attackedBy?: Color,
+    options?: { xray?: boolean },
+  ): Square[] {
+    return this._game.attackers(square, attackedBy, options)
   }
 
   private _isKingAttacked(color: Color): boolean {
@@ -619,8 +623,12 @@ export class ChessPGN implements IChessGame {
     return this._hash.toString(16)
   }
 
-  isAttacked(square: Square, attackedBy: Color): boolean {
-    return this._game.isAttacked(square, attackedBy)
+  isAttacked(
+    square: Square,
+    attackedBy: Color,
+    options?: { xray?: boolean },
+  ): boolean {
+    return this._game.isAttacked(square, attackedBy, options)
   }
 
   isCheck(): boolean {
