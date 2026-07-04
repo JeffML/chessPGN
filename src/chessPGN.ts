@@ -305,10 +305,12 @@ export function validateFen(fen: string): { ok: boolean; error?: string } {
     }
   }
 
-  // 12th criterion: is the side to move already delivering check?
-  // The side to move should not be attacking the opponent's king —
-  // that means the opponent's last move left their king in check,
-  // and it should be the opponent's turn to respond.
+  /*
+   * 12th criterion: is the side to move already delivering check?
+   * The side to move should not be attacking the opponent's king —
+   * that means the opponent's last move left their king in check,
+   * and it should be the opponent's turn to respond.
+   */
   try {
     const tempGame = new Game()
     tempGame.load(fen, { skipValidation: true })
