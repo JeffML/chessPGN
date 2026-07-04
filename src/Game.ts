@@ -387,7 +387,9 @@ export class Game implements IChessGame {
 
   _isKingAttacked(color: Color): boolean {
     const square = this._kings[color]
-    return square === -1 ? false : (this._attacked(swapColor(color), square) as boolean)
+    return square === -1
+      ? false
+      : (this._attacked(swapColor(color), square) as boolean)
   }
 
   isCheck(): boolean {

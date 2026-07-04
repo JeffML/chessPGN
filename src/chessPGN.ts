@@ -316,8 +316,7 @@ export function validateFen(fen: string): { ok: boolean; error?: string } {
     if (tempGame._isKingAttacked(them as Color)) {
       return {
         ok: false,
-        error:
-          'Invalid FEN: side to move is already delivering check',
+        error: 'Invalid FEN: side to move is already delivering check',
       }
     }
   } catch {

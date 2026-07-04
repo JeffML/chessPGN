@@ -245,14 +245,20 @@ test('attackers - xray through friendly piece (battery)', () => {
   // White rook on a1, White queen on a2, target a8
   // Friendly queen forms a battery — rook counts
   const chess = new ChessPGN('4k3/8/8/8/8/8/Q7/R3K3 w - - 0 1')
-  expect(chess.attackers('a8', WHITE, { xray: true })).to.have.members(['a1', 'a2'])
+  expect(chess.attackers('a8', WHITE, { xray: true })).to.have.members([
+    'a1',
+    'a2',
+  ])
 })
 
 test('attackers - xray multiple batteries', () => {
   // White rook on a1, White queen on a3, Black rook on a5, target a8
   // Both white rook and queen xray through the black rook
   const chess = new ChessPGN('4k3/8/8/r7/8/Q7/8/R3K3 w - - 0 1')
-  expect(chess.attackers('a8', WHITE, { xray: true })).to.have.members(['a1', 'a3'])
+  expect(chess.attackers('a8', WHITE, { xray: true })).to.have.members([
+    'a1',
+    'a3',
+  ])
 })
 
 test('attackers - xray diagonal battery', () => {
