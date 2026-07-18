@@ -1088,7 +1088,7 @@ export class ChessPGN implements IChessGame {
    * checking. Old positions are removed from the map if their counts are reduced to 0.
    */
   private _getPositionCount(hash: bigint): number {
-    return this._positionCount.get(hash) ?? 0
+    return this._game._getPositionCount(hash)
   }
 
   private _incPositionCount() {

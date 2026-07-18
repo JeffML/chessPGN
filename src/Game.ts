@@ -110,10 +110,9 @@ export class Game implements IChessGame {
   // Per-position comments and suffix annotations keyed by FEN
   _comments: Record<string, string> = {}
   _suffixes: Record<string, Suffix> = {}
-  _positionCount = new Map<bigint, number>()
   _history: History[] = []
 
-  // Stage 1-3: delegate state fields to Position (single source of truth)
+  // Stage 1-3: delegate position-state fields to Position (single source of truth)
   get _board() {
     return this._position._board
   }
@@ -122,6 +121,12 @@ export class Game implements IChessGame {
   }
   set _hash(v: bigint) {
     this._position._hash = v
+  }
+  get _positionCount(): Map<bigint, number> {
+    return this._position._positionCount
+  }
+  set _positionCount(v: Map<bigint, number>) {
+    this._position._positionCount = v
   }
   get _castling(): Record<Color, number> {
     return this._position._castling
@@ -471,7 +476,7 @@ export class Game implements IChessGame {
     return s
   }
 
-  private _getPositionCount(hash: bigint): number {
+  _getPositionCount(hash: bigint): number {
     return this._positionCount.get(hash) ?? 0
   }
 
@@ -889,10 +894,11 @@ export class Game implements IChessGame {
 
   // Make/Unmake move methods
   _push(move: InternalMove) {
+    // Snapshot position state via delegated getters (reads from Position)
     this._history.push({
       move,
       positionSnapshot: {
-        board: new Array<Piece>(128), // Not used yet - will be used when we fully integrate Position
+        board: new Array<Piece>(128), // Managed by manual undo logic
         kings: { b: this._kings.b, w: this._kings.w },
         turn: this._turn,
         castling: { b: this._castling.b, w: this._castling.w },
@@ -900,8 +906,8 @@ export class Game implements IChessGame {
         fenEpSquare: this._fenEpSquare,
         halfMoves: this._halfMoves,
         moveNumber: this._moveNumber,
-        hash: 0n, // Not used - hash is recomputed during undo
-        positionCount: new Map(), // Not used yet
+        hash: 0n, // Managed via XOR operations
+        positionCount: new Map(), // Managed separately
       },
     })
   }
@@ -1054,7 +1060,7 @@ export class Game implements IChessGame {
     const move = old.move
     const snapshot = old.positionSnapshot
 
-    // Restore position state from snapshot (except board and hash - handled by undo logic)
+    // Restore position state from snapshot via delegated setters
     this._kings = snapshot.kings
     this._turn = snapshot.turn
     this._castling = snapshot.castling
