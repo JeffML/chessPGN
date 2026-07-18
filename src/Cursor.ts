@@ -408,7 +408,16 @@ export class CursorImpl implements Cursor {
 export function indexPgnGames(pgn: string): GameIndex[] {
   const indices: GameIndex[] = []
   const lines = pgn.split('\n')
-  // trackers removed — we use the indices array to manage start/end offsets
+
+  // Precompute the character offset of the start of each line once (O(n)),
+  // so game-boundary detection can look up offsets in O(1) instead of
+  // re-scanning the whole PGN string per game (which made indexing O(n²)).
+  const lineOffsets: number[] = new Array(lines.length)
+  let runningOffset = 0
+  for (let i = 0; i < lines.length; i++) {
+    lineOffsets[i] = runningOffset
+    runningOffset += lines[i].length + 1 // +1 for the '\n'
+  }
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim()
@@ -424,7 +433,7 @@ export function indexPgnGames(pgn: string): GameIndex[] {
         continue
       }
 
-      const startOffset = getLineOffset(pgn, i)
+      const startOffset = lineOffsets[i]
 
       // If the last index entry was created without an endOffset, close it
       if (indices.length > 0 && indices[indices.length - 1].endOffset === 0) {
@@ -449,13 +458,4 @@ export function indexPgnGames(pgn: string): GameIndex[] {
   }
 
   return indices
-}
-
-function getLineOffset(pgn: string, lineNumber: number): number {
-  const lines = pgn.split('\n')
-  let offset = 0
-  for (let i = 0; i < lineNumber && i < lines.length; i++) {
-    offset += lines[i].length + 1 // +1 for newline
-  }
-  return offset
 }
