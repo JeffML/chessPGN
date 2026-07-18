@@ -378,7 +378,8 @@ export class Game implements IChessGame {
     // (undocumented)
     get _board(): Piece[];
     // (undocumented)
-    _castling: Record<Color, number>;
+    get _castling(): Record<Color, number>;
+    set _castling(v: Record<Color, number>);
     // (undocumented)
     _castlingKey(): bigint;
     clear(preserveHeaders?: boolean): void;
@@ -393,12 +394,14 @@ export class Game implements IChessGame {
     // (undocumented)
     _epKey(): bigint;
     // (undocumented)
-    _epSquare: number;
+    get _epSquare(): number;
+    set _epSquare(v: number);
     fen({ forceEnpassantSquare, }?: {
         forceEnpassantSquare?: boolean;
     }): string;
     // (undocumented)
-    _fenEpSquare: number;
+    get _fenEpSquare(): number;
+    set _fenEpSquare(v: number);
     // (undocumented)
     findPiece(piece: Piece): Square[];
     // (undocumented)
@@ -414,11 +417,15 @@ export class Game implements IChessGame {
     // (undocumented)
     getHeaders(): Record<string, string>;
     // (undocumented)
+    _getPositionCount(hash: bigint): number;
+    // (undocumented)
     getSuffixAnnotation(fen?: string): Suffix | undefined;
     // (undocumented)
-    _halfMoves: number;
+    get _halfMoves(): number;
+    set _halfMoves(v: number);
     // (undocumented)
-    _hash: bigint;
+    get _hash(): bigint;
+    set _hash(v: bigint);
     // @deprecated (undocumented)
     header(...args: string[]): Record<string, string | null>;
     // (undocumented)
@@ -478,7 +485,8 @@ export class Game implements IChessGame {
     // (undocumented)
     isThreefoldRepetition(): boolean;
     // (undocumented)
-    _kings: Record<Color, number>;
+    get _kings(): Record<Color, number>;
+    set _kings(v: Record<Color, number>);
     load(fen: string, { skipValidation }?: {
         skipValidation?: boolean;
     }): void;
@@ -498,7 +506,8 @@ export class Game implements IChessGame {
         maxWidth?: number;
     }): string;
     // (undocumented)
-    _moveNumber: number;
+    get _moveNumber(): number;
+    set _moveNumber(v: number);
     // (undocumented)
     _movePiece(from: number, to: number): void;
     moves(): string[];
@@ -588,7 +597,8 @@ export class Game implements IChessGame {
     // (undocumented)
     _position: Position;
     // (undocumented)
-    _positionCount: Map<bigint, number>;
+    get _positionCount(): Map<bigint, number>;
+    set _positionCount(v: Map<bigint, number>);
     _pruneComments(): void;
     // (undocumented)
     _push(move: InternalMove): void;
@@ -619,7 +629,8 @@ export class Game implements IChessGame {
     // (undocumented)
     _suffixes: Record<string, Suffix>;
     // (undocumented)
-    _turn: Color;
+    get _turn(): Color;
+    set _turn(v: Color);
     undo(): Move | null;
     // (undocumented)
     _undoMove(): InternalMove | null;
