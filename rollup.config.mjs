@@ -5,10 +5,12 @@ import { dts } from 'rollup-plugin-dts'
 export default [
   {
     input: 'src/chessPGN.ts',
+    external: ['worker_threads', 'path', '@chess-openings/eco.json'],
     output: {
       file: 'dist/cjs/chessPGN.js',
       format: 'cjs',
       sourcemap: true,
+      inlineDynamicImports: true,
     },
     plugins: [
       commonjs(),
@@ -20,10 +22,12 @@ export default [
   },
   {
     input: 'src/chessPGN.ts',
+    external: ['worker_threads', 'path', '@chess-openings/eco.json'],
     output: {
       file: 'dist/esm/chessPGN.js',
       format: 'esm',
       sourcemap: true,
+      inlineDynamicImports: true,
     },
     plugins: [
       commonjs(),
