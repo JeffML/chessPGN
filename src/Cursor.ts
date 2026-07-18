@@ -409,9 +409,11 @@ export function indexPgnGames(pgn: string): GameIndex[] {
   const indices: GameIndex[] = []
   const lines = pgn.split('\n')
 
-  // Precompute the character offset of the start of each line once (O(n)),
-  // so game-boundary detection can look up offsets in O(1) instead of
-  // re-scanning the whole PGN string per game (which made indexing O(n²)).
+  /*
+   * Precompute the character offset of the start of each line once (O(n)),
+   * so game-boundary detection can look up offsets in O(1) instead of
+   * re-scanning the whole PGN string per game (which made indexing O(n²)).
+   */
   const lineOffsets: number[] = new Array(lines.length)
   let runningOffset = 0
   for (let i = 0; i < lines.length; i++) {
