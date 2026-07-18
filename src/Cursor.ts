@@ -199,10 +199,13 @@ export class CursorImpl implements Cursor {
 
   // Phase 3: Async iteration
   async *[Symbol.asyncIterator](): AsyncIterableIterator<IChessGame> {
-    // Lazily initialize worker pool via dynamic import (Node only).
-    // In browsers, this import fails silently and we fall back to sync parsing.
+    /*
+     * Lazily initialize worker pool via dynamic import (Node only).
+     * In browsers, this import fails silently and we fall back to sync parsing.
+     */
     if (this.options.workers && !this.workerPool) {
       try {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { WorkerPool } = await import('./WorkerPool')
         const workerCount =
           typeof this.options.workers === 'number' ? this.options.workers : 4
@@ -476,8 +479,10 @@ export function indexPgnGames(pgn: string): GameIndex[] {
     indices[indices.length - 1].endOffset = pgn.length
   }
 
-  // Fallback: if no tagged games were found, scan for tagless (move-only)
-  // games that start with "1." after a blank line (or at the start of file).
+  /*
+   * Fallback: if no tagged games were found, scan for tagless (move-only)
+   * games that start with "1." after a blank line (or at the start of file).
+   */
   if (indices.length === 0) {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim()
