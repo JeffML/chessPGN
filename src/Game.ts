@@ -110,13 +110,18 @@ export class Game implements IChessGame {
   // Per-position comments and suffix annotations keyed by FEN
   _comments: Record<string, string> = {}
   _suffixes: Record<string, Suffix> = {}
-  _hash = 0n
   _positionCount = new Map<bigint, number>()
   _history: History[] = []
 
-  // Stage 1-2: delegate state fields to Position (single source of truth)
+  // Stage 1-3: delegate state fields to Position (single source of truth)
   get _board() {
     return this._position._board
+  }
+  get _hash(): bigint {
+    return this._position._hash
+  }
+  set _hash(v: bigint) {
+    this._position._hash = v
   }
   get _castling(): Record<Color, number> {
     return this._position._castling
@@ -1709,9 +1714,6 @@ export class Game implements IChessGame {
      * Note: Position count is incremented by the caller (ChessPGN.load or after moves)
      * not during FEN loading, since loading is setting up a position, not making a move
      */
-
-    // Keep Position in sync
-    this._position.load(fen)
   }
 
   /**
