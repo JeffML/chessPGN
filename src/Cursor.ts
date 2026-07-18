@@ -476,5 +476,34 @@ export function indexPgnGames(pgn: string): GameIndex[] {
     indices[indices.length - 1].endOffset = pgn.length
   }
 
+  // Fallback: if no tagged games were found, scan for tagless (move-only)
+  // games that start with "1." after a blank line (or at the start of file).
+  if (indices.length === 0) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim()
+      if (/^1\./.test(line)) {
+        const prev = i > 0 ? lines[i - 1].trim() : ''
+        if (prev === '') {
+          const startOffset = lineOffsets[i]
+
+          // Close the previous entry if one exists
+          if (
+            indices.length > 0 &&
+            indices[indices.length - 1].endOffset === 0
+          ) {
+            indices[indices.length - 1].endOffset = startOffset
+          }
+
+          indices.push({ startOffset, endOffset: 0 })
+        }
+      }
+    }
+
+    // Finalize trailing entry for tagless games too
+    if (indices.length > 0 && indices[indices.length - 1].endOffset === 0) {
+      indices[indices.length - 1].endOffset = pgn.length
+    }
+  }
+
   return indices
 }
