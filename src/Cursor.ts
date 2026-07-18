@@ -102,9 +102,12 @@ export class CursorImpl implements Cursor {
     this.totalGames = indices.length
 
     /*
-     * Worker pool initialization is disabled in browsers
-     * WorkerPool uses Node.js worker_threads which are not available in browsers
-     * For browser environments, single-threaded parsing is used automatically
+     * Worker pool is initialized lazily in [Symbol.asyncIterator]() via
+     * dynamic import. This keeps `worker_threads` out of browser bundles
+     * (the dynamic import is tree-shaken in browsers) while allowing Node
+     * consumers to use parallel parsing.
+     *
+     * Browser detection: if `window` exists, disable workers silently.
      */
     if (this.options.workers) {
       const isBrowser =
@@ -115,12 +118,6 @@ export class CursorImpl implements Cursor {
           '[chessPGN] Worker threads are not supported in browsers. Using single-threaded parsing.',
         )
         this.options.workers = false
-      } else {
-        /* Workers are only supported in Node.js - see WorkerPool.ts */
-        /* This code path will be tree-shaken out in browser builds */
-        throw new Error(
-          'Worker pool support requires separate Node.js-only build. Coming in future release.',
-        )
       }
     }
   }
@@ -202,6 +199,26 @@ export class CursorImpl implements Cursor {
 
   // Phase 3: Async iteration
   async *[Symbol.asyncIterator](): AsyncIterableIterator<IChessGame> {
+    // Lazily initialize worker pool via dynamic import (Node only).
+    // In browsers, this import fails silently and we fall back to sync parsing.
+    if (this.options.workers && !this.workerPool) {
+      try {
+        const { WorkerPool } = await import('./WorkerPool')
+        const workerCount =
+          typeof this.options.workers === 'number' ? this.options.workers : 4
+        this.workerPool = new WorkerPool(workerCount, {
+          batchSize: this.options.workerBatchSize,
+          strict: this.options.strict,
+        })
+      } catch (err) {
+        console.warn(
+          '[chessPGN] Worker pool unavailable, falling back to single-threaded parsing:',
+          (err as Error).message,
+        )
+        this.options.workers = false
+      }
+    }
+
     if (!this.workerPool) {
       // No workers - use synchronous path
       while (this.hasNext()) {
@@ -457,6 +474,35 @@ export function indexPgnGames(pgn: string): GameIndex[] {
   // Finalize any trailing partial entry
   if (indices.length > 0 && indices[indices.length - 1].endOffset === 0) {
     indices[indices.length - 1].endOffset = pgn.length
+  }
+
+  // Fallback: if no tagged games were found, scan for tagless (move-only)
+  // games that start with "1." after a blank line (or at the start of file).
+  if (indices.length === 0) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim()
+      if (/^1\./.test(line)) {
+        const prev = i > 0 ? lines[i - 1].trim() : ''
+        if (prev === '') {
+          const startOffset = lineOffsets[i]
+
+          // Close the previous entry if one exists
+          if (
+            indices.length > 0 &&
+            indices[indices.length - 1].endOffset === 0
+          ) {
+            indices[indices.length - 1].endOffset = startOffset
+          }
+
+          indices.push({ startOffset, endOffset: 0 })
+        }
+      }
+    }
+
+    // Finalize trailing entry for tagless games too
+    if (indices.length > 0 && indices[indices.length - 1].endOffset === 0) {
+      indices[indices.length - 1].endOffset = pgn.length
+    }
   }
 
   return indices
