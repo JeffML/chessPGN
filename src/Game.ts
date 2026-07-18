@@ -112,12 +112,17 @@ export class Game implements IChessGame {
   _suffixes: Record<string, Suffix> = {}
   _hash = 0n
   _positionCount = new Map<bigint, number>()
-  _castling: Record<Color, number> = { w: 0, b: 0 }
   _history: History[] = []
 
-  // Stage 1: delegate state fields to Position (single source of truth)
+  // Stage 1-2: delegate state fields to Position (single source of truth)
   get _board() {
     return this._position._board
+  }
+  get _castling(): Record<Color, number> {
+    return this._position._castling
+  }
+  set _castling(v: Record<Color, number>) {
+    this._position._castling = v
   }
   get _turn(): Color {
     return this._position._turn
