@@ -92,7 +92,7 @@ export const SEVEN_TAG_ROSTER: Record<string, string> = {
  * These nulls are placeholders to fix the order of tags (as they appear in PGN spec); null values will be
  * eliminated in getHeaders()
  */
-const SUPLEMENTAL_TAGS: Record<string, string | null> = {
+const SUPPLEMENTAL_TAGS: Record<string, string | null> = {
   WhiteTitle: null,
   BlackTitle: null,
   WhiteElo: null,
@@ -127,7 +127,7 @@ const SUPLEMENTAL_TAGS: Record<string, string | null> = {
 
 const HEADER_TEMPLATE = {
   ...SEVEN_TAG_ROSTER,
-  ...SUPLEMENTAL_TAGS,
+  ...SUPPLEMENTAL_TAGS,
 }
 /* eslint-enable @typescript-eslint/naming-convention */
 

@@ -105,24 +105,66 @@ const HEADER_TEMPLATE = {
 /* eslint-enable @typescript-eslint/naming-convention */
 
 export class Game implements IChessGame {
-  get _board() {
-    return this._position._board
-  }
-  _turn: Color = WHITE
+  _position: Position = new Position()
   _header: Record<string, string | null> = {}
   // Per-position comments and suffix annotations keyed by FEN
   _comments: Record<string, string> = {}
   _suffixes: Record<string, Suffix> = {}
-  _kings: Record<Color, number> = { w: EMPTY, b: EMPTY }
-  _halfMoves = 0
-  _hash = 0n
   _positionCount = new Map<bigint, number>()
-  _epSquare = -1
-  _castling: Record<Color, number> = { w: 0, b: 0 }
   _history: History[] = []
-  _fenEpSquare = -1
-  _moveNumber = 0
-  _position: Position = new Position()
+
+  // Stage 1-3: delegate state fields to Position (single source of truth)
+  get _board() {
+    return this._position._board
+  }
+  get _hash(): bigint {
+    return this._position._hash
+  }
+  set _hash(v: bigint) {
+    this._position._hash = v
+  }
+  get _castling(): Record<Color, number> {
+    return this._position._castling
+  }
+  set _castling(v: Record<Color, number>) {
+    this._position._castling = v
+  }
+  get _turn(): Color {
+    return this._position._turn
+  }
+  set _turn(v: Color) {
+    this._position._turn = v
+  }
+  get _kings(): Record<Color, number> {
+    return this._position._kings
+  }
+  set _kings(v: Record<Color, number>) {
+    this._position._kings = v
+  }
+  get _halfMoves(): number {
+    return this._position._halfMoves
+  }
+  set _halfMoves(v: number) {
+    this._position._halfMoves = v
+  }
+  get _epSquare(): number {
+    return this._position._epSquare
+  }
+  set _epSquare(v: number) {
+    this._position._epSquare = v
+  }
+  get _fenEpSquare(): number {
+    return this._position._fenEpSquare
+  }
+  set _fenEpSquare(v: number) {
+    this._position._fenEpSquare = v
+  }
+  get _moveNumber(): number {
+    return this._position._moveNumber
+  }
+  set _moveNumber(v: number) {
+    this._position._moveNumber = v
+  }
 
   constructor(headers?: Record<string, string>, root?: Node) {
     /*
@@ -1672,9 +1714,6 @@ export class Game implements IChessGame {
      * Note: Position count is incremented by the caller (ChessPGN.load or after moves)
      * not during FEN loading, since loading is setting up a position, not making a move
      */
-
-    // Keep Position in sync
-    this._position.load(fen)
   }
 
   /**
