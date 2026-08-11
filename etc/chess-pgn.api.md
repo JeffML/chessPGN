@@ -762,6 +762,8 @@ export class Move {
     // (undocumented)
     isCapture(): boolean;
     // (undocumented)
+    isCheck(): boolean;
+    // (undocumented)
     isEnPassant(): boolean;
     // (undocumented)
     isKingsideCastle(): boolean;
