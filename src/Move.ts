@@ -75,6 +75,10 @@ export class Move {
     }
   }
 
+  isCheck() {
+    return /[+#]$/.test(this.san)
+  }
+
   isCapture() {
     return this.flags.indexOf(FLAGS['CAPTURE']) > -1
   }
