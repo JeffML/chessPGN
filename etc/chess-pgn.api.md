@@ -27,7 +27,7 @@ export const BLACK = "b";
 
 // @public (undocumented)
 export class ChessPGN implements IChessGame {
-    constructor(fen?: string, { skipValidation }?: {
+    constructor(fen?: string, input?: {
         skipValidation?: boolean | undefined;
     });
     // (undocumented)
@@ -43,7 +43,7 @@ export class ChessPGN implements IChessGame {
         color: Color;
     } | null)[][];
     // (undocumented)
-    clear({ preserveHeaders }?: {
+    clear(input?: {
         preserveHeaders?: boolean | undefined;
     }): void;
     // @deprecated (undocumented)
@@ -54,7 +54,7 @@ export class ChessPGN implements IChessGame {
         comment: string;
     }[];
     // (undocumented)
-    fen({ forceEnpassantSquare, }?: {
+    fen(input?: {
         forceEnpassantSquare?: boolean;
     }): string;
     // (undocumented)
@@ -85,15 +85,15 @@ export class ChessPGN implements IChessGame {
     // (undocumented)
     history(): string[];
     // (undocumented)
-    history({ verbose }: {
+    history(input: {
         verbose: true;
     }): Move[];
     // (undocumented)
-    history({ verbose }: {
+    history(input: {
         verbose: false;
     }): string[];
     // (undocumented)
-    history({ verbose }: {
+    history(input: {
         verbose: boolean;
     }): string[] | Move[];
     // (undocumented)
@@ -115,7 +115,7 @@ export class ChessPGN implements IChessGame {
     // (undocumented)
     isInsufficientMaterial(): boolean;
     // (undocumented)
-    isPromotion({ from, to }: {
+    isPromotion(input: {
         from: Square;
         to: Square;
     }): boolean;
@@ -124,12 +124,12 @@ export class ChessPGN implements IChessGame {
     // (undocumented)
     isThreefoldRepetition(): boolean;
     // (undocumented)
-    load(fen: string, { skipValidation, preserveHeaders }?: {
+    load(fen: string, input?: {
         skipValidation?: boolean | undefined;
         preserveHeaders?: boolean | undefined;
     }): void;
     // (undocumented)
-    loadPgn(pgn: string, { strict, newlineChar, }?: {
+    loadPgn(pgn: string, input?: {
         strict?: boolean;
         newlineChar?: string;
     }): void;
@@ -138,7 +138,7 @@ export class ChessPGN implements IChessGame {
         from: string;
         to: string;
         promotion?: string;
-    } | null, { strict }?: {
+    } | null, input?: {
         strict?: boolean;
     }): Move;
     // (undocumented)
@@ -151,80 +151,80 @@ export class ChessPGN implements IChessGame {
     // (undocumented)
     moves(): string[];
     // (undocumented)
-    moves({ square }: {
+    moves(input: {
         square: Square;
     }): string[];
     // (undocumented)
-    moves({ piece }: {
+    moves(input: {
         piece: PieceSymbol;
     }): string[];
     // (undocumented)
-    moves({ square, piece }: {
+    moves(input: {
         square: Square;
         piece: PieceSymbol;
     }): string[];
     // (undocumented)
-    moves({ verbose, square }: {
+    moves(input: {
         verbose: true;
         square?: Square;
     }): Move[];
     // (undocumented)
-    moves({ verbose, square }: {
+    moves(input: {
         verbose: false;
         square?: Square;
     }): string[];
     // (undocumented)
-    moves({ verbose, square, }: {
+    moves(input: {
         verbose?: boolean;
         square?: Square;
     }): string[] | Move[];
     // (undocumented)
-    moves({ verbose, piece }: {
+    moves(input: {
         verbose: true;
         piece?: PieceSymbol;
     }): Move[];
     // (undocumented)
-    moves({ verbose, piece }: {
+    moves(input: {
         verbose: false;
         piece?: PieceSymbol;
     }): string[];
     // (undocumented)
-    moves({ verbose, piece, }: {
+    moves(input: {
         verbose?: boolean;
         piece?: PieceSymbol;
     }): string[] | Move[];
     // (undocumented)
-    moves({ verbose, square, piece, }: {
+    moves(input: {
         verbose: true;
         square?: Square;
         piece?: PieceSymbol;
     }): Move[];
     // (undocumented)
-    moves({ verbose, square, piece, }: {
+    moves(input: {
         verbose: false;
         square?: Square;
         piece?: PieceSymbol;
     }): string[];
     // (undocumented)
-    moves({ verbose, square, piece, }: {
+    moves(input: {
         verbose?: boolean;
         square?: Square;
         piece?: PieceSymbol;
     }): string[] | Move[];
     // (undocumented)
-    moves({ square, piece }: {
+    moves(input: {
         square?: Square;
         piece?: PieceSymbol;
     }): Move[];
     // (undocumented)
     perft(depth: number): number;
     // (undocumented)
-    pgn({ newline, maxWidth, }?: {
+    pgn(input?: {
         newline?: string;
         maxWidth?: number;
     }): string;
     // (undocumented)
-    put({ type, color }: {
+    put(input: {
         type: PieceSymbol;
         color: Color;
     }, square: Square): boolean;
@@ -312,7 +312,7 @@ export class CursorImpl implements Cursor {
     hasNext(): boolean;
     // (undocumented)
     next(): IChessGame | null;
-    pgn({ newline, maxWidth, }?: {
+    pgn(input?: {
         newline?: string;
         maxWidth?: number;
     }): string;
@@ -366,7 +366,7 @@ export class Game implements IChessGame {
     // (undocumented)
     _attacked(color: Color, square: number, verbose?: boolean, xray?: boolean): boolean | Square[];
     // (undocumented)
-    attackers(square: Square, attackedBy?: Color, { xray }?: {
+    attackers(square: Square, attackedBy?: Color, input?: {
         xray?: boolean;
     }): Square[];
     // (undocumented)
@@ -396,7 +396,7 @@ export class Game implements IChessGame {
     // (undocumented)
     get _epSquare(): number;
     set _epSquare(v: number);
-    fen({ forceEnpassantSquare, }?: {
+    fen(input?: {
         forceEnpassantSquare?: boolean;
     }): string;
     // (undocumented)
@@ -433,15 +433,15 @@ export class Game implements IChessGame {
     // (undocumented)
     history(): string[];
     // (undocumented)
-    history({ verbose }: {
+    history(input: {
         verbose: true;
     }): Move[];
     // (undocumented)
-    history({ verbose }: {
+    history(input: {
         verbose: false;
     }): string[];
     // (undocumented)
-    history({ verbose }: {
+    history(input: {
         verbose: boolean;
     }): string[] | Move[];
     // Warning: (ae-forgotten-export) The symbol "History_2" needs to be exported by the entry point chessPGN.d.ts
@@ -455,7 +455,7 @@ export class Game implements IChessGame {
     // @internal
     static _inferPieceType(san: string): PieceSymbol | undefined;
     // (undocumented)
-    isAttacked(square: Square, attackedBy: Color, { xray }?: {
+    isAttacked(square: Square, attackedBy: Color, input?: {
         xray?: boolean;
     }): boolean;
     // (undocumented)
@@ -487,7 +487,7 @@ export class Game implements IChessGame {
     // (undocumented)
     get _kings(): Record<Color, number>;
     set _kings(v: Record<Color, number>);
-    load(fen: string, { skipValidation }?: {
+    load(fen: string, input?: {
         skipValidation?: boolean;
     }): void;
     // (undocumented)
@@ -496,7 +496,7 @@ export class Game implements IChessGame {
         from: string;
         to: string;
         promotion?: string;
-    } | null, { strict }?: {
+    } | null, input?: {
         strict?: boolean;
     }): Move;
     // @internal
@@ -512,73 +512,73 @@ export class Game implements IChessGame {
     _movePiece(from: number, to: number): void;
     moves(): string[];
     // (undocumented)
-    moves({ square }: {
+    moves(input: {
         square: Square;
     }): string[];
     // (undocumented)
-    moves({ piece }: {
+    moves(input: {
         piece: PieceSymbol;
     }): string[];
     // (undocumented)
-    moves({ square, piece }: {
+    moves(input: {
         square: Square;
         piece: PieceSymbol;
     }): string[];
     // (undocumented)
-    moves({ verbose, square }: {
+    moves(input: {
         verbose: true;
         square?: Square;
     }): Move[];
     // (undocumented)
-    moves({ verbose, square }: {
+    moves(input: {
         verbose: false;
         square?: Square;
     }): string[];
     // (undocumented)
-    moves({ verbose, square, }: {
+    moves(input: {
         verbose?: boolean;
         square?: Square;
     }): string[] | Move[];
     // (undocumented)
-    moves({ verbose, piece }: {
+    moves(input: {
         verbose: true;
         piece?: PieceSymbol;
     }): Move[];
     // (undocumented)
-    moves({ verbose, piece }: {
+    moves(input: {
         verbose: false;
         piece?: PieceSymbol;
     }): string[];
     // (undocumented)
-    moves({ verbose, piece, }: {
+    moves(input: {
         verbose?: boolean;
         piece?: PieceSymbol;
     }): string[] | Move[];
     // (undocumented)
-    moves({ verbose, square, piece, }: {
+    moves(input: {
         verbose: true;
         square?: Square;
         piece?: PieceSymbol;
     }): Move[];
     // (undocumented)
-    moves({ verbose, square, piece, }: {
+    moves(input: {
         verbose: false;
         square?: Square;
         piece?: PieceSymbol;
     }): string[];
     // (undocumented)
-    moves({ verbose, square, piece, }: {
+    moves(input: {
         verbose?: boolean;
         square?: Square;
         piece?: PieceSymbol;
     }): string[] | Move[];
     // (undocumented)
-    moves({ square, piece }: {
+    moves(input: {
         square?: Square;
         piece?: PieceSymbol;
     }): Move[];
     // (undocumented)
-    _moves({ legal, piece, square, }?: {
+    _moves(input?: {
         legal?: boolean;
         piece?: PieceSymbol;
         square?: Square;
@@ -586,7 +586,7 @@ export class Game implements IChessGame {
     // @internal
     _moveToSan(move: InternalMove, moves: InternalMove[]): string;
     // (undocumented)
-    pgn({ newline, maxWidth, }?: {
+    pgn(input?: {
         newline?: string;
         maxWidth?: number;
     }): string;
