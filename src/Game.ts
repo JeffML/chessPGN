@@ -1177,13 +1177,14 @@ export class Game implements IChessGame {
     const attackers = [currentSquare + 1, currentSquare - 1]
 
     if (
-      this._board[startSquare] !== null ||
-      this._board[this._epSquare] !== null ||
+      this._board[startSquare] != null ||
+      this._board[this._epSquare] != null ||
       this._board[currentSquare]?.color !== swapColor(this._turn) ||
       this._board[currentSquare]?.type !== PAWN
     ) {
       this._hash ^= this._epKey()
       this._epSquare = EMPTY
+      this._fenEpSquare = EMPTY
       return
     }
 
