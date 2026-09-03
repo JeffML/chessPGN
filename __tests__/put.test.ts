@@ -255,3 +255,29 @@ test('put - replacing white pawn clears black en passant square 2', () => {
   cmp4.load(chess.fen(), { skipValidation: true })
   expect(chess.hash()).toEqual(cmp4.hash())
 })
+
+test('put - unrelated square preserves en passant square (chess.js #585)', () => {
+  const chess = new ChessPGN(
+    'rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3',
+  )
+
+  expect(chess.moves()).toContain('exf6')
+  chess.put({ type: KNIGHT, color: WHITE }, 'h3')
+  expect(chess.moves()).toContain('exf6')
+  expect(chess.fen()).toContain('f6')
+
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
+})
+
+test('put - clearing en passant square also clears forced fen en passant square (chess.js #585)', () => {
+  const chess = new ChessPGN(
+    'rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3',
+  )
+
+  chess.put({ type: KNIGHT, color: BLACK }, 'f6')
+  expect(chess.fen({ forceEnpassantSquare: true })).not.toContain('f6')
+
+  expect(chess.hash()).toEqual(
+    new ChessPGN(chess.fen(), { skipValidation: true }).hash(),
+  )
+})

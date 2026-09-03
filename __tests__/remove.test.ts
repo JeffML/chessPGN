@@ -191,3 +191,30 @@ test('remove - if a move has been made, reaching initial position does not delet
 
   expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
 })
+
+test('remove - unrelated square preserves en passant square (chess.js #585)', () => {
+  const chess = new ChessPGN(
+    'rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3',
+  )
+
+  expect(chess.moves()).toContain('exf6')
+  chess.remove('h7')
+  expect(chess.moves()).toContain('exf6')
+  expect(chess.fen()).toContain('f6')
+
+  expect(chess.hash()).toEqual(new ChessPGN(chess.fen()).hash())
+})
+
+test('remove - removing capturing pawn clears en passant square but preserves forced fen en passant square (chess.js #585)', () => {
+  const chess = new ChessPGN(
+    'rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3',
+  )
+
+  chess.remove('e5')
+  expect(chess.moves()).not.toContain('exf6')
+  expect(chess.fen({ forceEnpassantSquare: true })).toContain('f6')
+
+  expect(chess.hash()).toEqual(
+    new ChessPGN(chess.fen(), { skipValidation: true }).hash(),
+  )
+})
